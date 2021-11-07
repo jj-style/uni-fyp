@@ -1,0 +1,41 @@
+%{
+#include <stdio.h>
+int lno = 1;
+FILE *fp;
+%}
+
+{% for token in tokens %}
+{{-token.name}} {{token.regex}}
+{% endfor %}
+newline \n
+{% if skip_whitespace -%}
+whitespace  [ \t\r]+
+{%- endif %}
+
+%%
+{% if skip_whitespace -%}
+{whitespace} continue;
+{% endif -%}
+{newline} ++lno;
+{% for token in tokens %}
+{{- '{' + token.name + '}' }} fprintf(fp,"{{token.name}}:%s:%d\n",yytext,lno);
+{% endfor -%}
+.	{printf("unknown item %s\n", yytext); exit(1);}
+%%
+
+int main(int argc, char**argv) {
+  if (argc > 1) {
+    // set lex to read from file instead of stdin
+    FILE *fin = fopen(argv[1], "r");
+    if (!fin) {
+      //fprintf(stderr, "can't open file\n");
+      perror(argv[1]);
+      return 1;
+    }
+    yyin = fin;
+  }
+  fp = fopen("out.jl","w");
+  yylex();
+  fclose(fp);
+  return 0;
+}
