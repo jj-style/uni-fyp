@@ -1,0 +1,5 @@
+[flake8]
+# ignore line break before binary operator as black formatting often causes this error
+ignore = W503 
+max-line-length = 88
+exclude = *tests/*,*env/*,*tmp/*
