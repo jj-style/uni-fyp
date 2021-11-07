@@ -28,7 +28,6 @@ int main(int argc, char**argv) {
     // set lex to read from file instead of stdin
     FILE *fin = fopen(argv[1], "r");
     if (!fin) {
-      //fprintf(stderr, "can't open file\n");
       perror(argv[1]);
       return 1;
     }
