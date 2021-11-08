@@ -1,0 +1,5 @@
+<sentence> ::= <noun-phrase> <predicate>
+<noun-phrase> ::= <article> <noun>
+<article> ::= the | a | an
+<noun> ::= cat | flower
+<predicate> ::= jumps | blooms
