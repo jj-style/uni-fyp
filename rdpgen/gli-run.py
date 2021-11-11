@@ -1,5 +1,6 @@
-from gli.language import Type
-from gli.languages import Go
+"""Script to test running gli code"""
+from gli import Type
+from gli.gli import Go
 
 if __name__ == "__main__":
     g = Go()

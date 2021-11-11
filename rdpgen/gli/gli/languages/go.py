@@ -1,4 +1,4 @@
-from gli import Language, Type, imports, Expression
+from gli.gli.language import Language, Type, imports, Expression
 
 
 class Go(Language):
