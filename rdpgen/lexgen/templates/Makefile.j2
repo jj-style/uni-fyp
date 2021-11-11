@@ -1,6 +1,6 @@
-all: lexer
+all: {{program}}
 
-lexer: lex.yy.c
+{{program}}: lex.yy.c
 	gcc -lfl -o lexer lex.yy.c
 
 lex.yy.c: {{lexfile}}
