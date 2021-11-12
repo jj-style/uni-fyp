@@ -1,7 +1,7 @@
-from typing import List
 import click
 import tomli
-from lexgen import Token, template_lex_file
+from lexgen import template_lex_file, tokens_from_config_map
+from bnfparse.parse import parse_bnf, parser_from_productions, bnf_from_grammar_config
 
 
 @click.command()
@@ -17,10 +17,13 @@ def cli(file: str, outdir: str):
     with open(file) as f:
         config = tomli.load(f)
 
-    # get all the tokens that will appear in the language
-    tokens: List[Token] = []
-    for name, regex in config.get("tokens", {}).items():
-        tokens.append(Token(name, regex))
+    tokens = tokens_from_config_map(config.get("tokens", {}).items())
 
     # create a lexer program
     template_lex_file(tokens, outdir)
+
+    # parse the bnf grammar rules
+    grammar = config.get("grammar", {})
+    grammar_bnf = bnf_from_grammar_config(grammar)
+    productions = parse_bnf(grammar_bnf)
+    parser_from_productions(productions)

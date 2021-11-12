@@ -1,8 +1,23 @@
 import os
-from typing import List
+from typing import List, Dict
 from pathlib import Path
 from jinja2 import FileSystemLoader, Environment
 from lexgen.core import Token
+
+
+def tokens_from_config_map(config: Dict[str, str]) -> List[Token]:
+    """Parse the tokens section of the config into Token items
+
+    Args:
+        config (Dict[str, str]): Config section from TOML file
+
+    Returns:
+        List[Token]: The tokens that appear in the language
+    """
+    tokens: List[Token] = []
+    for name, regex in config:
+        tokens.append(Token(name, regex))
+    return tokens
 
 
 def template_lex_file(tokens: List[Token], directory: str):
