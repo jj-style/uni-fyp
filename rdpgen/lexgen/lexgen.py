@@ -34,10 +34,10 @@ def template_lex_file(tokens: List[Token], directory: str):
     result = template.render(tokens=tokens, skip_whitespace=True)
 
     base_path = Path(directory)
-    if base_path.exists():
-        raise Exception(
-            f"directory {base_path} already exists. Aborting to prevent data loss"
-        )
+    # if base_path.exists():
+    #     raise Exception(
+    #         f"directory {base_path} already exists. Aborting to prevent data loss"
+    #     )
     lexer_path = base_path.joinpath("lexer")
     if not lexer_path.exists():
         lexer_path.mkdir(parents=True)

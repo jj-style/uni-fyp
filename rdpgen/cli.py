@@ -1,7 +1,8 @@
 import click
 import tomli
 from lexgen import template_lex_file, tokens_from_config_map
-from bnfparse.parse import parse_bnf, parser_from_productions, bnf_from_grammar_config
+from bnfparse.parse import parse_bnf, bnf_from_grammar_config
+from bnfparse.parsergen import parser_from_grammar
 
 
 @click.command()
@@ -26,4 +27,4 @@ def cli(file: str, outdir: str):
     grammar = config.get("grammar", {})
     grammar_bnf = bnf_from_grammar_config(grammar)
     g = parse_bnf(grammar_bnf)
-    parser_from_productions(g.productions)
+    parser_from_grammar(g)

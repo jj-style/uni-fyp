@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 from enum import Enum, auto
+from typing import Union, Dict, List, Optional
 
 
 class Type(Enum):
@@ -79,6 +80,22 @@ class Language(ABC):
             id (str): identifier of the variable to assign to
             expr (Expression): the expression to evaluate
         """
+        raise NotImplementedError
+
+    @abstractmethod
+    def function(
+        self,
+        id: str,
+        return_type: Optional[Type],
+        arguments: Union[Dict[str, Type], List[Type]],
+        *statements
+    ) -> Expression:
+        # TODO - add documentation
+        raise NotImplementedError
+
+    @abstractmethod
+    def do_return(self, expression: Optional[Expression]) -> Expression:
+        # TODO - add documentation
         raise NotImplementedError
 
     @abstractmethod

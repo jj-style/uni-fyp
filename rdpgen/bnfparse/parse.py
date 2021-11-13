@@ -1,60 +1,10 @@
 import re
-from enum import Enum
-from typing import List, Dict, Set
+from typing import List, Dict
+from .parsergen import parser_from_grammar
+from .core import Expression, Term, Factor, Grammar, Production, NodeType
 
 RULE = re.compile(r"<(?P<name>.*)>\s*::=\s*(?P<expression>.*)")
 NONTERMINAL = re.compile(r"<(.*)>")
-
-
-class NodeType(Enum):
-    terminal = 1
-    nonterminal = 2
-
-
-class Factor:
-    def __init__(self, node_type: NodeType, name: str):
-        self.node_type: NodeType = node_type
-        self.name: str = name
-
-    def __repr__(self):
-        return f"Factor<node_type={self.node_type}, name={self.name}>"
-
-
-class Term:
-    def __init__(self, factors: List[Factor]):
-        self.factors: List[Factor] = factors
-
-    def __repr__(self):
-        return f"Term<factors={self.factors}>"
-
-
-class Expression:
-    def __init__(self, terms: List[Term]):
-        self.terms: List[Term] = terms
-
-    def __repr__(self):
-        return f"Expression<terms={self.terms}>"
-
-
-class Production:
-    def __init__(self, name, expression: Expression):
-        self.name = name
-        self.expression: Expression = expression
-
-    def __repr__(self):
-        return f"Production<name={self.name}, expression={self.expression}>"
-
-    # TODO
-    def left_set(self) -> Set[str]:
-        raise NotImplementedError(
-            "compute the left set of a production rule ->\
-            derive possible set of initial terminals"
-        )
-
-
-class Grammar:
-    def __init__(self, productions: List[Production]):
-        self.productions = productions
 
 
 def parse_expression(stream: List[str]) -> Expression:
@@ -122,20 +72,8 @@ def bnf_from_grammar_config(grammar_config: Dict[str, str]) -> str:
     return grammar_bnf
 
 
-def parser_from_productions(productions: List[Production]):
-    for p in productions:
-        # create function with p.name
-        print(f"def parse_{p.name}():")
-        print("\ttoken = get_token()")
-        for idx, term in enumerate(p.expression):
-            # get_token - check equals a term
-            print(f"\t{'el' if idx > 0 else ''}", end="")
-            print("if " + f"token == {term}:\n\t\tpass")
-        print("\telse:\n\t\traise Exception()")
-
-
 if __name__ == "__main__":
     with open("test.bnf", "r") as f:
         contents = f.read()
-    productions = parse_bnf(contents)
-    parser_from_productions(productions)
+    grammar = parse_bnf(contents)
+    parser_from_grammar(grammar)
