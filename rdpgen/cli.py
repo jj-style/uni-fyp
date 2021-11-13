@@ -25,5 +25,5 @@ def cli(file: str, outdir: str):
     # parse the bnf grammar rules
     grammar = config.get("grammar", {})
     grammar_bnf = bnf_from_grammar_config(grammar)
-    productions = parse_bnf(grammar_bnf)
-    parser_from_productions(productions)
+    g = parse_bnf(grammar_bnf)
+    parser_from_productions(g.productions)

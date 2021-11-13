@@ -1,6 +1,6 @@
 import re
 from enum import Enum
-from typing import List, Dict
+from typing import List, Dict, Set
 
 RULE = re.compile(r"<(?P<name>.*)>\s*::=\s*(?P<expression>.*)")
 NONTERMINAL = re.compile(r"<(.*)>")
@@ -25,32 +25,45 @@ class Term:
         self.factors: List[Factor] = factors
 
     def __repr__(self):
-        return f"Term<factors={f for f in self.factors}>"
+        return f"Term<factors={self.factors}>"
+
+
+class Expression:
+    def __init__(self, terms: List[Term]):
+        self.terms: List[Term] = terms
+
+    def __repr__(self):
+        return f"Expression<terms={self.terms}>"
 
 
 class Production:
-    def __init__(self, name, expression: List[Term]):
+    def __init__(self, name, expression: Expression):
         self.name = name
-        self.expression: List[Term] = expression
+        self.expression: Expression = expression
 
     def __repr__(self):
-        return f"Production<name={self.name}, terms={list(t for t in self.expression)}>"
+        return f"Production<name={self.name}, expression={self.expression}>"
 
     # TODO
-    def left_left(self) -> List[str]:
+    def left_set(self) -> Set[str]:
         raise NotImplementedError(
             "compute the left set of a production rule ->\
             derive possible set of initial terminals"
         )
 
 
-def parse_expression(stream: List[str]) -> List[Term]:
+class Grammar:
+    def __init__(self, productions: List[Production]):
+        self.productions = productions
+
+
+def parse_expression(stream: List[str]) -> Expression:
     terms: List[Term] = []
     terms.append(parse_term(stream))
     while len(stream) > 0 and stream[0] == "|":
         stream.pop(0)
         terms.append(parse_term(stream))
-    return terms
+    return Expression(terms)
 
 
 def parse_term(stream: List[str]) -> List[Factor]:
@@ -59,7 +72,7 @@ def parse_term(stream: List[str]) -> List[Factor]:
     while len(stream) > 0 and stream[0].isspace():
         stream.pop(0)
         factors.append(parse_factor(stream))
-    return factors
+    return Term(factors)
 
 
 def parse_factor(stream: List[str]):
@@ -70,7 +83,7 @@ def parse_factor(stream: List[str]):
     return Factor(NodeType.terminal, factor)
 
 
-def parse_bnf(rules: str) -> List[Production]:
+def parse_bnf(rules: str) -> Grammar:
     """hand-hacked BNF parser
 
     Args:
@@ -79,11 +92,27 @@ def parse_bnf(rules: str) -> List[Production]:
     productions = []
     for rule in [x for x in rules.split("\n") if x]:
         matches = RULE.match(rule).groupdict()
-        expression = matches["expression"].split(" ")
+        # hand-hacked lexing of BNF rules
+        expression = []
+        chars = [c for c in matches["expression"]]
+        while len(chars) > 0:
+            current_token = chars.pop(0)
+            if current_token.isspace():
+                while chars[0].isspace():
+                    current_token += chars.pop(0)
+                if chars[0] == "|":
+                    current_token = chars.pop(0)
+                    while chars[0].isspace():
+                        chars.pop(0)
+            else:
+                while len(chars) > 0 and not chars[0].isspace():
+                    current_token += chars.pop(0)
+            expression.append(current_token)
+        # parse the lexed BNF
         tree = parse_expression(expression)
         p = Production(matches["name"], tree)
         productions.append(p)
-    return productions
+    return Grammar(productions)
 
 
 def bnf_from_grammar_config(grammar_config: Dict[str, str]) -> str:

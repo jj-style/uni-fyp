@@ -1,5 +1,6 @@
 jinja2
 click
 toml
+pytest
 flake8
 black
