@@ -2,7 +2,7 @@ import os
 from typing import List, Dict
 from pathlib import Path
 from jinja2 import FileSystemLoader, Environment
-from lexgen.core import Token
+from .core import Token
 
 
 def tokens_from_config_map(config: Dict[str, str]) -> List[Token]:

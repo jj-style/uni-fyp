@@ -1,4 +1,4 @@
-from gli.gli.language import Language, Type, imports, Expression
+from ..language import Language, Type, imports, Expression
 from typing import Dict, Union, Optional, List
 
 
@@ -38,10 +38,10 @@ class Go(Language):
             }
         arg_list = ",".join([f"{name} {t}" for name, t in arguments.items()])
         ret_part = "" if return_type is None else " " + self.types(return_type)
+
         # TODO - block part of function and statements in it properly
-        return Expression(
-            f"func {id}({arg_list}){ret_part} {{\n\t{str(e) for e in statements}}}"
-        )
+        stmts = "\n".join(str(e) for e in statements)
+        return Expression(f"func {id}({arg_list}){ret_part} {{\n\t{stmts}\n}}")
 
     def do_return(self, expression: Optional[Expression]):
         if expression is None:

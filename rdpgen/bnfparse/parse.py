@@ -1,6 +1,5 @@
 import re
 from typing import List, Dict
-from .parsergen import parser_from_grammar
 from .core import Expression, Term, Factor, Grammar, Production, NodeType
 
 RULE = re.compile(r"<(?P<name>.*)>\s*::=\s*(?P<expression>.*)")
@@ -70,10 +69,3 @@ def bnf_from_grammar_config(grammar_config: Dict[str, str]) -> str:
     for rule, prod in grammar_config.items():
         grammar_bnf += f"<{rule}> ::= {prod}" + "\n"
     return grammar_bnf
-
-
-if __name__ == "__main__":
-    with open("test.bnf", "r") as f:
-        contents = f.read()
-    grammar = parse_bnf(contents)
-    parser_from_grammar(grammar)

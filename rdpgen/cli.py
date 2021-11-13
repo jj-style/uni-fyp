@@ -1,8 +1,8 @@
 import click
 import tomli
-from lexgen import template_lex_file, tokens_from_config_map
-from bnfparse.parse import parse_bnf, bnf_from_grammar_config
-from bnfparse.parsergen import parser_from_grammar
+from .lexgen import template_lex_file, tokens_from_config_map
+from .bnfparse.parse import parse_bnf, bnf_from_grammar_config
+from .bnfparse.parsergen import parser_from_grammar
 
 
 @click.command()
