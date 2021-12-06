@@ -21,27 +21,21 @@ class NodeType(Enum):
 
 
 class Node:
-    def __init__(self, node_type, value=None, left=None, right=None):
+    def __init__(self, node_type, value=None, *children):
         self._value = value
         self._type = node_type
-        self._left = left
-        self._right = right
+        self._children = [c for c in children]
 
-    @property
-    def left(self):
-        return self._left
+    def add_children(self, *children):
+        for child in children:
+            self._children.append(child)
 
-    @left.setter
-    def left(self, value):
-        self._left = value
-
-    @property
-    def right(self):
-        return self._right
-
-    @right.setter
-    def right(self, value):
-        self._right = value
+    def __str__(self, level=0):
+        "https://stackoverflow.com/a/20242504"
+        ret = "\t" * level + repr(self) + "\n"
+        for child in self._children:
+            ret += child.__str__(level + 1)
+        return ret
 
     def __repr__(self):
         return f"{self._type}{':' + self._value if self._value else ''}"
@@ -67,29 +61,28 @@ class Parser:
 
     def expression(self):
         """expression ::= term ( "|" term )+"""
-        left = self.term()
+        node = self.term()
         while self.peek() == "|":
+            old = node
             node = Node(NodeType.OR)
             self.next()  # consume "|"
             right = self.term()
 
-            node.left = left
-            node.right = right
-            left = node
-        return left
+            node.add_children(old, right)
+
+        return node
 
     def term(self):
-        """term ::= factor suffix?"""
-        left = self.factor()
+        """term ::= factor suffix? (" " factor suffix?)+"""
+        node = self.factor()
         if self.peek() in ["?", "+", "*"]:
+            old = node
             node = Node(NodeType.TERM)
             right = self.suffix()
 
-            # make sure suffix is left of node
-            node.left = right
-            node.right = left
-            left = node
-        return left
+            node.add_children(old, right)
+        # TODO: add whitespace separated terms to children
+        return node
 
     def suffix(self):
         """suffix ::= "?" | "+" | "*" """
@@ -131,14 +124,7 @@ class Parser:
             raise Exception(f"expected {expected}, got end of sequence")
 
     def print_tree(self):
-        self.__print_tree(self.tree)
-
-    def __print_tree(self, node, level=0):
-        "https://stackoverflow.com/a/62856494"
-        if node is not None:
-            self.__print_tree(node.left, level + 1)
-            print(" " * 8 * level + "->", node)
-            self.__print_tree(node.right, level + 1)
+        print(self.tree)
 
 
 if __name__ == "__main__":
@@ -148,7 +134,5 @@ if __name__ == "__main__":
     try:
         p.parse()
         p.print_tree()
-        print(p.tree.left)
-        print(p.tree.right)
     except Exception as e:
         print(e)
