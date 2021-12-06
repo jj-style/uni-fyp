@@ -51,3 +51,6 @@ class Production:
 class Grammar:
     def __init__(self, productions: List[Production]):
         self.productions = productions
+
+    def __repr__(self):
+        return f"Grammar<productions={self.productions}>"
