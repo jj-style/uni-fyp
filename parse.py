@@ -1,3 +1,5 @@
+from typing import Dict
+
 """ EBNF grammar:
    expression ::= term ( "|" term )+
    term ::= factor suffix? (" " factor suffix?)+
@@ -139,12 +141,43 @@ class Parser:
         print(self.tree)
 
 
+class Grammar:
+    @staticmethod
+    def bnf_from_grammar_dict(grammar_dict: Dict[str, str]) -> str:
+        grammar_bnf = ""
+        for rule, prod in grammar_dict.items():
+            grammar_bnf += f"{rule} ::= {prod}" + "\n"
+        return grammar_bnf
+
+    @classmethod
+    def from_bnf(cls):
+        productions = {}
+        for rule in rules.splitlines():
+            name, rhs = rule.split(" ::= ")
+            productions[name] = rhs
+        return cls(productions)
+
+    def __init__(self, rules: Dict[str, str]):
+        self.__rules = rules
+        self.productions = {}
+        for name, production in rules.items():
+            production_parser = Parser(production)
+            production_parser.parse()
+            self.productions[name] = production_parser.tree
+
+    @property
+    def bnf(self) -> str:
+        return Grammar.bnf_from_grammar_dict(self.__rules)
+
+    def __str__(self) -> str:
+        return "\n".join(f"{k} ->\n{v}" for k, v in self.productions.items())
+
+
 if __name__ == "__main__":
     # p = Parser("( x | y ) ? | z")
     # p = Parser('( x | y ) | "z" ?')
-    p = Parser("( x * y ) ? | z")
-    try:
-        p.parse()
-        p.print_tree()
-    except Exception as e:
-        print(e)
+    # p = Parser("( x * y ) ? | z")
+
+    rules = {"noun-phrase": "article noun", "article": '"the" | "a" | "an"'}
+    g = Grammar(rules)
+    print(g)
