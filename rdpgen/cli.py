@@ -1,7 +1,7 @@
 import click
 import tomli
 from .lexgen import template_lex_file, tokens_from_config_map
-from .bnfparse.parse import parse_bnf, bnf_from_grammar_config
+from .bnfparse.parse import Grammar
 from .bnfparse.parsergen import parser_from_grammar
 
 
@@ -12,7 +12,8 @@ def cli(file: str, outdir: str):
     """Interface to the recursive descent parser generator
 
     Args:
-        file (str):             path to TOML file containing token and grammar rules
+
+        file (str):             path to TOML file with token and grammar rules
         outdir (Optional[str]): directory to output parser program
     """
     with open(file) as f:
@@ -24,7 +25,6 @@ def cli(file: str, outdir: str):
     template_lex_file(tokens, outdir)
 
     # parse the bnf grammar rules
-    grammar = config.get("grammar", {})
-    grammar_bnf = bnf_from_grammar_config(grammar)
-    g = parse_bnf(grammar_bnf)
-    parser_from_grammar(g)
+    grammar_cfg = config.get("grammar", {})
+    grammar = Grammar(grammar_cfg)
+    parser_from_grammar(grammar)
