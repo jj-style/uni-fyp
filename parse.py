@@ -1,6 +1,6 @@
 """ EBNF grammar:
    expression ::= term ( "|" term )+
-   term ::= factor suffix?
+   term ::= factor suffix? (" " factor suffix?)+
    suffix ::= "?" | "+" | "*"
    factor ::= ("(" expression ")") | expression
    factor ::= RULE
@@ -73,15 +73,27 @@ class Parser:
         return node
 
     def term(self):
+        old, right = None, None
         """term ::= factor suffix? (" " factor suffix?)+"""
         node = self.factor()
         if self.peek() in ["?", "+", "*"]:
             old = node
             node = Node(NodeType.TERM)
             right = self.suffix()
-
             node.add_children(old, right)
-        # TODO: add whitespace separated terms to children
+
+        while self.peek() not in ["|", ")", None]:  # TODO: confirm this is right
+            left = node
+            node = Node(NodeType.TERM)
+            node.add_children(left)
+            next_node = self.factor()
+            if self.peek() in ["?", "+", "*"]:
+                old = next_node
+                next_node = Node(NodeType.TERM)
+                right = self.suffix()
+                next_node.add_children(old, right)
+            node.add_children(next_node)
+
         return node
 
     def suffix(self):
@@ -130,7 +142,7 @@ class Parser:
 if __name__ == "__main__":
     # p = Parser("( x | y ) ? | z")
     # p = Parser('( x | y ) | "z" ?')
-    p = Parser("x y | z")
+    p = Parser("( x * y ) ? | z")
     try:
         p.parse()
         p.print_tree()
