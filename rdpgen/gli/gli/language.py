@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 from enum import Enum, auto
 from typing import Union, Dict, List, Optional
+import os
 
 
 class Type(Enum):
@@ -29,9 +30,19 @@ class Expression:
         return str(self.body)
 
 
+class Context:
+    """Context for language"""
+
+    def __init__(self, expand_tabs: bool = False, tab_size: int = 2):
+        self.indent_lvl: int = 0
+        self.expand_tabs: bool = expand_tabs
+        self.tab_size: int = tab_size
+
+
 class Language(ABC):
-    def __init__(self):
-        self.imports = []
+    def __init__(self, ctx: Context = None):
+        self.imports = set()
+        self.ctx = Context() if not ctx else ctx
 
     @property
     @abstractmethod
@@ -39,14 +50,24 @@ class Language(ABC):
         """The name of the language"""
         raise NotImplementedError
 
+    @property
+    def whitespace_char(self) -> str:
+        return " " * self.ctx.tab_size if self.ctx.expand_tabs else "\t"
+
+    @property
+    def linesep(self) -> str:
+        return os.linesep
+
+    def indent(self, stmt: str) -> str:
+        return (self.ctx.indent_lvl * self.whitespace_char) + str(stmt)
+
     def import_package(self, pkg: str):
         """Adds a package to the list of imports
 
         Args:
             pkg (str): name of package/module
         """
-        if pkg not in self.imports:
-            self.imports.append(pkg)
+        self.imports.add(pkg)
 
     @abstractmethod
     def types(self, t: Type) -> str:
@@ -94,6 +115,13 @@ class Language(ABC):
         raise NotImplementedError
 
     @abstractmethod
+    def block(self, *statements) -> Expression:
+        """Block concept in a language,
+        defining a scope and indentation for statements
+        """
+        raise NotImplementedError
+
+    @abstractmethod
     def do_return(self, expression: Optional[Expression]) -> Expression:
         # TODO - add documentation
         raise NotImplementedError
@@ -101,4 +129,9 @@ class Language(ABC):
     @abstractmethod
     def println(self, *args) -> str:
         """Prints values to stdout with a newline at the end"""
+        raise NotImplementedError
+
+    @abstractmethod
+    def print(self, *args) -> str:
+        """Prints values to stdout"""
         raise NotImplementedError

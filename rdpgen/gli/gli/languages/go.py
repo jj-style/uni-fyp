@@ -34,14 +34,26 @@ class Go(Language):
         if isinstance(arguments, list):
             # not got named arguments to use so use arg1,..,argn
             arguments = {
-                f"arg{idx+1}": self.types(t) for t, idx in enumerate(arguments)
+                f"arg{idx+1}": self.types(t) for idx, t in enumerate(arguments)
             }
-        arg_list = ",".join([f"{name} {t}" for name, t in arguments.items()])
+        else:
+            arguments = {}
+        arg_list = ", ".join([f"{name} {t}" for name, t in arguments.items()])
         ret_part = "" if return_type is None else " " + self.types(return_type)
 
-        # TODO - block part of function and statements in it properly
-        stmts = "\n".join(str(e) for e in statements)
-        return Expression(f"func {id}({arg_list}){ret_part} {{\n\t{stmts}\n}}")
+        stmts = self.block(*statements)
+
+        return Expression(f"func {id}({arg_list}){ret_part} {stmts}")
+
+    def block(self, *statements) -> Expression:
+        block = f"{{{self.linesep}"
+        # TODO: make this indentation a contextmanager???
+        self.ctx.indent_lvl += 1
+        for stmt in statements:
+            block += self.indent(stmt) + self.linesep
+        self.ctx.indent_lvl -= 1
+        block += "}"
+        return Expression(block)
 
     def do_return(self, expression: Optional[Expression]):
         if expression is None:
@@ -52,3 +64,7 @@ class Go(Language):
     @imports("fmt")
     def println(self, *args) -> str:
         return f"""fmt.Println({", ".join([str(a) for a in args])})"""
+
+    @imports("fmt")
+    def print(self, *args) -> str:
+        return f"""fmt.Print({", ".join([str(a) for a in args])})"""
