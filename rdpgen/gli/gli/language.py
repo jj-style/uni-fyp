@@ -108,7 +108,7 @@ class Language(ABC):
         self,
         id: str,
         return_type: Optional[Type],
-        arguments: Union[Dict[str, Type], List[Type]],
+        arguments: Union[Dict[str, Type], List[Type], None],
         *statements
     ) -> Expression:
         # TODO - add documentation
