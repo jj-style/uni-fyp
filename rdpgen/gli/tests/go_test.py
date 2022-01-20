@@ -21,5 +21,4 @@ def test_go_variables_in_function():
         g.print(g.string("x is "), "x"),
         g.println(g.string("arguments to function are "), "arg1", "arg2"),
     )
-    print(f)
     assert str(f) == PRINT_VARIABLES
