@@ -1,13 +1,32 @@
 from abc import ABC, abstractmethod
 from enum import Enum, auto
-from typing import Union, Dict, List, Optional
+from typing import Union, Dict, List, Optional, Any, TypeVar
 import os
 
 
-class Type(Enum):
+class Primitive(Enum):
     Int = auto()
     Float = auto()
     String = auto()
+
+
+class Composite:
+    class CType(Enum):
+        Array = auto()
+
+    def __init__(self, base: CType, sub):
+        self.base = base
+        self.sub = sub
+
+    def __repr__(self):
+        return f"{self.base}<{self.sub}>"
+
+    @classmethod
+    def array(cls, t):
+        return cls(Composite.CType.Array, t)
+
+
+Type = TypeVar("Type", Primitive, Composite)
 
 
 def imports(*packages):
@@ -95,6 +114,16 @@ class Language(ABC):
 
         Args:
             s (str): the string to construct
+        """
+        raise NotImplementedError
+
+    @abstractmethod
+    def array(self, t: Type, elements: List[Any]):
+        """Create an array in a language
+
+        Args:
+            t (Type): The type of elements contained in the array
+            elements (List[Any]): elements to construct the array with
         """
         raise NotImplementedError
 

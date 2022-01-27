@@ -1,5 +1,5 @@
 from .common import file_contains
-from rdpgen.gli import Go, Context, Type
+from rdpgen.gli import Go, Context, Type, Primitive, Composite
 
 from .go_progs import *
 
@@ -15,8 +15,8 @@ def test_go_variables_in_function():
     f = g.function(
         "variables",
         None,
-        [Type.Int, Type.String],
-        g.declare("x", Type.Int),
+        [Primitive.Int, Primitive.String],
+        g.declare("x", Primitive.Int),
         g.assign("x", 25),
         g.print(g.string("x is "), "x"),
         g.println(g.string("arguments to function are "), "arg1", "arg2"),
@@ -30,7 +30,9 @@ def test_go_inner_functions():
         "function",
         None,
         None,
-        g.function("inner", None, [Type.String], g.println(g.string("inner function"))),
+        g.function(
+            "inner", None, [Primitive.String], g.println(g.string("inner function"))
+        ),
     )
     assert f == INNER_FUNC
 
@@ -61,3 +63,22 @@ def test_go_if_else():
         [g.println(g.string("=== RUNNING IN DEBUG MODE ==="))],
     )
     assert second == IF_NO_ELSE
+
+
+def test_go_types_array():
+    g = Go(Context(expand_tabs=True))
+    assert g.types(Composite.array(Primitive.Int)) == "[]int"
+    assert g.types(Composite.array(Primitive.String)) == "[]string"
+
+
+def test_go_array_declare():
+    g = Go(Context(expand_tabs=True))
+    f = g.function(
+        "main",
+        None,
+        None,
+        g.declare("mylist", Composite.array(Primitive.Int)),
+        g.assign("mylist", g.array(Composite.array(Primitive.Int), [1, 2, 3])),
+        g.println(g.string("mylist is "), "mylist"),
+    )
+    assert str(f) == ARRAY_DECLARE_ASSIGN

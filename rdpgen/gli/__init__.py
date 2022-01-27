@@ -1,8 +1,21 @@
-from .gli import Language, Type, Expression, Context, imports, expression, Go, Cpp
+from .gli import (
+    Language,
+    Type,
+    Primitive,
+    Composite,
+    Expression,
+    Context,
+    imports,
+    expression,
+    Go,
+    Cpp,
+)
 
 __all__ = [
     "Language",
     "Type",
+    "Primitive",
+    "Composite",
     "Expression",
     "imports",
     "Context",

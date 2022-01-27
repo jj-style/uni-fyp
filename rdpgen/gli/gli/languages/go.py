@@ -1,5 +1,5 @@
-from ..language import Language, Type, imports, expression
-from typing import Dict, Union, Optional, List
+from ..language import Language, Type, imports, expression, Primitive, Composite
+from typing import Dict, Union, Optional, List, Any
 
 
 class Go(Language):
@@ -8,15 +8,23 @@ class Go(Language):
         return "golang"
 
     def types(self, t: Type) -> str:
-        if t is Type.Int:
-            return "int"
-        elif t is Type.Float:
-            return "float64"
-        elif t is Type.String:
-            return "string"
+        if isinstance(t, Primitive):
+            if t is Primitive.Int:
+                return "int"
+            elif t is Primitive.Float:
+                return "float64"
+            elif t is Primitive.String:
+                return "string"
+        elif isinstance(t, Composite):
+            if t.base is Composite.CType.Array:
+                return f"[]{self.types(t.sub)}"
 
     def string(self, s: str):
         return f'"{s}"'
+
+    def array(self, t: Type, elements: List[Any]):
+        joined = ", ".join(str(e) for e in elements)
+        return f"{self.types(t)}{{{joined}}}"
 
     def declare(self, id: str, type: Type):
         return f"var {id} {self.types(type)}"

@@ -28,3 +28,9 @@ IF_ELSE = """if i == 0 {
 IF_NO_ELSE = """if mode == "debug" {
   fmt.Println("=== RUNNING IN DEBUG MODE ===")
 }"""
+
+ARRAY_DECLARE_ASSIGN = """func main() {
+  var mylist []int
+  mylist = []int{1, 2, 3}
+  fmt.Println("mylist is ", mylist)
+}"""
