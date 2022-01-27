@@ -68,3 +68,21 @@ class Go(Language):
     @imports("fmt")
     def print(self, *args) -> str:
         return f"""fmt.Print({", ".join([str(a) for a in args])})"""
+
+    def for_loop(
+        self,
+        it: str,
+        start,
+        stop,
+        step,
+        *statements,
+    ):
+        return f"for {self.assign(it, start)}; {stop}; {step} {self.block(*statements)}"
+
+    def if_else(
+        self,
+        condition,
+        true_stmts,
+        false_stmts=None,
+    ):
+        return f"if {condition} {self.block(*true_stmts)}{(' else ' + self.block(*false_stmts)) if false_stmts else ''}"  # noqa

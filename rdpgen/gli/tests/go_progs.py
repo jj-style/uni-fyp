@@ -14,3 +14,17 @@ INNER_FUNC = """func function() {
     fmt.Println("inner function")
 }
 }"""
+
+FOR_LOOP = """for i = 0; i < 10; i = i + 1 {
+  fmt.Println("i is ", i)
+}"""
+
+IF_ELSE = """if i == 0 {
+  fmt.Println("i is zero")
+} else {
+  fmt.Println("i is not zero")
+}"""
+
+IF_NO_ELSE = """if mode == "debug" {
+  fmt.Println("=== RUNNING IN DEBUG MODE ===")
+}"""

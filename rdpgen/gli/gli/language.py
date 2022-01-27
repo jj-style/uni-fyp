@@ -2,7 +2,6 @@ from abc import ABC, abstractmethod
 from enum import Enum, auto
 from typing import Union, Dict, List, Optional
 import os
-import re
 
 
 class Type(Enum):
@@ -39,6 +38,11 @@ class Expression:
 
     def __str__(self):
         return self.__f()
+
+    def __eq__(self, o):
+        if type(o) is str:
+            return str(self) == o
+        return False
 
 
 class Context:
@@ -134,7 +138,7 @@ class Language(ABC):
 
     @abstractmethod
     def do_return(self, expression=None):
-        # TODO - add documentation
+        """Return from a function, with an optional expression to return"""
         raise NotImplementedError
 
     @abstractmethod
@@ -146,3 +150,57 @@ class Language(ABC):
     def print(self, *args) -> str:
         """Prints values to stdout"""
         raise NotImplementedError
+
+    @abstractmethod
+    def for_loop(
+        self,
+        it: str,
+        start: Expression,
+        stop: Expression,
+        step: Expression,
+        *statements,
+    ):
+        """For loop implementation for a language.
+        Arguments:
+            it - loop iterator variable
+            start - expression to assign to iterator
+            stop - expression to evaluate against to terminate the loop
+            step - expression to change the iterator variable each iteration
+            *statements - statements to execute in the for loop
+        """
+        raise NotImplementedError
+
+    @abstractmethod
+    def if_else(
+        self,
+        condition: Expression,
+        true_stmts: List[Expression],
+        false_stmts: List[Expression] = None,
+    ) -> Expression:
+        """If/Else expression in a programming language.
+        Provide a condition and execute true (required) or flase statements (optional)
+        """
+        raise NotImplementedError
+
+    # TODO: add loads of non-abstract common things like
+    # equals, less than, array indexing, calling (), addition
+    def increment(self, id: str, inc: Expression = None):
+        return f"{id} = {id} + {1 if inc is None else inc}"
+
+    def lt(self, lhs: Expression, rhs: Expression):
+        return f"{lhs} < {rhs}"
+
+    def leq(self, lhs: Expression, rhs: Expression):
+        return f"{lhs} <= {rhs}"
+
+    def gt(self, lhs: Expression, rhs: Expression):
+        return f"{lhs} > {rhs}"
+
+    def geq(self, lhs: Expression, rhs: Expression):
+        return f"{lhs} >= {rhs}"
+
+    def eq(self, lhs: Expression, rhs: Expression):
+        return f"{lhs} == {rhs}"
+
+    def neq(self, lhs: Expression, rhs: Expression):
+        return f"{lhs} != {rhs}"
