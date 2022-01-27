@@ -2,6 +2,7 @@ from abc import ABC, abstractmethod
 from enum import Enum, auto
 from typing import Union, Dict, List, Optional
 import os
+import re
 
 
 class Type(Enum):
@@ -22,12 +23,22 @@ def imports(*packages):
     return import_wrapper
 
 
+def expression(func):
+    def wrap(*args, **kwargs):
+        def lazy():
+            return func(*args, **kwargs)
+
+        return Expression(lazy)
+
+    return wrap
+
+
 class Expression:
-    def __init__(self, body):
-        self.body = body
+    def __init__(self, expr_func):
+        self.__f = expr_func
 
     def __str__(self):
-        return str(self.body)
+        return self.__f()
 
 
 class Context:
@@ -75,7 +86,7 @@ class Language(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def string(self, s: str) -> Expression:
+    def string(self, s: str):
         """Construct a string in a language
 
         Args:
@@ -84,7 +95,7 @@ class Language(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def declare(self, id: str, type: Type) -> Expression:
+    def declare(self, id: str, type: Type):
         """Declare a variable
 
         Args:
@@ -94,7 +105,7 @@ class Language(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def assign(self, id: str, expr: Expression) -> Expression:
+    def assign(self, id: str, expr):
         """Assign the result of an expression to an variable
 
         Args:
@@ -109,20 +120,20 @@ class Language(ABC):
         id: str,
         return_type: Optional[Type],
         arguments: Union[Dict[str, Type], List[Type], None],
-        *statements
-    ) -> Expression:
+        *statements,
+    ):
         # TODO - add documentation
         raise NotImplementedError
 
     @abstractmethod
-    def block(self, *statements) -> Expression:
+    def block(self, *statements):
         """Block concept in a language,
         defining a scope and indentation for statements
         """
         raise NotImplementedError
 
     @abstractmethod
-    def do_return(self, expression: Optional[Expression]) -> Expression:
+    def do_return(self, expression=None):
         # TODO - add documentation
         raise NotImplementedError
 

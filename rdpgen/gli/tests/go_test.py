@@ -1,7 +1,7 @@
 from .common import file_contains
 from rdpgen.gli import Go, Context, Type
 
-from .go_progs import HELLO_WORLD, PRINT_VARIABLES
+from .go_progs import HELLO_WORLD, PRINT_VARIABLES, INNER_FUNC
 
 
 def test_go_hello_world():
@@ -22,3 +22,14 @@ def test_go_variables_in_function():
         g.println(g.string("arguments to function are "), "arg1", "arg2"),
     )
     assert str(f) == PRINT_VARIABLES
+
+
+def test_go_inner_functions():
+    g = Go(Context(expand_tabs=True))
+    f = g.function(
+        "function",
+        None,
+        None,
+        g.function("inner", None, [Type.String], g.println(g.string("inner function"))),
+    )
+    assert str(f) == INNER_FUNC

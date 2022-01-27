@@ -1,4 +1,4 @@
-from ..language import Language, Type, imports, Expression
+from ..language import Language, Type, imports
 from typing import Dict, Union, Optional, List
 
 
@@ -15,14 +15,14 @@ class Cpp(Language):
         elif t is Type.String:
             return "std::string"
 
-    def string(self, s: str) -> Expression:
-        return Expression(f'"{s}"')
+    def string(self, s: str):
+        return f'"{s}"'
 
-    def declare(self, id: str, type: Type) -> Expression:
-        return Expression(f"{self.types(type)} {id};")
+    def declare(self, id: str, type: Type):
+        return f"{self.types(type)} {id};"
 
-    def assign(self, id: str, expr: Expression) -> Expression:
-        return Expression(f"{id} = {expr};")
+    def assign(self, id: str, expr):
+        return f"{id} = {expr};"
 
     def function(
         self,
@@ -30,7 +30,7 @@ class Cpp(Language):
         return_type: Optional[Type],
         arguments: Union[Dict[str, Type], List[Type]],
         *statements,
-    ) -> Expression:
+    ):
         if isinstance(arguments, list):
             # not got named arguments to use so use arg1,..,argn
             arguments = {
@@ -41,13 +41,13 @@ class Cpp(Language):
 
         # TODO - block part of function and statements in it properly
         stmts = "\n".join(str(e) for e in statements)
-        return Expression(f"{ret_part} {id}({arg_list}) {{\n\t{stmts}\n}}")
+        return f"{ret_part} {id}({arg_list}) {{\n\t{stmts}\n}}"
 
-    def do_return(self, expression: Optional[Expression]):
+    def do_return(self, expression=None):
         if expression is None:
-            return Expression("return;")
+            return "return;"
         else:
-            return Expression(f"return {expression};")
+            return f"return {expression};"
 
     @imports("iostream")
     def println(self, *args) -> str:
@@ -58,4 +58,4 @@ class Cpp(Language):
             return_s = f"std::cout << {a};"
         else:
             return_s = 'std::cout << "";'
-        return Expression(return_s)
+        return return_s

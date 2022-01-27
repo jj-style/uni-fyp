@@ -58,9 +58,9 @@ class Parser:
         return self.tokens.pop(0) if self.has_next else None
 
     def parse(self):
-        self.tree = self.expression()
+        self.tree = self.)
 
-    def expression(self):
+    def self):
         """expression ::= term ( "|" term )+"""
         node = self.term()
         while self.peek() == "|":
@@ -116,7 +116,7 @@ class Parser:
         """factor ::= "(" expression ")" """
         if self.peek() == "(":
             self.consume("(")
-            grouped = self.expression()
+            grouped = self.)
             self.consume(")")
             return grouped  # Node(grouped, "grouped")
         else:

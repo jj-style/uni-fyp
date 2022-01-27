@@ -1,4 +1,4 @@
-from ..language import Language, Type, imports, Expression
+from ..language import Language, Type, imports, expression
 from typing import Dict, Union, Optional, List
 
 
@@ -15,22 +15,23 @@ class Go(Language):
         elif t is Type.String:
             return "string"
 
-    def string(self, s: str) -> Expression:
-        return Expression(f'"{s}"')
+    def string(self, s: str):
+        return f'"{s}"'
 
-    def declare(self, id: str, type: Type) -> Expression:
-        return Expression(f"var {id} {self.types(type)}")
+    def declare(self, id: str, type: Type):
+        return f"var {id} {self.types(type)}"
 
-    def assign(self, id: str, expr: Expression) -> Expression:
-        return Expression(f"{id} = {expr}")
+    def assign(self, id: str, expr):
+        return f"{id} = {expr}"
 
+    @expression
     def function(
         self,
         id: str,
         return_type: Optional[Type],
         arguments: Union[Dict[str, Type], List[Type], None],
         *statements,
-    ) -> Expression:
+    ):
         args = {} if not arguments else arguments
         if isinstance(arguments, list):
             # not got named arguments to use so use arg1,..,argn
@@ -39,25 +40,26 @@ class Go(Language):
         arg_list = ", ".join([f"{name} {t}" for name, t in args.items()])
         ret_part = "" if return_type is None else " " + self.types(return_type)
 
+        # TODO: make Expression class take this function so can make __str__ make string
+        # so don't have to do callable()
+
         stmts = self.block(*statements)
+        return f"func {id}({arg_list}){ret_part} {stmts}"
 
-        return Expression(f"func {id}({arg_list}){ret_part} {stmts}")
-
-    def block(self, *statements) -> Expression:
+    def block(self, *statements):
         block = f"{{{self.linesep}"
-        # TODO: make this indentation a contextmanager???
         self.ctx.indent_lvl += 1
         for stmt in statements:
-            block += self.indent(stmt) + self.linesep
+            block += self.indent(stmt if not callable(stmt) else stmt()) + self.linesep
         self.ctx.indent_lvl -= 1
         block += "}"
-        return Expression(block)
+        return block
 
-    def do_return(self, expression: Optional[Expression]):
+    def do_return(self, expression=None):
         if expression is None:
-            return Expression("return")
+            return "return"
         else:
-            return Expression(f"return {expression}")
+            return f"return {expression}"
 
     @imports("fmt")
     def println(self, *args) -> str:
