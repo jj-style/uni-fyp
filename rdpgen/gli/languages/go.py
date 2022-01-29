@@ -48,9 +48,6 @@ class Go(Language):
         arg_list = ", ".join([f"{name} {t}" for name, t in args.items()])
         ret_part = "" if return_type is None else " " + self.types(return_type)
 
-        # TODO: make Expression class take this function so can make __str__ make string
-        # so don't have to do callable()
-
         stmts = self.block(*statements)
         return f"func {id}({arg_list}){ret_part} {stmts}"
 
