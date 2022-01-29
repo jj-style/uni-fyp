@@ -34,3 +34,21 @@ ARRAY_DECLARE_ASSIGN = """func main() {
   mylist = []int{1, 2, 3}
   fmt.Println("mylist is ", mylist)
 }"""
+
+HELLO_WORLD_PRELUDE = """package main
+
+import (
+  "fmt"
+)
+
+"""
+
+PROG_HELLO_WORLD = """package main
+
+import (
+  "fmt"
+)
+
+func main() {
+  fmt.Println("hello world")
+}"""

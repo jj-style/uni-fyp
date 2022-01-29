@@ -7,6 +7,16 @@ class Go(Language):
     def name(self) -> str:
         return "golang"
 
+    def prelude(self, **kwargs):
+        package = kwargs.get("package", "main")
+        imports = ""
+        if len(self.imports) > 0:
+            pkgs = "\n".join(
+                self.whitespace_char + self.string(pkg) for pkg in self.imports
+            )
+            imports = f"import (\n{pkgs}\n)\n\n"
+        return f"package {package}\n\n{imports}"
+
     def types(self, t: Type) -> str:
         if isinstance(t, Primitive):
             if t is Primitive.Int:
@@ -55,7 +65,7 @@ class Go(Language):
         block = f"{{{self.linesep}"
         self.ctx.indent_lvl += 1
         for stmt in statements:
-            block += self.indent(stmt if not callable(stmt) else stmt()) + self.linesep
+            block += self.indent(str(stmt)) + self.linesep
         self.ctx.indent_lvl -= 1
         block += "}"
         return block

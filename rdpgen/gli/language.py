@@ -103,6 +103,10 @@ class Language(ABC):
         """
         self.imports.add(pkg)
 
+    def prelude(self, **kwargs) -> str:
+        """Program can generate a prelude before the code, e.g. to add imports"""
+        return ""
+
     @abstractmethod
     def types(self, t: Type) -> str:
         """How a language represents a type"""

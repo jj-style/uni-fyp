@@ -1,4 +1,3 @@
-from .common import file_contains
 from rdpgen.gli import Go, Context, Type, Primitive, Composite
 
 from .go_progs import *
@@ -82,3 +81,9 @@ def test_go_array_declare():
         g.println(g.string("mylist is "), "mylist"),
     )
     assert str(f) == ARRAY_DECLARE_ASSIGN
+
+
+def test_go_prelude():
+    g = Go(Context(expand_tabs=True))
+    f = g.function("main", None, None, g.println(g.string("hello world")))
+    assert g.prelude() == HELLO_WORLD_PRELUDE
