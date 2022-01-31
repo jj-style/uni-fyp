@@ -77,7 +77,15 @@ class Go(Language):
             return f"return {expression}"
 
     def comment(self, comment):
-        return f"// {comment}"
+        lines = comment.split(self.linesep)
+        if len(lines) == 1:
+            return f"// {lines[0]}"
+        multiline = "/*\n"
+        for line in lines:
+            multiline += line + "\n"
+        multiline += "*/\n"
+        print(multiline)
+        return multiline
 
     @imports("fmt")
     def println(self, *args) -> str:

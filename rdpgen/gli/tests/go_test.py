@@ -92,3 +92,11 @@ def test_go_prelude():
 def test_go_comment_oneline():
     g = Go(Context(expand_tabs=True))
     assert g.comment("i am a comment") == "// i am a comment"
+
+
+def test_go_comment_multiline():
+    g = Go(Context(expand_tabs=True))
+    assert (
+        g.comment("i am first line\ni am second line\ni am third line")
+        == MULTI_LINE_COMMENT
+    )

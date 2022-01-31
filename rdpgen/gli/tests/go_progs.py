@@ -52,3 +52,10 @@ import (
 func main() {
   fmt.Println("hello world")
 }"""
+
+MULTI_LINE_COMMENT = """/*
+i am first line
+i am second line
+i am third line
+*/
+"""
