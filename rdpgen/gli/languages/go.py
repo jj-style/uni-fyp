@@ -76,6 +76,9 @@ class Go(Language):
         else:
             return f"return {expression}"
 
+    def comment(self, comment):
+        return f"// {comment}"
+
     @imports("fmt")
     def println(self, *args) -> str:
         return f"""fmt.Println({", ".join([str(a) for a in args])})"""

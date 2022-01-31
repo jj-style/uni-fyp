@@ -170,6 +170,11 @@ class Language(ABC):
         raise NotImplementedError
 
     @abstractmethod
+    def comment(self, comment: str):
+        """Insert a comment in the language"""
+        raise NotImplementedError
+
+    @abstractmethod
     def do_return(self, expression=None):
         """Return from a function, with an optional expression to return"""
         raise NotImplementedError

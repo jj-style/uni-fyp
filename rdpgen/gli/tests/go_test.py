@@ -87,3 +87,8 @@ def test_go_prelude():
     g = Go(Context(expand_tabs=True))
     f = g.function("main", None, None, g.println(g.string("hello world")))
     assert g.prelude() == HELLO_WORLD_PRELUDE
+
+
+def test_go_comment_oneline():
+    g = Go(Context(expand_tabs=True))
+    assert g.comment("i am a comment") == "// i am a comment"
