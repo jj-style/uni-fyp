@@ -59,7 +59,8 @@ class Go(Language):
         ret_part = "" if return_type is None else " " + self.types(return_type)
 
         stmts = self.block(*statements)
-        return f"func {id}({arg_list}){ret_part} {stmts}"
+        func = f"func {id}({arg_list}){ret_part} {stmts}"
+        return func
 
     def block(self, *statements):
         block = f"{{{self.linesep}"
@@ -95,6 +96,7 @@ class Go(Language):
     def print(self, *args) -> str:
         return f"""fmt.Print({", ".join([str(a) for a in args])})"""
 
+    @expression
     def for_loop(
         self,
         it: str,
@@ -105,6 +107,15 @@ class Go(Language):
     ):
         return f"for {self.assign(it, start)}; {stop}; {step} {self.block(*statements)}"
 
+    @expression
+    def while_loop(self, *statements, condition=None):
+        stmts = list(statements)
+        if condition is not None:
+            stmts.insert(0, self.if_else(self.negate(condition), [self.break_loop()]))
+        loop = f"for {self.block(*stmts)}"
+        return loop
+
+    @expression
     def if_else(
         self,
         condition,

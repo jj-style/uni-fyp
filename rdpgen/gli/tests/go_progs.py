@@ -59,3 +59,19 @@ i am second line
 i am third line
 */
 """
+
+INFINITE_LOOP = """for {
+  fmt.Println("i am in an infinite loop")
+}"""
+
+WHILE_CONDITIONAL_LOOP = """func main() {
+  var x int
+  x = 0
+  for {
+    if !(x < 10) {
+      break
+}
+    fmt.Println("x is", x)
+    x = x + 1
+}
+}"""

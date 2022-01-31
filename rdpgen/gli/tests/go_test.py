@@ -100,3 +100,27 @@ def test_go_comment_multiline():
         g.comment("i am first line\ni am second line\ni am third line")
         == MULTI_LINE_COMMENT
     )
+
+
+def test_go_while_true_loop():
+    g = Go(Context(expand_tabs=True))
+    assert (
+        g.while_loop(g.println(g.string("i am in an infinite loop"))) == INFINITE_LOOP
+    )
+
+
+def test_go_while_condition():
+    g = Go(Context(expand_tabs=True))
+    f = g.function(
+        "main",
+        None,
+        None,
+        g.declare("x", Primitive.Int),
+        g.assign("x", "0"),
+        g.while_loop(
+            g.println(g.string("x is"), "x"),
+            g.increment("x"),
+            condition=g.lt("x", "10"),
+        ),
+    )
+    assert str(f) == WHILE_CONDITIONAL_LOOP

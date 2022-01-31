@@ -85,6 +85,11 @@ class Language(ABC):
         raise NotImplementedError
 
     @property
+    def terminator(self) -> str:
+        """Statement terminator"""
+        return ""
+
+    @property
     def whitespace_char(self) -> str:
         return " " * self.ctx.tab_size if self.ctx.expand_tabs else "\t"
 
@@ -209,6 +214,20 @@ class Language(ABC):
         raise NotImplementedError
 
     @abstractmethod
+    def while_loop(self, *statements, condition: Optional[Expression] = None):
+        """While loop implementation for a language.
+        Arguments:
+            condition: condition for when to terminate the loop.
+                       If None, an infinte loop is assumed
+            *statements - statements to execute in the for loop
+        """
+        raise NotImplementedError
+
+    def break_loop(self):
+        """Language implementation of break"""
+        return "break" + self.terminator
+
+    @abstractmethod
     def if_else(
         self,
         condition: Expression,
@@ -242,3 +261,6 @@ class Language(ABC):
 
     def neq(self, lhs: Expression, rhs: Expression):
         return f"{lhs} != {rhs}"
+
+    def negate(self, expr: Expression):
+        return f"!({expr})"
