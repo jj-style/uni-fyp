@@ -36,6 +36,9 @@ class Go(Language):
         joined = ", ".join(str(e) for e in elements)
         return f"{self.types(t)}{{{joined}}}"
 
+    def array_length(self, expression):
+        return f"len({expression})"
+
     def declare(self, id: str, type: Type):
         return f"var {id} {self.types(type)}"
 

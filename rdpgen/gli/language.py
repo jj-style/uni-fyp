@@ -150,6 +150,19 @@ class Language(ABC):
         raise NotImplementedError
 
     @abstractmethod
+    def array_length(self, expression):
+        """Get the lenght of an array"""
+        raise NotImplementedError
+
+    def index(self, expression, offset):
+        """Index an array"""
+        return f"{expression}[{offset}]"
+
+    def call(self, expression, *args):
+        """Call a function/method"""
+        return f"{expression}({', '.join(list(args))})"
+
+    @abstractmethod
     def declare(self, id: str, type: Type):
         """Declare a variable
 

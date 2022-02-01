@@ -124,3 +124,7 @@ def test_go_while_condition():
         ),
     )
     assert str(f) == WHILE_CONDITIONAL_LOOP
+
+def test_go_array_length():
+    g = Go(Context(expand_tabs=True))
+    assert g.array_length("mylist") == "len(mylist)"

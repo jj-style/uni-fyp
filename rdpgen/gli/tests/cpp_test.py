@@ -111,3 +111,7 @@ def test_cpp_while_condition():
         ),
     )
     assert str(f) == WHILE_CONDITIONAL_LOOP
+
+def test_cpp_array_length():
+    cpp = Cpp(Context(expand_tabs=True))
+    assert cpp.array_length("mylist") == "mylist.size()"

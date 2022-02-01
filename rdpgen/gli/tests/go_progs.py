@@ -75,3 +75,38 @@ WHILE_CONDITIONAL_LOOP = """func main() {
     x = x + 1
 }
 }"""
+
+BUBBLE_SORT_PROG = """package main
+
+import (
+  "fmt"
+)
+
+func bubblesort(arr []int) []int {
+  var i int
+  var j int
+  var temp int
+  for i = 0; i < len(arr); i = i + 1 {
+    for j = 0; j < len(arr) - i - 1; j = j + 1 {
+      if arr[j+1] < arr[j] {
+        temp = arr[j]
+        arr[j] = arr[j+1]
+        arr[j+1] = temp
+      } 
+    }
+  }
+  return arr
+}
+
+func main() {
+  var original []int
+  original = []int{5, 2, 4, 1, 3}
+  var sorted []int
+  sorted = bubblesort(original)
+  var i int
+  for i = 0; i < len(sorted); i = i + 1 {
+    fmt.Print(sorted[i], " ")
+  }
+  fmt.Println()
+}
+"""

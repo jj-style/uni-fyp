@@ -21,7 +21,6 @@ class Program:
         program = f"{self.lang.prelude()}"
         for stmt in self.__statements:
             program += str(stmt)
-        print(program)
         return program
 
     def write_file(self, filename: str):

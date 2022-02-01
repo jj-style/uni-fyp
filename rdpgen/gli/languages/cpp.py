@@ -36,6 +36,9 @@ class Cpp(Language):
         joined = ", ".join(str(e) for e in elements)
         return f"{{{joined}}}"
 
+    def array_length(self, expression):
+        return f"{expression}.size()"
+
     def declare(self, id: str, type: Type):
         return f"{self.types(type)} {id}{self.terminator}"
 
