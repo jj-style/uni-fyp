@@ -41,6 +41,19 @@ def imports(*packages):
     return import_wrapper
 
 
+# TODO: don't think this is needed
+def common(func):
+    def wrap(self, *args, **kwargs):
+        no_terminator = kwargs.get("no_terminator", False)
+        result = func(self, *args, **kwargs)
+
+        if no_terminator:
+            return result.rstrip(self.terminator)
+        return result
+
+    return wrap
+
+
 def expression(func):
     def wrap(*args, **kwargs):
         def lazy():
@@ -174,10 +187,17 @@ class Language(ABC):
         """
         raise NotImplementedError
 
-    @abstractmethod
     def comment(self, comment: str):
-        """Insert a comment in the language"""
-        raise NotImplementedError
+        """Insert a comment in the language.
+        If not overidden, defaults to C-like comments"""
+        lines = comment.split(self.linesep)
+        if len(lines) == 1:
+            return f"// {lines[0]}"
+        multiline = "/*\n"
+        for line in lines:
+            multiline += line + "\n"
+        multiline += "*/\n"
+        return multiline
 
     @abstractmethod
     def do_return(self, expression=None):
@@ -242,7 +262,10 @@ class Language(ABC):
     # TODO: add loads of non-abstract common things like
     # equals, less than, array indexing, calling (), addition
     def increment(self, id: str, inc: Expression = None):
-        return f"{id} = {id} + {1 if inc is None else inc}"
+        return f"{id} = {id} + {1 if inc is None else inc}{self.terminator}"
+
+    def decrement(self, id: str, dec: Expression = None):
+        return f"{id} = {id} - {1 if dec is None else dec}{self.terminator}"
 
     def lt(self, lhs: Expression, rhs: Expression):
         return f"{lhs} < {rhs}"
@@ -264,3 +287,5 @@ class Language(ABC):
 
     def negate(self, expr: Expression):
         return f"!({expr})"
+
+    # TODO: stdlib like fileio, readlines, read/write etc.
