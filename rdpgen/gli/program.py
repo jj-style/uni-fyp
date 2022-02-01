@@ -20,7 +20,7 @@ class Program:
         # generate language prelude
         program = f"{self.lang.prelude()}"
         for stmt in self.__statements:
-            program += str(stmt)
+            program += str(stmt) + "\n\n"
         return program
 
     def write_file(self, filename: str):

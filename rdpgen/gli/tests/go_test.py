@@ -33,7 +33,7 @@ def test_go_inner_functions():
             "inner", None, [Primitive.String], g.println(g.string("inner function"))
         ),
     )
-    assert f == INNER_FUNC
+    assert str(f) == INNER_FUNC
 
 
 def test_go_for_loop():
@@ -77,7 +77,7 @@ def test_go_array_declare():
         None,
         None,
         g.declare("mylist", Composite.array(Primitive.Int)),
-        g.assign("mylist", g.array(Composite.array(Primitive.Int), [1, 2, 3])),
+        g.assign("mylist", g.array(Primitive.Int, [1, 2, 3])),
         g.println(g.string("mylist is "), "mylist"),
     )
     assert str(f) == ARRAY_DECLARE_ASSIGN
@@ -124,6 +124,7 @@ def test_go_while_condition():
         ),
     )
     assert str(f) == WHILE_CONDITIONAL_LOOP
+
 
 def test_go_array_length():
     g = Go(Context(expand_tabs=True))

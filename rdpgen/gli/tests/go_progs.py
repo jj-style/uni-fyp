@@ -51,7 +51,9 @@ import (
 
 func main() {
   fmt.Println("hello world")
-}"""
+}
+
+"""
 
 MULTI_LINE_COMMENT = """/*
 i am first line
@@ -88,13 +90,13 @@ func bubblesort(arr []int) []int {
   var temp int
   for i = 0; i < len(arr); i = i + 1 {
     for j = 0; j < len(arr) - i - 1; j = j + 1 {
-      if arr[j+1] < arr[j] {
+      if arr[j + 1] < arr[j] {
         temp = arr[j]
-        arr[j] = arr[j+1]
-        arr[j+1] = temp
-      } 
-    }
-  }
+        arr[j] = arr[j + 1]
+        arr[j + 1] = temp
+}
+}
+}
   return arr
 }
 
@@ -106,7 +108,8 @@ func main() {
   var i int
   for i = 0; i < len(sorted); i = i + 1 {
     fmt.Print(sorted[i], " ")
-  }
+}
   fmt.Println()
 }
+
 """

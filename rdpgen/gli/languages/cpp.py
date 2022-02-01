@@ -56,8 +56,8 @@ class Cpp(Language):
         args = {} if not arguments else arguments
         if isinstance(arguments, list):
             # not got named arguments to use so use arg1,..,argn
-            args = {f"arg{idx+1}": self.types(t) for idx, t in enumerate(arguments)}
-        arg_list = ", ".join([f"{t} {name}" for name, t in args.items()])
+            args = {f"arg{idx+1}": t for idx, t in enumerate(arguments)}
+        arg_list = ", ".join([f"{self.types(t)} {name}" for name, t in args.items()])
         ret_part = "void" if return_type is None else " " + self.types(return_type)
 
         stmts = self.block(*statements)

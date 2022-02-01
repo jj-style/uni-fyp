@@ -280,6 +280,12 @@ class Language(ABC):
     def decrement(self, id: str, dec: Expression = None):
         return f"{id} = {id} - {1 if dec is None else dec}{self.terminator}"
 
+    def add(self, lhs, rhs):
+        return f"{lhs} + {rhs}"
+
+    def sub(self, lhs, rhs):
+        return f"{lhs} - {rhs}"
+
     def lt(self, lhs: Expression, rhs: Expression):
         return f"{lhs} < {rhs}"
 

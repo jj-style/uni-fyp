@@ -38,7 +38,9 @@ PROG_HELLO_WORLD = """#include <iostream>
 
 void main() {
   std::cout << "hello world" << std::endl;
-}"""
+}
+
+"""
 
 MULTI_LINE_COMMENT = """/*
 i am first line
