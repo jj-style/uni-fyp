@@ -10,6 +10,7 @@ def file_contains(file: str, text: str) -> bool:
 
 def run_cmd(cmd: str) -> str:
     """run a command return stdout"""
-    resp = subprocess.run(shlex.split(cmd), capture_output=True, text=True)
+    resp = subprocess.run(cmd, capture_output=True, text=True, shell=True)
+    print(resp)
     out = resp.stdout
     return out

@@ -12,7 +12,7 @@ class Cpp(Language):
         return ";"
 
     def prelude(self, **kwargs):
-        includes = "\n".join(f"#include <{pkg}>" for pkg in self.imports)
+        includes = "\n".join(f"#include <{pkg}>" for pkg in sorted(self.imports))
         return includes + "\n\n"
 
     def types(self, t: Type) -> str:
@@ -58,8 +58,14 @@ class Cpp(Language):
             # not got named arguments to use so use arg1,..,argn
             args = {f"arg{idx+1}": t for idx, t in enumerate(arguments)}
         arg_list = ", ".join([f"{self.types(t)} {name}" for name, t in args.items()])
-        ret_part = "void" if return_type is None else " " + self.types(return_type)
-
+        if return_type is None:
+            if id == "main":
+                ret_part = self.types(Primitive.Int)
+                statements = [*statements, self.do_return("0")]
+            else:
+                ret_part = "void"
+        else:
+            ret_part = self.types(return_type)
         stmts = self.block(*statements)
         func = f"{ret_part} {id}({arg_list}) {stmts}"
         return func
