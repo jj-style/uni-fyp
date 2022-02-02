@@ -1,4 +1,5 @@
 from ..language import Language, Type, imports, Primitive, Composite, expression
+from .utils import format_function_arguments
 from typing import Dict, Union, Optional, List, Any
 
 
@@ -53,11 +54,10 @@ class Cpp(Language):
         arguments: Union[Dict[str, Type], List[Type]],
         *statements,
     ):
-        args = {} if not arguments else arguments
-        if isinstance(arguments, list):
-            # not got named arguments to use so use arg1,..,argn
-            args = {f"arg{idx+1}": t for idx, t in enumerate(arguments)}
+        args = format_function_arguments(arguments)
         arg_list = ", ".join([f"{self.types(t)} {name}" for name, t in args.items()])
+
+        # special logic for main function as has to be int not void
         if return_type is None:
             if id == "main":
                 ret_part = self.types(Primitive.Int)

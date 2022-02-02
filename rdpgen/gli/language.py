@@ -125,6 +125,10 @@ class Language(ABC):
         """Program can generate a prelude before the code, e.g. to add imports"""
         return ""
 
+    def postlude(self, **kwargs):
+        """Program can generate postlude after the code"""
+        return ""
+
     @abstractmethod
     def types(self, t: Type) -> str:
         """How a language represents a type"""
