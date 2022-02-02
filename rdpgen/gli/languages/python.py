@@ -90,7 +90,7 @@ class Python(Language):
         ret_part = "" if return_type is None else " -> " + self.types(return_type)
 
         stmts = self.block(*statements)
-        func = f"def {id}({arg_list}){ret_part} {stmts}"
+        func = f"def {id}({arg_list}){ret_part}{stmts}"
         return func
 
     def block(self, *statements):
@@ -100,6 +100,16 @@ class Python(Language):
             block += self.indent(str(stmt)) + self.linesep
         self.ctx.indent_lvl -= 1
         return block
+
+    def comment(self, comment: str):
+        lines = comment.split(self.linesep)
+        if len(lines) == 1:
+            return f"# {lines[0]}"
+        multiline = '"""\n'
+        for line in lines:
+            multiline += line + "\n"
+        multiline += '"""\n'
+        return multiline
 
     def do_return(self, expression=None):
         if expression is None:
@@ -133,9 +143,9 @@ class Python(Language):
             step,
         ]
         return (
-            self.assign(it, start)
+            str(self.assign(it, start))
             + self.linesep
-            + self.while_loop(*statements, condition=self.neq(it, stop))
+            + str(self.while_loop(*statements, condition=stop))
         )
 
     @expression
@@ -143,7 +153,7 @@ class Python(Language):
         stmts = list(statements)
         if condition is not None:
             stmts.insert(0, self.if_else(self.negate(condition), [self.break_loop()]))
-        loop = f"while True {self.block(*stmts)}"
+        loop = f"while True{self.block(*stmts)}"
         return loop
 
     @expression
@@ -153,7 +163,7 @@ class Python(Language):
         true_stmts,
         false_stmts=None,
     ):
-        return f"if {condition}{self.block(*true_stmts)}{(' else' + self.block(*false_stmts)) if false_stmts else ''}"  # noqa
+        return f"if {condition}{self.block(*true_stmts)}{('else' + self.block(*false_stmts)) if false_stmts else ''}"  # noqa
 
     def negate(self, expr: Expression):
         return f"not ({expr})"

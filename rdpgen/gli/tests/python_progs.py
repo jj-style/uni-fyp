@@ -1,36 +1,44 @@
 HELLO_WORLD = """def main():
-  print("hello world")"""
+  print("hello world")
+"""
 
 PRINT_VARIABLES = """def variables(arg1: int, arg2: str):
   x: int
   x = 25
   print("x is ", x, end="")
-  print("arguments to function are ", arg1, arg2)"""
-
-INNER_FUNC = """def function():
-  def inner(arg1 str):
-    print("inner function")
+  print("arguments to function are ", arg1, arg2)
 """
 
-FOR_LOOP = """while True:
-  if i == 10:
+INNER_FUNC = """def function():
+  def inner(arg1: str):
+    print("inner function")
+
+"""
+
+FOR_LOOP = """i = 0
+while True:
+  if not (i < 10):
     break
+
   print("i is ", i)
   i = i + 1
-}"""
+"""
 
 IF_ELSE = """if i == 0:
   print("i is zero")
 else:
-  print("i is not zero")"""
+  print("i is not zero")
+"""
 
 IF_NO_ELSE = """if mode == "debug":
-  print("=== RUNNING IN DEBUG MODE ===")"""
+  print("=== RUNNING IN DEBUG MODE ===")
+"""
 
 ARRAY_DECLARE_ASSIGN = """def main():
   mylist: List[int]
   mylist = [1, 2, 3]
-  print("mylist is ", mylist)"""
+  print("mylist is ", mylist)
+"""
 
 HELLO_WORLD_PRELUDE = """
 
@@ -54,16 +62,20 @@ i am third line
 """
 
 INFINITE_LOOP = """while True:
-  print("i am in an infinite loop")"""
+  print("i am in an infinite loop")
+"""
 
 WHILE_CONDITIONAL_LOOP = """def main():
   x: int
   x = 0
-  While True {
+  while True:
     if not (x < 10):
       break
+
     print("x is", x)
-    x = x + 1"""
+    x = x + 1
+
+"""
 
 BUBBLE_SORT_PROG = """from typing import List
 

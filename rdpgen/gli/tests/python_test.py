@@ -51,6 +51,7 @@ def test_python_inner_functions():
             "inner", None, [Primitive.String], p.println(p.string("inner function"))
         ),
     )
+    print(f)
     assert str(f) == INNER_FUNC
 
 
@@ -84,8 +85,8 @@ def test_python_if_else():
 
 def test_python_types_array():
     p = Python(Context(expand_tabs=True))
-    assert p.types(Composite.array(Primitive.Int)) == "[]int"
-    assert p.types(Composite.array(Primitive.String)) == "[]string"
+    assert p.types(Composite.array(Primitive.Int)) == "List[int]"
+    assert p.types(Composite.array(Primitive.String)) == "List[str]"
 
 
 def test_python_array_declare():
@@ -109,7 +110,7 @@ def test_python_prelude():
 
 def test_python_comment_oneline():
     p = Python(Context(expand_tabs=True))
-    assert p.comment("i am a comment") == "// i am a comment"
+    assert p.comment("i am a comment") == "# i am a comment"
 
 
 def test_python_comment_multiline():
@@ -122,9 +123,9 @@ def test_python_comment_multiline():
 
 def test_python_while_true_loop():
     p = Python(Context(expand_tabs=True))
-    assert (
-        p.while_loop(p.println(p.string("i am in an infinite loop"))) == INFINITE_LOOP
-    )
+    loop = p.while_loop(p.println(p.string("i am in an infinite loop")))
+    print(loop)
+    assert str(loop) == INFINITE_LOOP
 
 
 def test_python_while_condition():
