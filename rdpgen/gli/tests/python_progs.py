@@ -49,9 +49,9 @@ PROG_HELLO_WORLD = """
 def main():
   print("hello world")
 
+
 if __name__ == "__main__":
   main()
-
 """
 
 MULTI_LINE_COMMENT = """\"\"\"
@@ -78,8 +78,10 @@ WHILE_CONDITIONAL_LOOP = """def main():
 """
 
 BUBBLE_SORT_PROG = """from typing import List
+from typing import get_type_hints
 
-def bubblesort(arr List[int]) -> List[int]:
+
+def bubblesort(arr: List[int]) -> List[int]:
   i: int
   j: int
   temp: int
@@ -87,17 +89,23 @@ def bubblesort(arr List[int]) -> List[int]:
   while True:
     if not (i < len(arr)):
       break
+
     j = 0
     while True:
       if not (j < len(arr) - i - 1):
         break
+
       if arr[j + 1] < arr[j]:
         temp = arr[j]
         arr[j] = arr[j + 1]
         arr[j + 1] = temp
+
       j = j + 1
+
     i = i + 1
+
   return arr
+
 
 def main():
   original: List[int]
@@ -109,9 +117,12 @@ def main():
   while True:
     if not (i < len(sorted)):
       break
+
     print(sorted[i], " ", end="")
     i = i + 1
+
   print()
+
 
 if __name__ == "__main__":
   main()

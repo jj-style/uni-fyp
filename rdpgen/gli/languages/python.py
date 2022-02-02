@@ -121,6 +121,7 @@ class Python(Language):
         return f"""print({", ".join([str(a) for a in args])})"""
 
     def print(self, *args) -> str:
+        print(f"""print({", ".join([str(a) for a in args])}, end="")""")
         return f"""print({", ".join([str(a) for a in args])}, end="")"""
 
     @expression
@@ -145,7 +146,7 @@ class Python(Language):
         return (
             str(self.assign(it, start))
             + self.linesep
-            + str(self.while_loop(*statements, condition=stop))
+            + self.indent(str(self.while_loop(*statements, condition=stop)))
         )
 
     @expression

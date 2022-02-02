@@ -1,11 +1,14 @@
-from rdpgen.gli import Program, Language, Go, Context, Cpp, Composite, Primitive
+from rdpgen.gli import Program, Language, Go, Context, Cpp, Composite, Primitive, Python
+from .common import file_contains, run_cmd
+from tempfile import NamedTemporaryFile
+from pathlib import Path
+
 from .go_progs import PROG_HELLO_WORLD as GO_PROG_HELLO_WORLD
 from .go_progs import BUBBLE_SORT_PROG as GO_BUBBLE_SORT_PROG
 from .cpp_progs import PROG_HELLO_WORLD as CPP_PROG_HELLO_WORLD
 from .cpp_progs import BUBBLE_SORT_PROG as CPP_BUBBLE_SORT_PROG
-from .common import file_contains, run_cmd
-from tempfile import NamedTemporaryFile
-from pathlib import Path
+from .python_progs import BUBBLE_SORT_PROG as PYTHON_BUBBLE_SORT_PROG
+from .python_progs import PROG_HELLO_WORLD as PYTHON_HELLO_WORLD
 
 
 def test_go_prog_hello_world():
@@ -48,9 +51,17 @@ def test_cpp_prog_writes_file():
     outfile.close()
 
 
+def test_python_prog_hello_world():
+    p = Python(Context(expand_tabs=True))
+    prog = Program(p)
+    prog.add(p.function("main", None, None, p.println(p.string("hello world"))))
+    assert prog.generate() == PYTHON_HELLO_WORLD
+
+
 def test_bubblesort():
     go = Go(Context(expand_tabs=True))
     cpp = Cpp(Context(expand_tabs=True))
+    py = Python(Context(expand_tabs=True))
     language_source = {
         go: {
             "src": GO_BUBBLE_SORT_PROG,
@@ -64,6 +75,12 @@ def test_bubblesort():
             "out": "1 2 3 4 5 \n",
             "suffix": ".cpp",
             "clean": ["~/a.out"],
+        },
+        py: {
+            "src": PYTHON_BUBBLE_SORT_PROG,
+            "cmd": "python3 _",
+            "out": "1  2  3  4  5  \n",
+            "suffix": ".py",
         },
     }
     for g, test in language_source.items():
