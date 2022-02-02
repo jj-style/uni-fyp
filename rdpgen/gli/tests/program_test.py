@@ -126,12 +126,12 @@ def test_bubblesort():
         prog.write_file(outfile.name)
 
         cmd = test["cmd"].replace("_", outfile.name)
-        cmd = cmd.replace("~", Path(outfile.name).parent.name)
+        cmd = cmd.replace("~", str(Path(outfile.name).parent))
         assert run_cmd(cmd) == test["out"]
 
         to_clean = test.get("clean", [])
         for f in to_clean:
-            p = Path(f.replace("~", Path(outfile.name).parent.name))
+            p = Path(f.replace("~", str(Path(outfile.name).parent)))
             if p.exists():
                 p.unlink()
 
