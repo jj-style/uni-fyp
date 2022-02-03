@@ -312,3 +312,15 @@ class Language(ABC):
         return f"!({expr})"
 
     # TODO: stdlib like fileio, readlines, read/write etc.
+
+    @abstractmethod
+    def command(self, command: str, suppress_output: bool = True):
+        """Invoke an operating system command"""
+        raise NotImplementedError
+
+    """
+    @abstractmethod
+    def read_lines(self, file: str):
+        "Open a file and read the lines into a list of strings"
+        raise NotImplementedError
+    """

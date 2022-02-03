@@ -168,3 +168,13 @@ class Python(Language):
 
     def negate(self, expr: Expression):
         return f"not ({expr})"
+
+    @imports("subprocess")
+    def command(self, command: str, suppress_output: bool = True):
+        cmd = command.replace('"', '\\"')
+        subprocess_opts = [
+            "shell=True",
+            "stdout=subprocess.DEVNULL",
+            "stderr=subprocess.DEVNULL",
+        ]
+        return self.call("subprocess.run", f'"{cmd}"', *subprocess_opts)
