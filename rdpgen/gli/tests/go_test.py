@@ -129,3 +129,17 @@ def test_go_while_condition():
 def test_go_array_length():
     g = Go(Context(expand_tabs=True))
     assert g.array_length("mylist") == "len(mylist)"
+
+
+def test_go_command():
+    g = Go(Context(expand_tabs=True))
+
+    # test it produces correct call for running ls -l
+    c = g.command("ls -l")
+    assert "os/exec" in g.imports
+    assert c == COMMAND_NO_OUTPUT
+
+    # test it produces correct call for running ls -l with output
+    c = g.command("ls -l", suppress_output=False)
+    assert "os/exec" in g.imports
+    assert c == COMMAND_OUTPUT

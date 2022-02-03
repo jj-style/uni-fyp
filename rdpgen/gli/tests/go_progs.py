@@ -113,3 +113,11 @@ func main() {
 }
 
 """
+
+COMMAND_NO_OUTPUT = """var cmd *exec.Cmd
+cmd = exec.Command("ls", "-l")
+_ = cmd.Run()"""
+
+COMMAND_OUTPUT = """var out []byte
+out, _ = exec.Command("ls", "-l").Output()
+fmt.Println(string(out))"""

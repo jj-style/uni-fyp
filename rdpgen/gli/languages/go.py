@@ -1,6 +1,7 @@
 from ..language import Language, Type, imports, expression, Primitive, Composite
 from .utils import format_function_arguments
 from typing import Dict, Union, Optional, List, Any
+import shlex
 
 
 class Go(Language):
@@ -29,6 +30,10 @@ class Go(Language):
         elif isinstance(t, Composite):
             if t.base is Composite.CType.Array:
                 return f"[]{self.types(t.sub)}"
+        else:
+            # allow special types in certain functions
+            # e.g. command() needs type Cmd
+            return str(t)
 
     def string(self, s: str):
         return f'"{s}"'
@@ -112,3 +117,30 @@ class Go(Language):
         false_stmts=None,
     ):
         return f"if {condition} {self.block(*true_stmts)}{(' else ' + self.block(*false_stmts)) if false_stmts else ''}"  # noqa
+
+    @imports("os/exec")
+    def command(self, command: str, suppress_output: bool = True):
+        stmts = []
+        args = [f'"{a}"' for a in shlex.split(command)]
+        if suppress_output:
+            stmts.append(self.declare("cmd", "*exec.Cmd"))
+            stmts.append(
+                self.assign(
+                    "cmd",
+                    self.call("exec.Command", *args),
+                )
+            )
+            stmts.append(self.assign("_", self.call("cmd.Run")))
+
+        else:
+            stmts.append(self.declare("out", Composite.array("byte")))
+            stmts.append(
+                self.assign(
+                    "out, _",
+                    self.call("exec.Command", *args) + f".{self.call('Output')}",
+                )
+            )
+            stmts.append(self.println("string(out)"))
+
+        stmts = [self.indent(s) for s in stmts]
+        return self.linesep.join(stmts)
