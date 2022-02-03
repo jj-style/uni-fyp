@@ -177,4 +177,6 @@ class Python(Language):
             "stdout=subprocess.DEVNULL",
             "stderr=subprocess.DEVNULL",
         ]
+        if not suppress_output:
+            subprocess_opts = subprocess_opts[:1]
         return self.call("subprocess.run", f'"{cmd}"', *subprocess_opts)

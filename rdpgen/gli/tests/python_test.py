@@ -163,6 +163,10 @@ def test_python_command():
         == """subprocess.run("ls -l", shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)"""
     )
 
+    # test without supressing output
+    c = p.command("ls -l", suppress_output=False)
+    assert c == """subprocess.run("ls -l", shell=True)"""
+
     # get a write-only file, run command to write text to it and check it now contains text
     file = NamedTemporaryFile("w")
     path = Path(file.name)
