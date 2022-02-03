@@ -112,6 +112,21 @@ def test_cpp_while_condition():
     )
     assert str(f) == WHILE_CONDITIONAL_LOOP
 
+
 def test_cpp_array_length():
     cpp = Cpp(Context(expand_tabs=True))
     assert cpp.array_length("mylist") == "mylist.size()"
+
+
+def test_cpp_command():
+    cpp = Cpp(Context(expand_tabs=True))
+
+    # test it produces correct call for running ls -l
+    c = cpp.command("ls -l")
+    assert "stdlib.h" in cpp.imports
+    assert c == COMMAND_NO_OUTPUT
+
+    # test it produces correct call for running ls -l with output
+    c = cpp.command("ls -l", suppress_output=False)
+    assert "stdlib.h" in cpp.imports
+    assert c == COMMAND_OUTPUT

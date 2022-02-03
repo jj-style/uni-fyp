@@ -126,3 +126,10 @@ class Cpp(Language):
         false_stmts=None,
     ):
         return f"if ({condition}) {self.block(*true_stmts)}{(' else ' + self.block(*false_stmts)) if false_stmts else ''}"  # noqa
+
+    @imports("stdlib.h")
+    def command(self, command: str, suppress_output: bool = True):
+        cmd = command.replace('"', '\\"')
+        if suppress_output:
+            cmd += " > /dev/null 2>&1"
+        return f'system("{cmd}"){self.terminator}'

@@ -99,3 +99,6 @@ int main() {
 }
 
 """
+
+COMMAND_OUTPUT = """system("ls -l");"""
+COMMAND_NO_OUTPUT = """system("ls -l > /dev/null 2>&1");"""
