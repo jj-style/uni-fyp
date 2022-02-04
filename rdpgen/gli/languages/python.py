@@ -10,6 +10,7 @@ from ..language import (
 )
 from .utils import format_function_arguments
 from typing import Dict, Union, Optional, List, Any
+import regex as re
 
 
 class Python(Language):
@@ -99,7 +100,7 @@ class Python(Language):
         for stmt in statements:
             block += self.indent(str(stmt)) + self.linesep
         self.ctx.indent_lvl -= 1
-        return block
+        return block.rstrip(self.linesep)
 
     def comment(self, comment: str):
         lines = comment.split(self.linesep)
@@ -137,7 +138,21 @@ class Python(Language):
         # with a while loop so the step function can be generic and not restricted
         # to an integer step size
 
-        # TODO: could add case for python: if step ~= /<it> = <it> + <step>/ -> step -> for i in range :) # noqa
+        # match stopping condition and stepping condition on regexes
+        # if match a simple "iterator [<>] <something>" and
+        # "iterator" = "iterator" [+-] <step_size>
+        # then convert it to a pythonic range for loop
+        m1 = re.match(rf"{it}\s*(?P<condition>(<|>))\s*(?P<end>.*$)", stop)
+        m2 = re.match(
+            rf"{it}\s*(=\s*{it}\s*(?P<op>[+-])\s*(?P<size>\d+)|(?P<op>[+-])\s*=\s*(?P<size>\d+))$",  # noqa
+            step,
+        )
+
+        if m1 and m2:
+            range_groups = m1.groupdict()
+            range_steps = m2.groupdict()
+            decreasing = range_steps["op"] == "-"
+            return f"for {it} in range({start}, {range_groups['end']}, {'-' if decreasing else ''}{range_steps['size']}){self.block(*statements)}"  # noqa
 
         statements = [
             *statements,
@@ -164,7 +179,10 @@ class Python(Language):
         true_stmts,
         false_stmts=None,
     ):
-        return f"if {condition}{self.block(*true_stmts)}{('else' + self.block(*false_stmts)) if false_stmts else ''}"  # noqa
+        expr = f"if {condition}{self.block(*true_stmts)}"
+        if false_stmts:
+            expr += self.linesep + self.indent(f"{('else' + self.block(*false_stmts))}")
+        return expr
 
     def negate(self, expr: Expression):
         return f"not ({expr})"
