@@ -18,7 +18,7 @@ def test_python_imports():
 def test_python_postlude():
     p = Python(Context(expand_tabs=True))
     f = str(p.function("main", None, None, p.println(p.string("hello world"))))
-    assert str(p.postlude()) == """if __name__ == "__main__":\n  main()\n"""
+    assert str(p.postlude()) == """if __name__ == "__main__":\n  main()"""
 
 
 def test_python_hello_world():
@@ -51,7 +51,6 @@ def test_python_inner_functions():
             "inner", None, [Primitive.String], p.println(p.string("inner function"))
         ),
     )
-    print(f)
     assert str(f) == INNER_FUNC
 
 
@@ -145,7 +144,6 @@ def test_python_comment_multiline():
 def test_python_while_true_loop():
     p = Python(Context(expand_tabs=True))
     loop = p.while_loop(p.println(p.string("i am in an infinite loop")))
-    print(loop)
     assert str(loop) == INFINITE_LOOP
 
 

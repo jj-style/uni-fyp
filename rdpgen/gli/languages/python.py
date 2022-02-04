@@ -100,7 +100,7 @@ class Python(Language):
         for stmt in statements:
             block += self.indent(str(stmt)) + self.linesep
         self.ctx.indent_lvl -= 1
-        return block
+        return block.rstrip(self.linesep)
 
     def comment(self, comment: str):
         lines = comment.split(self.linesep)
@@ -179,7 +179,10 @@ class Python(Language):
         true_stmts,
         false_stmts=None,
     ):
-        return f"if {condition}{self.block(*true_stmts)}{('else' + self.block(*false_stmts)) if false_stmts else ''}"  # noqa
+        expr = f"if {condition}{self.block(*true_stmts)}"
+        if false_stmts:
+            expr += self.linesep + self.indent(f"{('else' + self.block(*false_stmts))}")
+        return expr
 
     def negate(self, expr: Expression):
         return f"not ({expr})"
