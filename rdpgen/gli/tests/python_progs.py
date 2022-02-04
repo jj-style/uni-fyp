@@ -15,13 +15,21 @@ INNER_FUNC = """def function():
 
 """
 
-FOR_LOOP = """i = 0
+FOR_LOOP_GENERIC = """i = 0
 while True:
   if not (i < 10):
     break
 
   print("i is ", i)
-  i = i + 1
+  i = doSomething(i)
+"""
+
+FOR_LOOP_RANGED_INC = """for i in range(0, 10, 1):
+  print("in a classic python for loop")
+"""
+
+FOR_LOOP_RANGED_DEC = """for i in range(10, 0, -1):
+  print("in a decreasing python for loop")
 """
 
 IF_ELSE = """if i == 0:

@@ -55,16 +55,37 @@ def test_python_inner_functions():
     assert str(f) == INNER_FUNC
 
 
-def test_python_for_loop():
+def test_python_for_loop_generic():
     p = Python(Context(expand_tabs=True))
     f = p.for_loop(
         "i",
         0,
         p.lt("i", 10),
-        p.increment("i", inc=1),
+        p.assign("i", p.call("doSomething", "i")),
         p.println(p.string("i is "), "i"),
     )
-    assert f == FOR_LOOP
+    assert f == FOR_LOOP_GENERIC
+
+
+def test_python_for_loop_ranged():
+    p = Python(Context(expand_tabs=True))
+    inc = p.for_loop(
+        "i",
+        0,
+        p.lt("i", 10),
+        p.increment("i"),
+        p.println(p.string("in a classic python for loop")),
+    )
+    assert str(inc) == FOR_LOOP_RANGED_INC
+
+    dec = p.for_loop(
+        "i",
+        10,
+        p.gt("i", 0),
+        p.decrement("i"),
+        p.println(p.string("in a decreasing python for loop")),
+    )
+    assert str(dec) == FOR_LOOP_RANGED_DEC
 
 
 def test_python_if_else():

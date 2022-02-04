@@ -1,6 +1,7 @@
 jinja2
 click
 toml
+regex
 pytest
 flake8
 black

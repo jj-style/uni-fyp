@@ -10,6 +10,7 @@ from ..language import (
 )
 from .utils import format_function_arguments
 from typing import Dict, Union, Optional, List, Any
+import regex as re
 
 
 class Python(Language):
@@ -137,7 +138,17 @@ class Python(Language):
         # with a while loop so the step function can be generic and not restricted
         # to an integer step size
 
-        # TODO: could add case for python: if step ~= /<it> = <it> + <step>/ -> step -> for i in range :) # noqa
+        m1 = re.match(rf"{it}\s*(?P<condition>(<|>))\s*(?P<end>.*$)", stop)
+        m2 = re.match(
+            rf"{it}\s*(=\s*{it}\s*(?P<op>[+-])\s*(?P<size>\d+)|(?P<op>[+-])\s*=\s*(?P<size>\d+))$",  # noqa
+            step,
+        )
+
+        if m1 and m2:
+            range_groups = m1.groupdict()
+            range_steps = m2.groupdict()
+            decreasing = range_steps["op"] == "-"
+            return f"for {it} in range({start}, {range_groups['end']}, {'-' if decreasing else ''}{range_steps['size']}){self.block(*statements)}"  # noqa
 
         statements = [
             *statements,
