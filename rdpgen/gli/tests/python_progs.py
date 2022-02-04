@@ -93,24 +93,14 @@ def bubblesort(arr: List[int]) -> List[int]:
   i: int
   j: int
   temp: int
-  i = 0
-  while True:
-    if not (i < len(arr)):
-      break
-
-    j = 0
-    while True:
-      if not (j < len(arr) - i - 1):
-        break
-
+  for i in range(0, len(arr), 1):
+    for j in range(0, len(arr) - i - 1, 1):
       if arr[j + 1] < arr[j]:
         temp = arr[j]
         arr[j] = arr[j + 1]
         arr[j + 1] = temp
 
-      j = j + 1
 
-    i = i + 1
 
   return arr
 
@@ -121,13 +111,8 @@ def main():
   sorted: List[int]
   sorted = bubblesort(original)
   i: int
-  i = 0
-  while True:
-    if not (i < len(sorted)):
-      break
-
+  for i in range(0, len(sorted), 1):
     print(sorted[i], " ", end="")
-    i = i + 1
 
   print()
 
