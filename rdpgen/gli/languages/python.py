@@ -138,6 +138,10 @@ class Python(Language):
         # with a while loop so the step function can be generic and not restricted
         # to an integer step size
 
+        # match stopping condition and stepping condition on regexes
+        # if match a simple "iterator [<>] <something>" and
+        # "iterator" = "iterator" [+-] <step_size>
+        # then convert it to a pythonic range for loop
         m1 = re.match(rf"{it}\s*(?P<condition>(<|>))\s*(?P<end>.*$)", stop)
         m2 = re.match(
             rf"{it}\s*(=\s*{it}\s*(?P<op>[+-])\s*(?P<size>\d+)|(?P<op>[+-])\s*=\s*(?P<size>\d+))$",  # noqa
