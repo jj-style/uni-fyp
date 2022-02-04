@@ -164,7 +164,7 @@ class Language(ABC):
 
     def call(self, expression, *args):
         """Call a function/method"""
-        return f"{expression}({', '.join(list(args))})"
+        return f"{expression}({', '.join(str(a) for a in list(args))})"
 
     @abstractmethod
     def declare(self, id: str, type: Type):
@@ -314,8 +314,22 @@ class Language(ABC):
     # TODO: stdlib like fileio, readlines, read/write etc.
 
     @abstractmethod
-    def command(self, command: str, suppress_output: bool = True):
-        """Invoke an operating system command"""
+    def command(
+        self, command: str, suppress_output: bool = True, exit_on_failure: bool = True
+    ):
+        """Invoke an operating system command
+        Arguments:
+            command: str - command to execute on the command line
+
+        Optional Arguments:
+            suppress_output: bool - show/supress the output of the command on stdout [default True]
+            exit_on_failure: bool - whether the code should exit on failure [default True]
+        """  # noqa: E501
+        raise NotImplementedError
+
+    @abstractmethod
+    def exit(self, code: int = 0):
+        """Exit the program with an optional status code, defaulting to 0"""
         raise NotImplementedError
 
     """

@@ -118,6 +118,22 @@ COMMAND_NO_OUTPUT = """var cmd *exec.Cmd
 cmd = exec.Command("ls", "-l")
 _ = cmd.Run()"""
 
+COMMAND_NO_OUTPUT_WITH_EXIT = """var cmd *exec.Cmd
+var err Error
+cmd = exec.Command("ls", "-l")
+err = cmd.Run()
+if err != nil {
+  os.Exit(1)
+}"""
+
 COMMAND_OUTPUT = """var out []byte
 out, _ = exec.Command("ls", "-l").Output()
+fmt.Println(string(out))"""
+
+COMMAND_OUTPUT_WITH_EXIT = """var out []byte
+var err Error
+out, err = exec.Command("ls", "-l").Output()
+if err != nil {
+  os.Exit(1)
+}
 fmt.Println(string(out))"""

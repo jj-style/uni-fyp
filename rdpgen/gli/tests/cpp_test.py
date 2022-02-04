@@ -122,11 +122,34 @@ def test_cpp_command():
     cpp = Cpp(Context(expand_tabs=True))
 
     # test it produces correct call for running ls -l
-    c = cpp.command("ls -l")
+    c = cpp.command("ls -l", exit_on_failure=False)
     assert "stdlib.h" in cpp.imports
     assert c == COMMAND_NO_OUTPUT
 
     # test it produces correct call for running ls -l with output
-    c = cpp.command("ls -l", suppress_output=False)
+    c = cpp.command("ls -l", suppress_output=False, exit_on_failure=False)
     assert "stdlib.h" in cpp.imports
     assert c == COMMAND_OUTPUT
+
+
+def test_cpp_command_with_exit():
+    cpp = Cpp(Context(expand_tabs=True))
+
+    # test it produces correct call for running ls -l
+    c = cpp.command("ls -l", exit_on_failure=True)
+    assert "stdlib.h" in cpp.imports
+    assert c == COMMAND_NO_OUTPUT_WITH_EXIT
+
+    # test it produces correct call for running ls -l with output
+    c = cpp.command("ls -l", suppress_output=False, exit_on_failure=True)
+    assert "stdlib.h" in cpp.imports
+    assert c == COMMAND_OUTPUT_WITH_EXIT
+
+
+def test_cpp_exit():
+    cpp = Cpp(Context(expand_tabs=True))
+    assert cpp.exit() == "exit(0);"
+    assert "stdlib.h" in cpp.imports
+    cases = range(100)
+    for c in cases:
+        assert cpp.exit(c) == f"exit({c});"

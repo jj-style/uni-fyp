@@ -102,3 +102,14 @@ int main() {
 
 COMMAND_OUTPUT = """system("ls -l");"""
 COMMAND_NO_OUTPUT = """system("ls -l > /dev/null 2>&1");"""
+COMMAND_OUTPUT_WITH_EXIT = """int rc;
+rc = system("ls -l");
+if (rc != 0) {
+  exit(1);
+}"""
+
+COMMAND_NO_OUTPUT_WITH_EXIT = """int rc;
+rc = system("ls -l > /dev/null 2>&1");
+if (rc != 0) {
+  exit(1);
+}"""

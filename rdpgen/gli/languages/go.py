@@ -119,28 +119,43 @@ class Go(Language):
         return f"if {condition} {self.block(*true_stmts)}{(' else ' + self.block(*false_stmts)) if false_stmts else ''}"  # noqa
 
     @imports("os/exec")
-    def command(self, command: str, suppress_output: bool = True):
+    def command(
+        self, command: str, suppress_output: bool = True, exit_on_failure: bool = True
+    ):
         stmts = []
         args = [f'"{a}"' for a in shlex.split(command)]
         if suppress_output:
             stmts.append(self.declare("cmd", "*exec.Cmd"))
+            if exit_on_failure:
+                stmts.append(self.declare("err", "Error"))
             stmts.append(
                 self.assign(
                     "cmd",
                     self.call("exec.Command", *args),
                 )
             )
-            stmts.append(self.assign("_", self.call("cmd.Run")))
+            to_assign = "err" if exit_on_failure else "_"
+            stmts.append(self.assign(to_assign, self.call("cmd.Run")))
+            if exit_on_failure:
+                stmts.append(self.if_else(self.neq("err", "nil"), [self.exit(1)]))
 
         else:
             stmts.append(self.declare("out", Composite.array("byte")))
+            if exit_on_failure:
+                stmts.append(self.declare("err", "Error"))
+            to_assign = "err" if exit_on_failure else "_"
             stmts.append(
                 self.assign(
-                    "out, _",
+                    f"out, {to_assign}",
                     self.call("exec.Command", *args) + f".{self.call('Output')}",
                 )
             )
+            if exit_on_failure:
+                stmts.append(self.if_else(self.neq("err", "nil"), [self.exit(1)]))
             stmts.append(self.println("string(out)"))
 
-        stmts = [self.indent(s) for s in stmts]
-        return self.linesep.join(stmts)
+        return self.linesep.join([self.indent(s) for s in stmts])
+
+    @imports("os")
+    def exit(self, code: int = 0):
+        return self.call("os.Exit", code)

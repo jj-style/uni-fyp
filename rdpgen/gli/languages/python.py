@@ -188,7 +188,9 @@ class Python(Language):
         return f"not ({expr})"
 
     @imports("subprocess")
-    def command(self, command: str, suppress_output: bool = True):
+    def command(
+        self, command: str, suppress_output: bool = True, exit_on_failure: bool = True
+    ):
         cmd = command.replace('"', '\\"')
         subprocess_opts = [
             "shell=True",
@@ -197,4 +199,21 @@ class Python(Language):
         ]
         if not suppress_output:
             subprocess_opts = subprocess_opts[:1]
-        return self.call("subprocess.run", f'"{cmd}"', *subprocess_opts)
+
+        stmts = []
+        if exit_on_failure:
+            stmts.append(
+                self.assign(
+                    "response",
+                    self.call("subprocess.run", f'"{cmd}"', *subprocess_opts),
+                )
+            )
+            stmts.append(
+                self.if_else(self.neq("response.returncode", 0), [self.exit(code=1)])
+            )
+        else:
+            stmts.append(self.call("subprocess.run", f'"{cmd}"', *subprocess_opts))
+        return self.linesep.join([self.indent(s) for s in stmts])
+
+    def exit(self, code: int = 0):
+        return self.call("exit", code)

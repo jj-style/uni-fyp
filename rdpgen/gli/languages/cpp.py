@@ -128,8 +128,23 @@ class Cpp(Language):
         return f"if ({condition}) {self.block(*true_stmts)}{(' else ' + self.block(*false_stmts)) if false_stmts else ''}"  # noqa
 
     @imports("stdlib.h")
-    def command(self, command: str, suppress_output: bool = True):
+    def command(
+        self, command: str, suppress_output: bool = True, exit_on_failure: bool = True
+    ):
         cmd = command.replace('"', '\\"')
         if suppress_output:
             cmd += " > /dev/null 2>&1"
-        return f'system("{cmd}"){self.terminator}'
+        stmts = []
+        if exit_on_failure:
+            stmts.append(self.declare("rc", Primitive.Int))
+            stmts.append(self.assign("rc", self.call("system", self.string(cmd))))
+        else:
+            stmts.append(self.call("system", self.string(cmd)) + self.terminator)
+        if exit_on_failure:
+            stmts.append(self.if_else(self.neq("rc", 0), [self.exit(1)]))
+
+        return self.linesep.join([self.indent(s) for s in stmts])
+
+    @imports("stdlib.h")
+    def exit(self, code: int = 0):
+        return self.call("exit", code) + self.terminator
