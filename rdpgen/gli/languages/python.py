@@ -217,3 +217,22 @@ class Python(Language):
 
     def exit(self, code: int = 0):
         return self.call("exit", code)
+
+    def read_lines(self, file: str):
+        func_name = "read_lines"
+
+        def lib():
+            s1 = self.assign("file", self.call("open", "file", self.string("r")))
+            s2 = self.assign("lines", self.call("file.readlines"))
+            s3 = self.call("file.close")
+            s4 = self.do_return(expression="lines")
+            stmts = [s1, s2, s3, s4]
+            return self.function(
+                func_name,
+                Composite.array(Primitive.String),
+                {"file": Primitive.String},
+                *stmts,
+            )
+
+        self.register_helper(func_name, lib())
+        return self.call(func_name, file)

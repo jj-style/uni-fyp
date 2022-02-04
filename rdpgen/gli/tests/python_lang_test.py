@@ -223,3 +223,15 @@ def test_python_exit():
     cases = range(100)
     for c in cases:
         assert p.exit(c) == f"exit({c})"
+
+
+def test_python_read_lines():
+    p = Python(Context(expand_tabs=True))
+    p.read_lines("myfile.txt")
+    p.read_lines("myfile.txt")
+    assert len(p.helper_funcs) == 1
+
+    lines = p.assign("lines", p.read_lines(p.string("file.txt")))
+    assert lines == 'lines = read_lines("file.txt")'
+    f = str(p.helper_funcs["read_lines"])
+    assert f == READ_LINES_FUNC

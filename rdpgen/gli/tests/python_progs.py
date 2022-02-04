@@ -96,3 +96,30 @@ def main():
 
 if __name__ == "__main__":
   main()"""
+
+READ_LINES_FUNC = """def read_lines(file: str) -> List[str]:
+  file = open(file, "r")
+  lines = file.readlines()
+  file.close()
+  return lines"""
+
+
+def READ_LINES_PROGRAM(fname: str):
+    return f"""from typing import List
+from typing import get_type_hints
+
+
+def read_lines(file: str) -> List[str]:
+  file = open(file, "r")
+  lines = file.readlines()
+  file.close()
+  return lines
+
+def main():
+  lines: List[str]
+  lines = read_lines("{fname}")
+  for i in range(0, len(lines), 1):
+    print(lines[i])
+
+if __name__ == "__main__":
+  main()"""
