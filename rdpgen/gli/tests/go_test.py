@@ -162,3 +162,16 @@ def test_go_exit():
     cases = range(100)
     for c in cases:
         assert g.exit(c) == f"os.Exit({c})"
+
+
+def test_go_read_lines():
+    g = Go(Context(expand_tabs=True))
+    g.read_lines("myfile.txt")
+    g.read_lines("myfile.txt")
+    assert len(g.helper_funcs) == 1
+
+    lines = g.assign("lines", g.read_lines(g.string("file.txt")))
+    assert lines == 'lines = readLines("file.txt")'
+    f = str(g.helper_funcs["readLines"])
+    print(f)
+    assert f == READ_LINES_FUNC

@@ -119,7 +119,7 @@ cmd = exec.Command("ls", "-l")
 _ = cmd.Run()"""
 
 COMMAND_NO_OUTPUT_WITH_EXIT = """var cmd *exec.Cmd
-var err Error
+var err error
 cmd = exec.Command("ls", "-l")
 err = cmd.Run()
 if err != nil {
@@ -131,9 +131,69 @@ out, _ = exec.Command("ls", "-l").Output()
 fmt.Println(string(out))"""
 
 COMMAND_OUTPUT_WITH_EXIT = """var out []byte
-var err Error
+var err error
 out, err = exec.Command("ls", "-l").Output()
 if err != nil {
   os.Exit(1)
 }
 fmt.Println(string(out))"""
+
+READ_LINES_FUNC = """func readLines(file string) []string {
+  var f *os.File
+  var err error
+  f, err = os.Open(file)
+  if err != nil {
+    os.Exit(1)
+}
+  var scanner *bufio.Scanner
+  scanner = bufio.NewScanner(f)
+  scanner.Split(bufio.ScanLines)
+  var lines []string
+  for scanner.Scan() {
+    lines = append(lines, scanner.Text())
+}
+  f.Close()
+  return lines
+}"""
+
+
+def READ_LINES_PROGRAM(fname: str):
+    return (
+        """package main
+
+import (
+  "bufio"
+  "fmt"
+  "os"
+)
+
+func readLines(file string) []string {
+  var f *os.File
+  var err error
+  f, err = os.Open(file)
+  if err != nil {
+    os.Exit(1)
+}
+  var scanner *bufio.Scanner
+  scanner = bufio.NewScanner(f)
+  scanner.Split(bufio.ScanLines)
+  var lines []string
+  for scanner.Scan() {
+    lines = append(lines, scanner.Text())
+}
+  f.Close()
+  return lines
+}
+
+func main() {
+  var lines []string
+  lines = readLines("%s")
+  var i int
+  for i = 0; i < len(lines); i = i + 1 {
+    fmt.Println(lines[i])
+}
+}
+
+"""
+        % fname
+    )

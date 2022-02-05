@@ -222,10 +222,10 @@ class Python(Language):
         func_name = "read_lines"
 
         def lib():
-            s1 = self.assign("file", self.call("open", "file", self.string("r")))
-            s2 = self.assign("lines", self.call("file.readlines"))
-            s3 = self.call("file.close")
-            s4 = self.do_return(expression="lines")
+            s1 = self.assign("f", self.call("open", "file", self.string("r")))
+            s2 = self.assign("text", self.call("f.read"))
+            s3 = self.call("f.close")
+            s4 = self.do_return(expression=self.call("text.splitlines"))
             stmts = [s1, s2, s3, s4]
             return self.function(
                 func_name,

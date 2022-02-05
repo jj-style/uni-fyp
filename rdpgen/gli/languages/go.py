@@ -1,4 +1,12 @@
-from ..language import Language, Type, imports, expression, Primitive, Composite
+from ..language import (
+    Language,
+    Type,
+    imports,
+    expression,
+    Primitive,
+    Composite,
+    Expression,
+)
 from .utils import format_function_arguments
 from typing import Dict, Union, Optional, List, Any
 import shlex
@@ -14,7 +22,7 @@ class Go(Language):
         imports = ""
         if len(self.imports) > 0:
             pkgs = "\n".join(
-                self.whitespace_char + self.string(pkg) for pkg in self.imports
+                self.whitespace_char + self.string(pkg) for pkg in sorted(self.imports)
             )
             imports = f"import (\n{pkgs}\n)\n\n"
         return f"package {package}\n\n{imports}"
@@ -127,7 +135,7 @@ class Go(Language):
         if suppress_output:
             stmts.append(self.declare("cmd", "*exec.Cmd"))
             if exit_on_failure:
-                stmts.append(self.declare("err", "Error"))
+                stmts.append(self.declare("err", "error"))
             stmts.append(
                 self.assign(
                     "cmd",
@@ -142,7 +150,7 @@ class Go(Language):
         else:
             stmts.append(self.declare("out", Composite.array("byte")))
             if exit_on_failure:
-                stmts.append(self.declare("err", "Error"))
+                stmts.append(self.declare("err", "error"))
             to_assign = "err" if exit_on_failure else "_"
             stmts.append(
                 self.assign(
@@ -159,3 +167,32 @@ class Go(Language):
     @imports("os")
     def exit(self, code: int = 0):
         return self.call("os.Exit", code)
+
+    @imports("bufio", "os")
+    def read_lines(self, file: str):
+        func_name = "readLines"
+
+        def lib():
+            s1 = self.declare("f", "*os.File")
+            s2 = self.declare("err", "error")
+            s3 = self.assign("f, err", self.call("os.Open", "file"))
+            s4 = self.if_else(self.neq("err", "nil"), [self.exit(1)])
+            s5 = self.declare("scanner", "*bufio.Scanner")
+            s6 = self.assign("scanner", self.call("bufio.NewScanner", "f"))
+            s7 = self.call("scanner.Split", "bufio.ScanLines")
+            s8 = self.declare("lines", Composite.array(Primitive.String))
+            s9 = Expression(
+                lambda: f"for {self.call('scanner.Scan')} {self.block(self.assign('lines', self.call('append', 'lines', self.call('scanner.Text'))))}"  # noqa
+            )
+            s10 = self.call("f.Close")
+            s11 = self.do_return(expression="lines")
+            stmts = [s1, s2, s3, s4, s5, s6, s7, s8, s9, s10, s11]
+            return self.function(
+                func_name,
+                Composite.array(Primitive.String),
+                {"file": Primitive.String},
+                *stmts,
+            )
+
+        self.register_helper(func_name, lib())
+        return self.call(func_name, file)
