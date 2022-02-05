@@ -29,6 +29,8 @@ class Cpp(Language):
             if t.base is Composite.CType.Array:
                 self.import_package("vector")
                 return f"std::vector<{self.types(t.sub)}>"
+        else:
+            return str(t)
 
     def string(self, s: str):
         return f'"{s}"'
@@ -39,6 +41,9 @@ class Cpp(Language):
 
     def array_length(self, expression):
         return f"{expression}.size()"
+
+    def array_append(self, id: str, item):
+        return self.call(f"{id}.push_back", str(item)) + self.terminator
 
     def declare(self, id: str, type: Type):
         return f"{self.types(type)} {id}{self.terminator}"
@@ -148,3 +153,35 @@ class Cpp(Language):
     @imports("stdlib.h")
     def exit(self, code: int = 0):
         return self.call("exit", code) + self.terminator
+
+    @imports("iostream", "fstream")
+    def read_lines(self, file: str):
+        func_name = "read_lines"
+
+        def lib():
+            s1 = self.declare("f", "std::fstream")
+            s2 = self.declare("lines", Composite.array(Primitive.String))
+            s3 = self.call("f.open", "file", "std::ios::in") + self.terminator
+            s4 = self.if_else(
+                self.call("f.is_open"),
+                [
+                    self.declare("line", Primitive.String),
+                    self.while_loop(
+                        self.array_append("lines", "line"),
+                        condition=self.call("getline", "f", "line"),
+                    ),
+                    self.call("f.close") + self.terminator,
+                ],
+                false_stmts=[self.exit(1)],
+            )
+            s5 = self.do_return(expression="lines")
+            stmts = [s1, s2, s3, s4, s5]
+            return self.function(
+                func_name,
+                Composite.array(Primitive.String),
+                {"file": Primitive.String},
+                *stmts,
+            )
+
+        self.register_helper(func_name, lib())
+        return self.call(func_name, file)

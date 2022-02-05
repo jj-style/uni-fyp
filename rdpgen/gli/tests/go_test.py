@@ -173,5 +173,10 @@ def test_go_read_lines():
     lines = g.assign("lines", g.read_lines(g.string("file.txt")))
     assert lines == 'lines = readLines("file.txt")'
     f = str(g.helper_funcs["readLines"])
-    print(f)
     assert f == READ_LINES_FUNC
+
+
+def test_go_array_append():
+    g = Go(Context(expand_tabs=True))
+    assert g.array_append("mylist", 5) == "mylist = append(mylist, 5)"
+    assert g.array_append("mylist", g.string("hi")) == 'mylist = append(mylist, "hi")'

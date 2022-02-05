@@ -149,6 +149,11 @@ class Language(ABC):
         """Get the lenght of an array"""
         raise NotImplementedError
 
+    @abstractmethod
+    def array_append(self, id: str, item):
+        """Append an item to the end of an array"""
+        raise NotImplementedError
+
     def index(self, expression, offset):
         """Index an array"""
         return f"{expression}[{offset}]"

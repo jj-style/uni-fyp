@@ -1,6 +1,7 @@
 from rdpgen.gli import *
 from .python_progs import READ_LINES_PROGRAM as PY_SRC
 from .go_progs import READ_LINES_PROGRAM as GO_SRC
+from .cpp_progs import READ_LINES_PROGRAM as CPP_SRC
 from .common import run_cmd
 from tempfile import NamedTemporaryFile
 import subprocess
@@ -30,7 +31,7 @@ def create_readlines_program(lang, filename):
 
 
 def test_read_lines_program():
-    f1 = NamedTemporaryFile("w", delete=False, suffix=".py")
+    f1 = NamedTemporaryFile("w", delete=False)
     for l in ["line1", "line2", "line3"]:
         f1.write(l + "\n")
     f1.close()
@@ -46,6 +47,12 @@ def test_read_lines_program():
             "suffix": ".go",
             "cmd": "go run _",
             "src": GO_SRC(f1.name),
+        },
+        "cpp": {
+            "lang": Cpp(Context(expand_tabs=True)),
+            "suffix": ".cpp",
+            "cmd": "cd ~ && g++ _ && ./a.out",
+            "src": CPP_SRC(f1.name),
         },
     }
 

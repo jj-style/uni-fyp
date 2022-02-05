@@ -118,6 +118,12 @@ def test_cpp_array_length():
     assert cpp.array_length("mylist") == "mylist.size()"
 
 
+def test_cpp_array_append():
+    cpp = Cpp(Context(expand_tabs=True))
+    assert cpp.array_append("mylist", 5) == "mylist.push_back(5);"
+    assert cpp.array_append("mylist", cpp.string("hi")) == 'mylist.push_back("hi");'
+
+
 def test_cpp_command():
     cpp = Cpp(Context(expand_tabs=True))
 
@@ -153,3 +159,15 @@ def test_cpp_exit():
     cases = range(100)
     for c in cases:
         assert cpp.exit(c) == f"exit({c});"
+
+
+def test_cpp_read_lines():
+    cpp = Cpp(Context(expand_tabs=True))
+    cpp.read_lines("myfile.txt")
+    cpp.read_lines("myfile.txt")
+    assert len(cpp.helper_funcs) == 1
+
+    lines = cpp.assign("lines", cpp.read_lines(cpp.string("file.txt")))
+    assert lines == 'lines = read_lines("file.txt");'
+    f = str(cpp.helper_funcs["read_lines"])
+    assert f == READ_LINES_FUNC

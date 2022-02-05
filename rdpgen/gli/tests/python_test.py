@@ -235,3 +235,9 @@ def test_python_read_lines():
     assert lines == 'lines = read_lines("file.txt")'
     f = str(p.helper_funcs["read_lines"])
     assert f == READ_LINES_FUNC
+
+
+def test_python_array_append():
+    p = Python(Context(expand_tabs=True))
+    assert p.array_append("mylist", 5) == "mylist.append(5)"
+    assert p.array_append("mylist", p.string("5")) == 'mylist.append("5")'

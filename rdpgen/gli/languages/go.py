@@ -53,6 +53,9 @@ class Go(Language):
     def array_length(self, expression):
         return f"len({expression})"
 
+    def array_append(self, id: str, item):
+        return self.assign(id, self.call("append", id, str(item)))
+
     def declare(self, id: str, type: Type):
         return f"var {id} {self.types(type)}"
 

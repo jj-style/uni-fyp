@@ -68,6 +68,9 @@ class Python(Language):
     def array_length(self, expression):
         return f"len({expression})"
 
+    def array_append(self, id: str, item):
+        return self.call(f"{id}.append", str(item))
+
     @imports("typing.get_type_hints")
     def declare(self, id: str, type: Type):
         return f"{id}: {self.types(type)}"
