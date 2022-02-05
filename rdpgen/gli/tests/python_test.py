@@ -1,5 +1,7 @@
 from rdpgen.gli import Python, Context, Primitive, Composite
 from .python_progs import *
+from tempfile import NamedTemporaryFile
+from pathlib import Path
 
 
 def test_python_imports():
@@ -167,3 +169,75 @@ def test_python_while_condition():
 def test_python_array_length():
     p = Python(Context(expand_tabs=True))
     assert p.array_length("mylist") == "len(mylist)"
+
+
+def test_python_command():
+    p = Python(Context(expand_tabs=True))
+
+    # test it produces correct call for running ls -l
+    c = p.command("ls -l", exit_on_failure=False)
+    assert "subprocess" in p.imports
+    assert (
+        c
+        == """subprocess.run("ls -l", shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)"""
+    )
+
+    # test without supressing output
+    c = p.command("ls -l", suppress_output=False, exit_on_failure=False)
+    assert c == """subprocess.run("ls -l", shell=True)"""
+
+    # get a write-only file, run command to write text to it and check it now contains text
+    file = NamedTemporaryFile("w")
+    path = Path(file.name)
+    assert path.exists()
+    assert path.read_text() == ""
+    cmd = p.command(f'echo "some text" > {str(path)}', exit_on_failure=False)
+    assert (
+        cmd
+        == f"""subprocess.run("echo \\"some text\\" > {str(path)}", shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)"""
+    )
+    import subprocess
+
+    eval(cmd)  # run the command
+    assert path.read_text() == "some text\n"
+
+    file.close()
+
+
+def test_python_command_exit_on_failure():
+    p = Python(Context(expand_tabs=True))
+    file = "/some/random/file/that/probably/doesnt/exist"
+    c = p.command(f"cat {file}", exit_on_failure=False, suppress_output=False)
+    assert str(c) == f"""subprocess.run("cat {file}", shell=True)"""
+
+    c = p.command(f"cat {file}", exit_on_failure=True, suppress_output=False)
+    assert (
+        str(c)
+        == f"""response = subprocess.run("cat {file}", shell=True)\nif response.returncode != 0:\n  exit(1)"""
+    )
+
+
+def test_python_exit():
+    p = Python(Context(expand_tabs=True))
+    assert p.exit() == "exit(0)"
+    cases = range(100)
+    for c in cases:
+        assert p.exit(c) == f"exit({c})"
+
+
+def test_python_read_lines():
+    p = Python(Context(expand_tabs=True))
+    p.read_lines("myfile.txt")
+    p.read_lines("myfile.txt")
+    assert len(p.helper_funcs) == 1
+
+    lines = p.assign("lines", p.read_lines(p.string("file.txt")))
+    assert lines == 'lines = read_lines("file.txt")'
+    f = str(p.helper_funcs["read_lines"])
+    assert f == READ_LINES_FUNC
+
+
+def test_python_array_append():
+    p = Python(Context(expand_tabs=True))
+    assert p.array_append("mylist", 5) == "mylist.append(5)"
+    assert p.array_append("mylist", p.string("5")) == 'mylist.append("5")'

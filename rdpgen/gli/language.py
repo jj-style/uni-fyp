@@ -41,19 +41,6 @@ def imports(*packages):
     return import_wrapper
 
 
-# TODO: don't think this is needed
-def common(func):
-    def wrap(self, *args, **kwargs):
-        no_terminator = kwargs.get("no_terminator", False)
-        result = func(self, *args, **kwargs)
-
-        if no_terminator:
-            return result.rstrip(self.terminator)
-        return result
-
-    return wrap
-
-
 def expression(func):
     def wrap(*args, **kwargs):
         def lazy():
@@ -89,7 +76,11 @@ class Context:
 class Language(ABC):
     def __init__(self, ctx: Context = None):
         self.imports = set()
+        self.helper_funcs = {}
         self.ctx = Context() if not ctx else ctx
+
+    def register_helper(self, name, func):
+        self.helper_funcs[name] = func
 
     @property
     @abstractmethod
@@ -158,13 +149,18 @@ class Language(ABC):
         """Get the lenght of an array"""
         raise NotImplementedError
 
+    @abstractmethod
+    def array_append(self, id: str, item):
+        """Append an item to the end of an array"""
+        raise NotImplementedError
+
     def index(self, expression, offset):
         """Index an array"""
         return f"{expression}[{offset}]"
 
     def call(self, expression, *args):
         """Call a function/method"""
-        return f"{expression}({', '.join(list(args))})"
+        return f"{expression}({', '.join(str(a) for a in list(args))})"
 
     @abstractmethod
     def declare(self, id: str, type: Type):
@@ -312,3 +308,27 @@ class Language(ABC):
         return f"!({expr})"
 
     # TODO: stdlib like fileio, readlines, read/write etc.
+
+    @abstractmethod
+    def command(
+        self, command: str, suppress_output: bool = True, exit_on_failure: bool = True
+    ):
+        """Invoke an operating system command
+        Arguments:
+            command: str - command to execute on the command line
+
+        Optional Arguments:
+            suppress_output: bool - show/supress the output of the command on stdout [default True]
+            exit_on_failure: bool - whether the code should exit on failure [default True]
+        """  # noqa: E501
+        raise NotImplementedError
+
+    @abstractmethod
+    def exit(self, code: int = 0):
+        """Exit the program with an optional status code, defaulting to 0"""
+        raise NotImplementedError
+
+    @abstractmethod
+    def read_lines(self, file: str):
+        """Open a file and read the lines into a list of strings"""
+        raise NotImplementedError

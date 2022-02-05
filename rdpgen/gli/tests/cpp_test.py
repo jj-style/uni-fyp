@@ -112,6 +112,62 @@ def test_cpp_while_condition():
     )
     assert str(f) == WHILE_CONDITIONAL_LOOP
 
+
 def test_cpp_array_length():
     cpp = Cpp(Context(expand_tabs=True))
     assert cpp.array_length("mylist") == "mylist.size()"
+
+
+def test_cpp_array_append():
+    cpp = Cpp(Context(expand_tabs=True))
+    assert cpp.array_append("mylist", 5) == "mylist.push_back(5);"
+    assert cpp.array_append("mylist", cpp.string("hi")) == 'mylist.push_back("hi");'
+
+
+def test_cpp_command():
+    cpp = Cpp(Context(expand_tabs=True))
+
+    # test it produces correct call for running ls -l
+    c = cpp.command("ls -l", exit_on_failure=False)
+    assert "stdlib.h" in cpp.imports
+    assert c == COMMAND_NO_OUTPUT
+
+    # test it produces correct call for running ls -l with output
+    c = cpp.command("ls -l", suppress_output=False, exit_on_failure=False)
+    assert "stdlib.h" in cpp.imports
+    assert c == COMMAND_OUTPUT
+
+
+def test_cpp_command_with_exit():
+    cpp = Cpp(Context(expand_tabs=True))
+
+    # test it produces correct call for running ls -l
+    c = cpp.command("ls -l", exit_on_failure=True)
+    assert "stdlib.h" in cpp.imports
+    assert c == COMMAND_NO_OUTPUT_WITH_EXIT
+
+    # test it produces correct call for running ls -l with output
+    c = cpp.command("ls -l", suppress_output=False, exit_on_failure=True)
+    assert "stdlib.h" in cpp.imports
+    assert c == COMMAND_OUTPUT_WITH_EXIT
+
+
+def test_cpp_exit():
+    cpp = Cpp(Context(expand_tabs=True))
+    assert cpp.exit() == "exit(0);"
+    assert "stdlib.h" in cpp.imports
+    cases = range(100)
+    for c in cases:
+        assert cpp.exit(c) == f"exit({c});"
+
+
+def test_cpp_read_lines():
+    cpp = Cpp(Context(expand_tabs=True))
+    cpp.read_lines("myfile.txt")
+    cpp.read_lines("myfile.txt")
+    assert len(cpp.helper_funcs) == 1
+
+    lines = cpp.assign("lines", cpp.read_lines(cpp.string("file.txt")))
+    assert lines == 'lines = read_lines("file.txt");'
+    f = str(cpp.helper_funcs["read_lines"])
+    assert f == READ_LINES_FUNC

@@ -68,6 +68,9 @@ class Python(Language):
     def array_length(self, expression):
         return f"len({expression})"
 
+    def array_append(self, id: str, item):
+        return self.call(f"{id}.append", str(item))
+
     @imports("typing.get_type_hints")
     def declare(self, id: str, type: Type):
         return f"{id}: {self.types(type)}"
@@ -186,3 +189,53 @@ class Python(Language):
 
     def negate(self, expr: Expression):
         return f"not ({expr})"
+
+    @imports("subprocess")
+    def command(
+        self, command: str, suppress_output: bool = True, exit_on_failure: bool = True
+    ):
+        cmd = command.replace('"', '\\"')
+        subprocess_opts = [
+            "shell=True",
+            "stdout=subprocess.DEVNULL",
+            "stderr=subprocess.DEVNULL",
+        ]
+        if not suppress_output:
+            subprocess_opts = subprocess_opts[:1]
+
+        stmts = []
+        if exit_on_failure:
+            stmts.append(
+                self.assign(
+                    "response",
+                    self.call("subprocess.run", f'"{cmd}"', *subprocess_opts),
+                )
+            )
+            stmts.append(
+                self.if_else(self.neq("response.returncode", 0), [self.exit(code=1)])
+            )
+        else:
+            stmts.append(self.call("subprocess.run", f'"{cmd}"', *subprocess_opts))
+        return self.linesep.join([self.indent(s) for s in stmts])
+
+    def exit(self, code: int = 0):
+        return self.call("exit", code)
+
+    def read_lines(self, file: str):
+        func_name = "read_lines"
+
+        def lib():
+            s1 = self.assign("f", self.call("open", "file", self.string("r")))
+            s2 = self.assign("text", self.call("f.read"))
+            s3 = self.call("f.close")
+            s4 = self.do_return(expression=self.call("text.splitlines"))
+            stmts = [s1, s2, s3, s4]
+            return self.function(
+                func_name,
+                Composite.array(Primitive.String),
+                {"file": Primitive.String},
+                *stmts,
+            )
+
+        self.register_helper(func_name, lib())
+        return self.call(func_name, file)

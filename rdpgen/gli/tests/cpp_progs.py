@@ -99,3 +99,58 @@ int main() {
 }
 
 """
+
+COMMAND_OUTPUT = """system("ls -l");"""
+COMMAND_NO_OUTPUT = """system("ls -l > /dev/null 2>&1");"""
+COMMAND_OUTPUT_WITH_EXIT = """int rc;
+rc = system("ls -l");
+if (rc != 0) {
+  exit(1);
+}"""
+
+COMMAND_NO_OUTPUT_WITH_EXIT = """int rc;
+rc = system("ls -l > /dev/null 2>&1");
+if (rc != 0) {
+  exit(1);
+}"""
+
+READ_LINES_FUNC = """std::vector<std::string> read_lines(std::string file) {
+  std::fstream f;
+  std::vector<std::string> lines;
+  f.open(file, std::ios::in);
+  if (f.is_open()) {
+    std::string line;
+    while (getline(f, line)) {
+      lines.push_back(line);
+}
+    f.close();
+} else {
+    exit(1);
+}
+  return lines;
+}"""
+
+
+def READ_LINES_PROGRAM(fname: str):
+    return """#include <fstream>
+#include <iostream>
+#include <stdlib.h>
+#include <string>
+#include <vector>
+
+%s
+
+int main() {
+  std::vector<std::string> lines;
+  lines = read_lines("%s");
+  int i;
+  for (i = 0; i < lines.size(); i = i + 1) {
+    std::cout << lines[i] << std::endl;
+}
+  return 0;
+}
+
+""" % (
+        READ_LINES_FUNC,
+        fname,
+    )

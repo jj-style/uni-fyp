@@ -19,6 +19,9 @@ class Program:
         """Generate the full source code"""
         # generate language prelude
         program = f"{self.lang.prelude()}"
+        # add in the helper functions
+        for helper in self.lang.helper_funcs.values():
+            program += str(helper) + "\n\n"
         for stmt in self.__statements:
             program += str(stmt) + "\n\n"
         program += str(self.lang.postlude())

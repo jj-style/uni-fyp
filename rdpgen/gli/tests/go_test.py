@@ -129,3 +129,54 @@ def test_go_while_condition():
 def test_go_array_length():
     g = Go(Context(expand_tabs=True))
     assert g.array_length("mylist") == "len(mylist)"
+
+
+def test_go_command():
+    g = Go(Context(expand_tabs=True))
+
+    # test it produces correct call for running ls -l
+    c = g.command("ls -l", exit_on_failure=False)
+    assert "os/exec" in g.imports
+    assert c == COMMAND_NO_OUTPUT
+
+    # test it produces correct call for running ls -l with output
+    c = g.command("ls -l", suppress_output=False, exit_on_failure=False)
+    assert "os/exec" in g.imports
+    assert c == COMMAND_OUTPUT
+
+
+def test_go_command_exit_on_failure():
+    g = Go(Context(expand_tabs=True))
+
+    c = g.command("ls -l", exit_on_failure=True)
+    assert c == COMMAND_NO_OUTPUT_WITH_EXIT
+
+    c = g.command("ls -l", suppress_output=False, exit_on_failure=True)
+    assert c == COMMAND_OUTPUT_WITH_EXIT
+
+
+def test_go_exit():
+    g = Go(Context(expand_tabs=True))
+    assert g.exit() == "os.Exit(0)"
+    assert "os" in g.imports
+    cases = range(100)
+    for c in cases:
+        assert g.exit(c) == f"os.Exit({c})"
+
+
+def test_go_read_lines():
+    g = Go(Context(expand_tabs=True))
+    g.read_lines("myfile.txt")
+    g.read_lines("myfile.txt")
+    assert len(g.helper_funcs) == 1
+
+    lines = g.assign("lines", g.read_lines(g.string("file.txt")))
+    assert lines == 'lines = readLines("file.txt")'
+    f = str(g.helper_funcs["readLines"])
+    assert f == READ_LINES_FUNC
+
+
+def test_go_array_append():
+    g = Go(Context(expand_tabs=True))
+    assert g.array_append("mylist", 5) == "mylist = append(mylist, 5)"
+    assert g.array_append("mylist", g.string("hi")) == 'mylist = append(mylist, "hi")'
