@@ -87,7 +87,7 @@ std::vector<int> bubblesort(std::vector<int> arr) {
 
 int main() {
   std::vector<int> original;
-  original = {5, 2, 4, 1, 3};
+  original = {9, 6, 7, 4, 5};
   std::vector<int> sorted;
   sorted = bubblesort(original);
   int i;

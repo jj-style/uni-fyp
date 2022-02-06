@@ -94,8 +94,10 @@ class Go(Language):
             if type is None:
                 raise MissingTypeError()
             stmts.append(self.declare(item, type))
-        stmts.append(f"for {it}, {item} = range {id} {self.block(*statements)}")
-        return self.linesep.join([self.indent(s) for s in stmts])
+        stmts.append(
+            self.indent(f"for {it}, {item} = range {id} {self.block(*statements)}")
+        )
+        return self.linesep.join(stmts)
 
     def declare(self, id: str, type: Type):
         return f"var {id} {self.types(type)}"

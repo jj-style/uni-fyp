@@ -77,16 +77,18 @@ class Cpp(Language):
             )
         else:
             stmts.append(
-                self.for_loop(
-                    it,
-                    0,
-                    self.lt(it, self.array_length(id)),
-                    self.increment(it),
-                    *statements,
+                self.indent(
+                    self.for_loop(
+                        it,
+                        0,
+                        self.lt(it, self.array_length(id)),
+                        self.increment(it),
+                        *statements,
+                    )
                 )
             )
 
-        return self.linesep.join([self.indent(s) for s in stmts])
+        return self.linesep.join(stmts)
 
     @expression
     def array_enumerate(
@@ -105,8 +107,10 @@ class Cpp(Language):
                 raise MissingTypeError()
             stmts.append(self.declare(item, type))
         loop_stmts = [self.assign(item, self.index(id, it)), *statements]
-        stmts.append(self.array_iterate(id, it, *loop_stmts, declare_it=declare_it))
-        return self.linesep.join([self.indent(s) for s in stmts])
+        stmts.append(
+            self.indent(self.array_iterate(id, it, *loop_stmts, declare_it=declare_it))
+        )
+        return self.linesep.join(stmts)
 
     def declare(self, id: str, type: Type):
         return f"{self.types(type)} {id}{self.terminator}"

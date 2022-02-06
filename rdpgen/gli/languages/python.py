@@ -92,13 +92,15 @@ class Python(Language):
                 stmts.append(self.declare(it, Primitive.Int))
 
         if iterate_items:
-            stmts.append(f"for {it} in {id}{self.block(*statements)}")
+            stmts.append(self.indent(f"for {it} in {id}{self.block(*statements)}"))
         else:
             stmts.append(
-                f"for {it} in range({self.array_length(id)}){self.block(*statements)}"
+                self.indent(
+                    f"for {it} in {self.call('range', self.array_length(id))}{self.block(*statements)}"  # noqa
+                )
             )
 
-        return self.linesep.join([self.indent(s) for s in stmts])
+        return self.linesep.join(stmts)
 
     @expression
     def array_enumerate(
