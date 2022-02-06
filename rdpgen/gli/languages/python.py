@@ -7,6 +7,7 @@ from ..language import (
     Composite,
     Context,
     Expression,
+    MissingTypeError,
 )
 from .utils import format_function_arguments
 from typing import Dict, Union, Optional, List, Any
@@ -70,6 +71,57 @@ class Python(Language):
 
     def array_append(self, id: str, item):
         return self.call(f"{id}.append", str(item))
+
+    @expression
+    def array_iterate(
+        self,
+        id: str,
+        it: str,
+        *statements,
+        declare_it: bool = True,
+        iterate_items: bool = False,
+        type: Type = None,
+    ):
+        if iterate_items and type is None:
+            raise MissingTypeError()
+
+        stmts = []
+        if declare_it:
+            if iterate_items:
+                stmts.append(self.declare(it, type))
+            else:
+                stmts.append(self.declare(it, Primitive.Int))
+        if iterate_items:
+            stmts.append(f"for {it} in {id}{self.block(*statements)}")
+        else:
+            stmts.append(
+                f"for {it} in range({self.array_length(id)}){self.block(*statements)}"
+            )
+
+        return self.linesep.join([self.indent(s) for s in stmts])
+
+    @expression
+    def array_enumerate(
+        self,
+        id: str,
+        it: str,
+        item: str,
+        *statements,
+        declare_it: bool = True,
+        declare_item: bool = False,
+        type: Type = None,
+    ):
+        stmts = []
+        if declare_it:
+            stmts.append(self.declare(it, Primitive.Int))
+        if declare_item:
+            if type is None:
+                raise MissingTypeError()
+            stmts.append(self.declare(item, type))
+        stmts.append(
+            f"for {it}, {item} in {self.call('enumerate', id)}{self.block(*statements)}"
+        )
+        return self.linesep.join([self.indent(s) for s in stmts])
 
     @imports("typing.get_type_hints")
     def declare(self, id: str, type: Type):

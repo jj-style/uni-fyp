@@ -4,6 +4,11 @@ from typing import Union, Dict, List, Optional, Any, TypeVar
 import os
 
 
+class MissingTypeError(Exception):
+    def __init__(self):
+        super().__init__("type must be provided")
+
+
 class Primitive(Enum):
     Int = auto()
     Float = auto()
@@ -154,6 +159,50 @@ class Language(ABC):
     @abstractmethod
     def array_append(self, id: str, item):
         """Append an item to the end of an array"""
+        raise NotImplementedError
+
+    @abstractmethod
+    def array_iterate(
+        self,
+        id: str,
+        it: str,
+        *statements,
+        declare_it: bool = True,
+        iterate_items: bool = False,
+        type: Type = None,
+    ):
+        """Iterate over an array with a named iterator variable
+        Arguments:
+            id: str - name of the array to iterate over
+            it: str - name of the iterator variable
+            *statements - statements to execute in loop
+            declare_it: bool - if True, will declare the variable first (default = True)
+            iterate_items: bool - if True, will iterate over the items in the array not the indices (False)
+            type: Type - type of items in the array, required if iterate_items is True
+        """  # noqa
+        raise NotImplementedError
+
+    @abstractmethod
+    def array_enumerate(
+        self,
+        id: str,
+        it: str,
+        item: str,
+        *statements,
+        declare_it: bool = True,
+        declare_item: bool = False,
+        type: Type = None,
+    ):
+        """Enumerate over an array with a named iterator variable and item variable
+        Arguments:
+            id: str - name of the array to iterate over
+            it: str - name of the iterator variable
+            item: str - name of variable of each item
+            *statements - statements to execute in loop
+            declare_it: bool - if True, will declare the variable first (default = True)
+            declare_item: bool - if True, will declare the variable first (default = False)
+            type: Type - type of elements in the array. Required if declare_item is True (default = None)
+        """  # noqa
         raise NotImplementedError
 
     def index(self, expression, offset):
