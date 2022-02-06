@@ -1,6 +1,8 @@
-from rdpgen.gli import Cpp, Context, Type, Primitive, Composite
+from rdpgen.gli import Cpp, Context, Type, Primitive, Composite, MissingTypeError
 
 from .cpp_progs import *
+
+import pytest
 
 
 def test_cpp_hello_world():
@@ -181,3 +183,87 @@ def test_cpp_boolean_and():
 def test_cpp_boolean_or():
     cpp = Cpp(Context(expand_tabs=True))
     assert cpp.bool_or(cpp.lt("x", 10), cpp.gt("x", 20)) == "x < 10 || x > 20"
+
+
+def test_cpp_array_iterate():
+    cpp = Cpp(Context(expand_tabs=True))
+    i1 = cpp.array_iterate("mylist", "i", cpp.println("i"))
+    assert (
+        i1
+        == """int i;
+for (i = 0; i < mylist.size(); i = i + 1) {
+  std::cout << i << std::endl;
+}"""
+    )
+
+    i2 = cpp.array_iterate("mylist", "i", cpp.println("i"), declare_it=False)
+    assert (
+        i2
+        == """for (i = 0; i < mylist.size(); i = i + 1) {
+  std::cout << i << std::endl;
+}"""
+    )
+
+    i3 = cpp.array_iterate(
+        "mylist",
+        "elem",
+        cpp.println("elem"),
+        iterate_items=True,
+        type=Primitive.String,
+    )
+    assert (
+        i3
+        == """for (std::string elem : mylist) {
+  std::cout << elem << std::endl;
+}"""
+    )
+
+    with pytest.raises(MissingTypeError) as err:
+        # could add special case for C++ to add `auto` if type not given
+        str(
+            cpp.array_iterate("mylist", "elem", cpp.println("elem"), iterate_items=True)
+        )
+
+
+def test_cpp_array_enumerate():
+    cpp = Cpp(Context(expand_tabs=True))
+
+    e1 = cpp.array_enumerate("mylist", "i", "elem", cpp.println("i", "elem"))
+    assert (
+        str(e1)
+        == """int i;
+for (i = 0; i < mylist.size(); i = i + 1) {
+  elem = mylist[i];
+  std::cout << i << elem << std::endl;
+}"""
+    )
+
+    e2 = cpp.array_enumerate(
+        "mylist",
+        "i",
+        "elem",
+        cpp.println("i", "elem"),
+        declare_item=True,
+        type=Primitive.String,
+    )
+    print(e2)
+    assert (
+        str(e2)
+        == """std::string elem;
+int i;
+for (i = 0; i < mylist.size(); i = i + 1) {
+  elem = mylist[i];
+  std::cout << i << elem << std::endl;
+}"""
+    )
+
+    with pytest.raises(MissingTypeError) as err:
+        str(
+            cpp.array_enumerate(
+                "mylist",
+                "i",
+                "elem",
+                cpp.println("i", "elem"),
+                declare_item=True,
+            )
+        )

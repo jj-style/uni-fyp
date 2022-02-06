@@ -1,4 +1,12 @@
-from ..language import Language, Type, imports, Primitive, Composite, expression
+from ..language import (
+    Language,
+    Type,
+    imports,
+    Primitive,
+    Composite,
+    expression,
+    MissingTypeError,
+)
 from .utils import format_function_arguments
 from typing import Dict, Union, Optional, List, Any
 
@@ -44,6 +52,61 @@ class Cpp(Language):
 
     def array_append(self, id: str, item):
         return self.call(f"{id}.push_back", str(item)) + self.terminator
+
+    @expression
+    def array_iterate(
+        self,
+        id: str,
+        it: str,
+        *statements,
+        declare_it: bool = True,
+        iterate_items: bool = False,
+        type: Type = None,
+    ):
+        stmts = []
+        if declare_it:
+            if iterate_items:
+                if type is None:
+                    raise MissingTypeError()
+            else:
+                stmts.append(self.declare(it, Primitive.Int))
+
+        if iterate_items:
+            stmts.append(
+                f"for ({self.types(type)} {it} : {id}) {self.block(*statements)}"
+            )
+        else:
+            stmts.append(
+                self.for_loop(
+                    it,
+                    0,
+                    self.lt(it, self.array_length(id)),
+                    self.increment(it),
+                    *statements,
+                )
+            )
+
+        return self.linesep.join([self.indent(s) for s in stmts])
+
+    @expression
+    def array_enumerate(
+        self,
+        id: str,
+        it: str,
+        item: str,
+        *statements,
+        declare_it: bool = True,
+        declare_item: bool = False,
+        type: Type = None,
+    ):
+        stmts = []
+        if declare_item:
+            if type is None:
+                raise MissingTypeError()
+            stmts.append(self.declare(item, type))
+        loop_stmts = [self.assign(item, self.index(id, it)), *statements]
+        stmts.append(self.array_iterate(id, it, *loop_stmts, declare_it=declare_it))
+        return self.linesep.join([self.indent(s) for s in stmts])
 
     def declare(self, id: str, type: Type):
         return f"{self.types(type)} {id}{self.terminator}"
