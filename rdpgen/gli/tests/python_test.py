@@ -326,3 +326,12 @@ for i, elem in enumerate(mylist):
                 declare_item=True,
             )
         )
+
+
+def test_python_string_split():
+    p = Python(Context(expand_tabs=True))
+    assert (
+        p.string_split(p.string("hello,world"), p.string(","))
+        == """"hello,world".split(",")"""
+    )
+    assert p.string_split("list", p.string(":")) == """list.split(":")"""

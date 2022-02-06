@@ -270,3 +270,13 @@ for i, elem = range mylist {
                 declare_item=True,
             )
         )
+
+
+def test_go_string_split():
+    g = Go(Context(expand_tabs=True))
+    assert (
+        g.string_split(g.string("hello,world"), g.string(","))
+        == """strings.Split("hello,world", ",")"""
+    )
+    assert g.string_split("list", g.string(":")) == """strings.Split(list, ":")"""
+    assert "strings" in g.imports

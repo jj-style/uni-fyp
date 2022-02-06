@@ -246,7 +246,6 @@ for (i = 0; i < mylist.size(); i = i + 1) {
         declare_item=True,
         type=Primitive.String,
     )
-    print(e2)
     assert (
         str(e2)
         == """std::string elem;
@@ -267,3 +266,21 @@ for (i = 0; i < mylist.size(); i = i + 1) {
                 declare_item=True,
             )
         )
+
+
+def test_cpp_string_split():
+    cpp = Cpp(Context(expand_tabs=True))
+    assert (
+        cpp.string_split(cpp.string("hello,world"), cpp.string(","))
+        == """split_string("hello,world", ',')"""
+    )
+    assert len(cpp.helper_funcs) == 1
+    f = cpp.helper_funcs["split_string"]
+    assert str(f) == STRING_SPLIT_FUNC
+    assert cpp.string_split("list", cpp.string(":")) == """split_string(list, ':')"""
+    assert len(cpp.helper_funcs) == 1
+    f = cpp.helper_funcs["split_string"]
+    assert str(f) == STRING_SPLIT_FUNC
+    should_import = ["sstream"]
+    for imp in should_import:
+        assert imp in cpp.imports

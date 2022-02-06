@@ -47,6 +47,10 @@ class Go(Language):
     def string(self, s: str):
         return f'"{s}"'
 
+    @imports("strings")
+    def string_split(self, s: str, delim: str):
+        return self.call("strings.Split", s, delim)
+
     def array(self, t: Type, elements: List[Any]):
         joined = ", ".join(str(e) for e in elements)
         return f"[]{self.types(t)}{{{joined}}}"

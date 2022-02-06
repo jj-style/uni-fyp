@@ -142,6 +142,11 @@ class Language(ABC):
         raise NotImplementedError
 
     @abstractmethod
+    def string_split(self, s: str, delim: str):
+        """Split a string into a list of strings based on a delimiter"""
+        raise NotImplementedError
+
+    @abstractmethod
     def array(self, t: Type, elements: List[Any]):
         """Create an array in a language
 

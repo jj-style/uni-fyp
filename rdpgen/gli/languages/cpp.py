@@ -43,6 +43,30 @@ class Cpp(Language):
     def string(self, s: str):
         return f'"{s}"'
 
+    @imports("sstream")
+    def string_split(self, s: str, delim: str):
+        func_name = "split_string"
+
+        def lib():
+            s1 = self.declare("tmp", Primitive.String)
+            s2 = self.call("std::stringstream ss", "s") + self.terminator
+            s3 = self.declare("words", Composite.array(Primitive.String))
+            s4 = self.while_loop(
+                self.array_append("words", "tmp"),
+                condition=self.call("std::getline", "ss", "tmp", "delim"),
+            )
+            s5 = self.do_return(expression="words")
+            stmts = [s1, s2, s3, s4, s5]
+            return self.function(
+                func_name,
+                Composite.array(Primitive.String),
+                {"s": Primitive.String, "delim": "char"},
+                *stmts,
+            )
+
+        self.register_helper(func_name, lib())
+        return self.call(func_name, s, delim.replace('"', "'"))
+
     def array(self, t: Type, elements: List[Any]):
         joined = ", ".join(str(e) for e in elements)
         return f"{{{joined}}}"

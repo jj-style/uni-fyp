@@ -154,3 +154,14 @@ int main() {
         READ_LINES_FUNC,
         fname,
     )
+
+
+STRING_SPLIT_FUNC = """std::vector<std::string> split_string(std::string s, char delim) {
+  std::string tmp;
+  std::stringstream ss(s);
+  std::vector<std::string> words;
+  while (std::getline(ss, tmp, delim)) {
+    words.push_back(tmp);
+}
+  return words;
+}"""

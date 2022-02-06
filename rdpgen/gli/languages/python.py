@@ -62,6 +62,9 @@ class Python(Language):
     def string(self, s: str):
         return f'"{s}"'
 
+    def string_split(self, s: str, delim: str):
+        return f"{s}.{self.call('split', delim)}"
+
     def array(self, t: Type, elements: List[Any]):
         joined = ", ".join(str(e) for e in elements)
         return f"[{joined}]"
