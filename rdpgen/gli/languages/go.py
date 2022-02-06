@@ -131,7 +131,7 @@ class Go(Language):
         for stmt in statements:
             block += self.indent(str(stmt)) + self.linesep
         self.ctx.indent_lvl -= 1
-        block += "}"
+        block += self.indent("}") if self.ctx.indent_lvl > 0 else "}"
         return block
 
     def do_return(self, expression=None):

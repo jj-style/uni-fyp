@@ -12,7 +12,7 @@ PRINT_VARIABLES = """func variables(arg1 int, arg2 string) {
 INNER_FUNC = """func function() {
   func inner(arg1 string) {
     fmt.Println("inner function")
-}
+  }
 }"""
 
 FOR_LOOP = """for i = 0; i < 10; i = i + 1 {
@@ -72,10 +72,10 @@ WHILE_CONDITIONAL_LOOP = """func main() {
   for {
     if !(x < 10) {
       break
-}
+    }
     fmt.Println("x is", x)
     x = x + 1
-}
+  }
 }"""
 
 BUBBLE_SORT_PROG = """package main
@@ -94,9 +94,9 @@ func bubblesort(arr []int) []int {
         temp = arr[j]
         arr[j] = arr[j + 1]
         arr[j + 1] = temp
-}
-}
-}
+      }
+    }
+  }
   return arr
 }
 
@@ -108,7 +108,7 @@ func main() {
   var i int
   for i, _ = range sorted {
     fmt.Print(sorted[i], " ")
-}
+  }
   fmt.Println()
 }
 
@@ -144,14 +144,14 @@ READ_LINES_FUNC = """func readLines(file string) []string {
   f, err = os.Open(file)
   if err != nil {
     os.Exit(1)
-}
+  }
   var scanner *bufio.Scanner
   scanner = bufio.NewScanner(f)
   scanner.Split(bufio.ScanLines)
   var lines []string
   for scanner.Scan() {
     lines = append(lines, scanner.Text())
-}
+  }
   f.Close()
   return lines
 }"""
@@ -173,14 +173,14 @@ func readLines(file string) []string {
   f, err = os.Open(file)
   if err != nil {
     os.Exit(1)
-}
+  }
   var scanner *bufio.Scanner
   scanner = bufio.NewScanner(f)
   scanner.Split(bufio.ScanLines)
   var lines []string
   for scanner.Scan() {
     lines = append(lines, scanner.Text())
-}
+  }
   f.Close()
   return lines
 }
@@ -191,7 +191,7 @@ func main() {
   var i int
   for i = 0; i < len(lines); i = i + 1 {
     fmt.Println(lines[i])
-}
+  }
 }
 
 """

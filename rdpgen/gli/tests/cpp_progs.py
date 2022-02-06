@@ -62,7 +62,7 @@ WHILE_CONDITIONAL_LOOP = """int main() {
   while (x < 10) {
     std::cout << "x is" << x << std::endl;
     x = x + 1;
-}
+  }
   return 0;
 }"""
 
@@ -79,9 +79,9 @@ std::vector<int> bubblesort(std::vector<int> arr) {
         temp = arr[j];
         arr[j] = arr[j + 1];
         arr[j + 1] = temp;
-}
-}
-}
+      }
+    }
+  }
   return arr;
 }
 
@@ -93,7 +93,7 @@ int main() {
   int i;
   for (i = 0; i < sorted.size(); i = i + 1) {
     std::cout << sorted[i] << " ";
-}
+  }
   std::cout << std::endl;
   return 0;
 }
@@ -122,11 +122,11 @@ READ_LINES_FUNC = """std::vector<std::string> read_lines(std::string file) {
     std::string line;
     while (getline(f, line)) {
       lines.push_back(line);
-}
+    }
     f.close();
-} else {
+  } else {
     exit(1);
-}
+  }
   return lines;
 }"""
 
@@ -146,7 +146,7 @@ int main() {
   int i;
   for (i = 0; i < lines.size(); i = i + 1) {
     std::cout << lines[i] << std::endl;
-}
+  }
   return 0;
 }
 
@@ -162,6 +162,6 @@ STRING_SPLIT_FUNC = """std::vector<std::string> split_string(std::string s, char
   std::vector<std::string> words;
   while (std::getline(ss, tmp, delim)) {
     words.push_back(tmp);
-}
+  }
   return words;
 }"""
