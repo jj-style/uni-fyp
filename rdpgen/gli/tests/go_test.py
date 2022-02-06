@@ -180,3 +180,13 @@ def test_go_array_append():
     g = Go(Context(expand_tabs=True))
     assert g.array_append("mylist", 5) == "mylist = append(mylist, 5)"
     assert g.array_append("mylist", g.string("hi")) == 'mylist = append(mylist, "hi")'
+
+
+def test_go_boolean_and():
+    go = Go(Context(expand_tabs=True))
+    assert go.bool_and(go.gt("x", 10), go.lt("x", 20)) == "x > 10 && x < 20"
+
+
+def test_go_boolean_or():
+    go = Go(Context(expand_tabs=True))
+    assert go.bool_or(go.lt("x", 10), go.gt("x", 20)) == "x < 10 || x > 20"

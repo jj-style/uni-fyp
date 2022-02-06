@@ -241,3 +241,13 @@ def test_python_array_append():
     p = Python(Context(expand_tabs=True))
     assert p.array_append("mylist", 5) == "mylist.append(5)"
     assert p.array_append("mylist", p.string("5")) == 'mylist.append("5")'
+
+
+def test_python_boolean_and():
+    p = Python(Context(expand_tabs=True))
+    assert p.bool_and(p.gt("x", 10), p.lt("x", 20)) == "x > 10 and x < 20"
+
+
+def test_python_boolean_or():
+    p = Python(Context(expand_tabs=True))
+    assert p.bool_or(p.lt("x", 10), p.gt("x", 20)) == "x < 10 or x > 20"

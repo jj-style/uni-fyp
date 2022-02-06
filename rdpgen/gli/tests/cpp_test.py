@@ -171,3 +171,13 @@ def test_cpp_read_lines():
     assert lines == 'lines = read_lines("file.txt");'
     f = str(cpp.helper_funcs["read_lines"])
     assert f == READ_LINES_FUNC
+
+
+def test_cpp_boolean_and():
+    cpp = Cpp(Context(expand_tabs=True))
+    assert cpp.bool_and(cpp.gt("x", 10), cpp.lt("x", 20)) == "x > 10 && x < 20"
+
+
+def test_cpp_boolean_or():
+    cpp = Cpp(Context(expand_tabs=True))
+    assert cpp.bool_or(cpp.lt("x", 10), cpp.gt("x", 20)) == "x < 10 || x > 20"

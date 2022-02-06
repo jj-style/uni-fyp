@@ -190,6 +190,12 @@ class Python(Language):
     def negate(self, expr: Expression):
         return f"not ({expr})"
 
+    def bool_and(self, expr1, expr2):
+        return f"{expr1} and {expr2}"
+
+    def bool_or(self, expr1, expr2):
+        return f"{expr1} or {expr2}"
+
     @imports("subprocess")
     def command(
         self, command: str, suppress_output: bool = True, exit_on_failure: bool = True
