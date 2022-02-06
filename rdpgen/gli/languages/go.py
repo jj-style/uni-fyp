@@ -6,6 +6,7 @@ from ..language import (
     Primitive,
     Composite,
     Expression,
+    MissingTypeError,
 )
 from .utils import format_function_arguments
 from typing import Dict, Union, Optional, List, Any
@@ -55,6 +56,46 @@ class Go(Language):
 
     def array_append(self, id: str, item):
         return self.assign(id, self.call("append", id, str(item)))
+
+    def array_iterate(
+        self,
+        id: str,
+        it: str,
+        *statements,
+        declare_it: bool = True,
+        iterate_items: bool = False,
+        type: Type = None,
+    ):
+        return self.array_enumerate(
+            id,
+            "_" if iterate_items else it,
+            it if iterate_items else "_",
+            *statements,
+            declare_it=(not iterate_items) and declare_it,
+            declare_item=declare_it and iterate_items,
+            type=type,
+        )
+
+    @expression
+    def array_enumerate(
+        self,
+        id: str,
+        it: str,
+        item: str,
+        *statements,
+        declare_it: bool = True,
+        declare_item: bool = False,
+        type: Type = None,
+    ):
+        stmts = []
+        if declare_it:
+            stmts.append(self.declare(it, Primitive.Int))
+        if declare_item:
+            if type is None:
+                raise MissingTypeError()
+            stmts.append(self.declare(item, type))
+        stmts.append(f"for {it}, {item} = range {id} {self.block(*statements)}")
+        return self.linesep.join([self.indent(s) for s in stmts])
 
     def declare(self, id: str, type: Type):
         return f"var {id} {self.types(type)}"

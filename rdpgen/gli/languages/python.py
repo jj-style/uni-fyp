@@ -82,15 +82,15 @@ class Python(Language):
         iterate_items: bool = False,
         type: Type = None,
     ):
-        if iterate_items and type is None:
-            raise MissingTypeError()
-
         stmts = []
         if declare_it:
             if iterate_items:
+                if type is None:
+                    raise MissingTypeError()
                 stmts.append(self.declare(it, type))
             else:
                 stmts.append(self.declare(it, Primitive.Int))
+
         if iterate_items:
             stmts.append(f"for {it} in {id}{self.block(*statements)}")
         else:
