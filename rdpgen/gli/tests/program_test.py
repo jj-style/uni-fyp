@@ -66,20 +66,20 @@ def test_bubblesort():
         go: {
             "src": GO_BUBBLE_SORT_PROG,
             "cmd": "go run _",
-            "out": "1 2 3 4 5 \n",
+            "out": "4 5 6 7 9 \n",
             "suffix": ".go",
         },
         cpp: {
             "src": CPP_BUBBLE_SORT_PROG,
             "cmd": "cd ~ && g++ _ && ./a.out",
-            "out": "1 2 3 4 5 \n",
+            "out": "4 5 6 7 9 \n",
             "suffix": ".cpp",
             "clean": ["~/a.out"],
         },
         py: {
             "src": PYTHON_BUBBLE_SORT_PROG,
             "cmd": "python3 _",
-            "out": "1  2  3  4  5  \n",
+            "out": "4  5  6  7  9  \n",
             "suffix": ".py",
         },
     }
@@ -90,16 +90,11 @@ def test_bubblesort():
             None,
             None,
             g.declare("original", Composite.array(Primitive.Int)),
-            g.assign("original", g.array(Primitive.Int, [5, 2, 4, 1, 3])),
+            g.assign("original", g.array(Primitive.Int, [9, 6, 7, 4, 5])),
             g.declare("sorted", Composite.array(Primitive.Int)),
             g.assign("sorted", g.call("bubblesort", "original")),
-            g.declare("i", Primitive.Int),
-            g.for_loop(
-                "i",
-                0,
-                g.lt("i", g.array_length("sorted")),
-                g.increment("i"),
-                g.print(g.index("sorted", "i"), g.string(" ")),
+            g.array_iterate(
+                "sorted", "i", g.print(g.index("sorted", "i"), g.string(" "))
             ),
             g.println(),
         )

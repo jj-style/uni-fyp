@@ -1,4 +1,12 @@
-from ..language import Language, Type, imports, Primitive, Composite, expression
+from ..language import (
+    Language,
+    Type,
+    imports,
+    Primitive,
+    Composite,
+    expression,
+    MissingTypeError,
+)
 from .utils import format_function_arguments
 from typing import Dict, Union, Optional, List, Any
 
@@ -35,6 +43,30 @@ class Cpp(Language):
     def string(self, s: str):
         return f'"{s}"'
 
+    @imports("sstream")
+    def string_split(self, s: str, delim: str):
+        func_name = "split_string"
+
+        def lib():
+            s1 = self.declare("tmp", Primitive.String)
+            s2 = self.call("std::stringstream ss", "s") + self.terminator
+            s3 = self.declare("words", Composite.array(Primitive.String))
+            s4 = self.while_loop(
+                self.array_append("words", "tmp"),
+                condition=self.call("std::getline", "ss", "tmp", "delim"),
+            )
+            s5 = self.do_return(expression="words")
+            stmts = [s1, s2, s3, s4, s5]
+            return self.function(
+                func_name,
+                Composite.array(Primitive.String),
+                {"s": Primitive.String, "delim": "char"},
+                *stmts,
+            )
+
+        self.register_helper(func_name, lib())
+        return self.call(func_name, s, delim.replace('"', "'"))
+
     def array(self, t: Type, elements: List[Any]):
         joined = ", ".join(str(e) for e in elements)
         return f"{{{joined}}}"
@@ -44,6 +76,65 @@ class Cpp(Language):
 
     def array_append(self, id: str, item):
         return self.call(f"{id}.push_back", str(item)) + self.terminator
+
+    @expression
+    def array_iterate(
+        self,
+        id: str,
+        it: str,
+        *statements,
+        declare_it: bool = True,
+        iterate_items: bool = False,
+        type: Type = None,
+    ):
+        stmts = []
+        if declare_it:
+            if iterate_items:
+                if type is None:
+                    raise MissingTypeError()
+            else:
+                stmts.append(self.declare(it, Primitive.Int))
+
+        if iterate_items:
+            stmts.append(
+                f"for ({self.types(type)} {it} : {id}) {self.block(*statements)}"
+            )
+        else:
+            stmts.append(
+                self.indent(
+                    self.for_loop(
+                        it,
+                        0,
+                        self.lt(it, self.array_length(id)),
+                        self.increment(it),
+                        *statements,
+                    )
+                )
+            )
+
+        return self.linesep.join(stmts)
+
+    @expression
+    def array_enumerate(
+        self,
+        id: str,
+        it: str,
+        item: str,
+        *statements,
+        declare_it: bool = True,
+        declare_item: bool = False,
+        type: Type = None,
+    ):
+        stmts = []
+        if declare_item:
+            if type is None:
+                raise MissingTypeError()
+            stmts.append(self.declare(item, type))
+        loop_stmts = [self.assign(item, self.index(id, it)), *statements]
+        stmts.append(
+            self.indent(self.array_iterate(id, it, *loop_stmts, declare_it=declare_it))
+        )
+        return self.linesep.join(stmts)
 
     def declare(self, id: str, type: Type):
         return f"{self.types(type)} {id}{self.terminator}"

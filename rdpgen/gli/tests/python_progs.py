@@ -86,11 +86,11 @@ def bubblesort(arr: List[int]) -> List[int]:
 
 def main():
   original: List[int]
-  original = [5, 2, 4, 1, 3]
+  original = [9, 6, 7, 4, 5]
   sorted: List[int]
   sorted = bubblesort(original)
   i: int
-  for i in range(0, len(sorted), 1):
+  for i in range(len(sorted)):
     print(sorted[i], " ", end="")
   print()
 

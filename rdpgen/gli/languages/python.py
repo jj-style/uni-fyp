@@ -7,6 +7,7 @@ from ..language import (
     Composite,
     Context,
     Expression,
+    MissingTypeError,
 )
 from .utils import format_function_arguments
 from typing import Dict, Union, Optional, List, Any
@@ -61,6 +62,9 @@ class Python(Language):
     def string(self, s: str):
         return f'"{s}"'
 
+    def string_split(self, s: str, delim: str):
+        return f"{s}.{self.call('split', delim)}"
+
     def array(self, t: Type, elements: List[Any]):
         joined = ", ".join(str(e) for e in elements)
         return f"[{joined}]"
@@ -70,6 +74,59 @@ class Python(Language):
 
     def array_append(self, id: str, item):
         return self.call(f"{id}.append", str(item))
+
+    @expression
+    def array_iterate(
+        self,
+        id: str,
+        it: str,
+        *statements,
+        declare_it: bool = True,
+        iterate_items: bool = False,
+        type: Type = None,
+    ):
+        stmts = []
+        if declare_it:
+            if iterate_items:
+                if type is None:
+                    raise MissingTypeError()
+                stmts.append(self.declare(it, type))
+            else:
+                stmts.append(self.declare(it, Primitive.Int))
+
+        if iterate_items:
+            stmts.append(self.indent(f"for {it} in {id}{self.block(*statements)}"))
+        else:
+            stmts.append(
+                self.indent(
+                    f"for {it} in {self.call('range', self.array_length(id))}{self.block(*statements)}"  # noqa
+                )
+            )
+
+        return self.linesep.join(stmts)
+
+    @expression
+    def array_enumerate(
+        self,
+        id: str,
+        it: str,
+        item: str,
+        *statements,
+        declare_it: bool = True,
+        declare_item: bool = False,
+        type: Type = None,
+    ):
+        stmts = []
+        if declare_it:
+            stmts.append(self.declare(it, Primitive.Int))
+        if declare_item:
+            if type is None:
+                raise MissingTypeError()
+            stmts.append(self.declare(item, type))
+        stmts.append(
+            f"for {it}, {item} in {self.call('enumerate', id)}{self.block(*statements)}"
+        )
+        return self.linesep.join([self.indent(s) for s in stmts])
 
     @imports("typing.get_type_hints")
     def declare(self, id: str, type: Type):
@@ -189,6 +246,12 @@ class Python(Language):
 
     def negate(self, expr: Expression):
         return f"not ({expr})"
+
+    def bool_and(self, expr1, expr2):
+        return f"{expr1} and {expr2}"
+
+    def bool_or(self, expr1, expr2):
+        return f"{expr1} or {expr2}"
 
     @imports("subprocess")
     def command(

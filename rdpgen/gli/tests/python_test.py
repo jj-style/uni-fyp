@@ -1,7 +1,8 @@
-from rdpgen.gli import Python, Context, Primitive, Composite
+from rdpgen.gli import Python, Context, Primitive, Composite, MissingTypeError
 from .python_progs import *
 from tempfile import NamedTemporaryFile
 from pathlib import Path
+import pytest
 
 
 def test_python_imports():
@@ -241,3 +242,96 @@ def test_python_array_append():
     p = Python(Context(expand_tabs=True))
     assert p.array_append("mylist", 5) == "mylist.append(5)"
     assert p.array_append("mylist", p.string("5")) == 'mylist.append("5")'
+
+
+def test_python_boolean_and():
+    p = Python(Context(expand_tabs=True))
+    assert p.bool_and(p.gt("x", 10), p.lt("x", 20)) == "x > 10 and x < 20"
+
+
+def test_python_boolean_or():
+    p = Python(Context(expand_tabs=True))
+    assert p.bool_or(p.lt("x", 10), p.gt("x", 20)) == "x < 10 or x > 20"
+
+
+def test_python_array_iterate():
+    p = Python(Context(expand_tabs=True))
+    i1 = p.array_iterate("mylist", "i", p.println("i"))
+    assert (
+        i1
+        == """i: int
+for i in range(len(mylist)):
+  print(i)"""
+    )
+
+    i2 = p.array_iterate("mylist", "i", p.println("i"), declare_it=False)
+    assert (
+        i2
+        == """for i in range(len(mylist)):
+  print(i)"""
+    )
+
+    i3 = p.array_iterate(
+        "mylist",
+        "elem",
+        p.println("elem"),
+        iterate_items=True,
+        type=Primitive.String,
+    )
+    assert (
+        i3
+        == """elem: str
+for elem in mylist:
+  print(elem)"""
+    )
+
+    with pytest.raises(MissingTypeError) as err:
+        str(p.array_iterate("mylist", "elem", p.println("elem"), iterate_items=True))
+
+
+def test_python_array_enumerate():
+    p = Python(Context(expand_tabs=True))
+
+    e1 = p.array_enumerate("mylist", "i", "elem", p.println("i", "elem"))
+    assert (
+        str(e1)
+        == """i: int
+for i, elem in enumerate(mylist):
+  print(i, elem)"""
+    )
+
+    e2 = p.array_enumerate(
+        "mylist",
+        "i",
+        "elem",
+        p.println("i", "elem"),
+        declare_item=True,
+        type=Primitive.String,
+    )
+    assert (
+        str(e2)
+        == """i: int
+elem: str
+for i, elem in enumerate(mylist):
+  print(i, elem)"""
+    )
+
+    with pytest.raises(MissingTypeError) as err:
+        str(
+            p.array_enumerate(
+                "mylist",
+                "i",
+                "elem",
+                p.println("i", "elem"),
+                declare_item=True,
+            )
+        )
+
+
+def test_python_string_split():
+    p = Python(Context(expand_tabs=True))
+    assert (
+        p.string_split(p.string("hello,world"), p.string(","))
+        == """"hello,world".split(",")"""
+    )
+    assert p.string_split("list", p.string(":")) == """list.split(":")"""

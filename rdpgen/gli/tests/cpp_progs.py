@@ -87,7 +87,7 @@ std::vector<int> bubblesort(std::vector<int> arr) {
 
 int main() {
   std::vector<int> original;
-  original = {5, 2, 4, 1, 3};
+  original = {9, 6, 7, 4, 5};
   std::vector<int> sorted;
   sorted = bubblesort(original);
   int i;
@@ -154,3 +154,14 @@ int main() {
         READ_LINES_FUNC,
         fname,
     )
+
+
+STRING_SPLIT_FUNC = """std::vector<std::string> split_string(std::string s, char delim) {
+  std::string tmp;
+  std::stringstream ss(s);
+  std::vector<std::string> words;
+  while (std::getline(ss, tmp, delim)) {
+    words.push_back(tmp);
+}
+  return words;
+}"""

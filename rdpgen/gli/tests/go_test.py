@@ -1,6 +1,7 @@
-from rdpgen.gli import Go, Context, Type, Primitive, Composite
+from rdpgen.gli import Go, Context, Type, Primitive, Composite, MissingTypeError
 
 from .go_progs import *
+import pytest
 
 
 def test_go_hello_world():
@@ -180,3 +181,102 @@ def test_go_array_append():
     g = Go(Context(expand_tabs=True))
     assert g.array_append("mylist", 5) == "mylist = append(mylist, 5)"
     assert g.array_append("mylist", g.string("hi")) == 'mylist = append(mylist, "hi")'
+
+
+def test_go_boolean_and():
+    go = Go(Context(expand_tabs=True))
+    assert go.bool_and(go.gt("x", 10), go.lt("x", 20)) == "x > 10 && x < 20"
+
+
+def test_go_boolean_or():
+    go = Go(Context(expand_tabs=True))
+    assert go.bool_or(go.lt("x", 10), go.gt("x", 20)) == "x < 10 || x > 20"
+
+
+def test_go_array_iterate():
+    g = Go(Context(expand_tabs=True))
+    i1 = g.array_iterate("mylist", "i", g.println("i"))
+    assert (
+        str(i1)
+        == """var i int
+for i, _ = range mylist {
+  fmt.Println(i)
+}"""
+    )
+
+    i2 = g.array_iterate("mylist", "i", g.println("i"), declare_it=False)
+    assert (
+        i2
+        == """for i, _ = range mylist {
+  fmt.Println(i)
+}"""
+    )
+
+    i3 = g.array_iterate(
+        "mylist",
+        "elem",
+        g.println("elem"),
+        iterate_items=True,
+        type=Primitive.String,
+    )
+    assert (
+        i3
+        == """var elem string
+for _, elem = range mylist {
+  fmt.Println(elem)
+}"""
+    )
+
+    with pytest.raises(MissingTypeError) as err:
+        str(g.array_iterate("mylist", "elem", g.println("elem"), iterate_items=True))
+
+
+def test_go_array_enumerate():
+    g = Go(Context(expand_tabs=True))
+
+    e1 = g.array_enumerate("mylist", "i", "elem", g.println("i", "elem"))
+    assert (
+        str(e1)
+        == """var i int
+for i, elem = range mylist {
+  fmt.Println(i, elem)
+}"""
+    )
+
+    e2 = g.array_enumerate(
+        "mylist",
+        "i",
+        "elem",
+        g.println("i", "elem"),
+        declare_item=True,
+        type=Primitive.String,
+    )
+    assert (
+        str(e2)
+        == """var i int
+var elem string
+for i, elem = range mylist {
+  fmt.Println(i, elem)
+}"""
+    )
+
+    with pytest.raises(MissingTypeError) as err:
+        str(
+            g.array_enumerate(
+                "mylist",
+                "i",
+                "elem",
+                g.println("i", "elem"),
+                declare_item=True,
+            )
+        )
+
+
+def test_go_string_split():
+    g = Go(Context(expand_tabs=True))
+    assert (
+        g.string_split(g.string("hello,world"), g.string(","))
+        == """strings.Split("hello,world", ",")"""
+    )
+    assert g.string_split("list", g.string(":")) == """strings.Split(list, ":")"""
+    assert "strings" in g.imports

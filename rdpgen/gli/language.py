@@ -4,6 +4,11 @@ from typing import Union, Dict, List, Optional, Any, TypeVar
 import os
 
 
+class MissingTypeError(Exception):
+    def __init__(self):
+        super().__init__("type must be provided")
+
+
 class Primitive(Enum):
     Int = auto()
     Float = auto()
@@ -26,6 +31,8 @@ class Composite:
         return cls(Composite.CType.Array, t)
 
 
+# TODO: make this a Union and make custom expression types so can check types
+# of arguments
 Type = TypeVar("Type", Primitive, Composite)
 
 
@@ -135,6 +142,11 @@ class Language(ABC):
         raise NotImplementedError
 
     @abstractmethod
+    def string_split(self, s: str, delim: str):
+        """Split a string into a list of strings based on a delimiter"""
+        raise NotImplementedError
+
+    @abstractmethod
     def array(self, t: Type, elements: List[Any]):
         """Create an array in a language
 
@@ -152,6 +164,50 @@ class Language(ABC):
     @abstractmethod
     def array_append(self, id: str, item):
         """Append an item to the end of an array"""
+        raise NotImplementedError
+
+    @abstractmethod
+    def array_iterate(
+        self,
+        id: str,
+        it: str,
+        *statements,
+        declare_it: bool = True,
+        iterate_items: bool = False,
+        type: Type = None,
+    ):
+        """Iterate over an array with a named iterator variable
+        Arguments:
+            id: str - name of the array to iterate over
+            it: str - name of the iterator variable
+            *statements - statements to execute in loop
+            declare_it: bool - if True, will declare the variable first (default = True)
+            iterate_items: bool - if True, will iterate over the items in the array not the indices (False)
+            type: Type - type of items in the array, required if iterate_items is True
+        """  # noqa
+        raise NotImplementedError
+
+    @abstractmethod
+    def array_enumerate(
+        self,
+        id: str,
+        it: str,
+        item: str,
+        *statements,
+        declare_it: bool = True,
+        declare_item: bool = False,
+        type: Type = None,
+    ):
+        """Enumerate over an array with a named iterator variable and item variable
+        Arguments:
+            id: str - name of the array to iterate over
+            it: str - name of the iterator variable
+            item: str - name of variable of each item
+            *statements - statements to execute in loop
+            declare_it: bool - if True, will declare the variable first (default = True)
+            declare_item: bool - if True, will declare the variable first (default = False)
+            type: Type - type of elements in the array. Required if declare_item is True (default = None)
+        """  # noqa
         raise NotImplementedError
 
     def index(self, expression, offset):
@@ -190,7 +246,13 @@ class Language(ABC):
         arguments: Union[Dict[str, Type], List[Type], None],
         *statements,
     ):
-        # TODO - add documentation
+        """A function in a language
+        Arguments:
+            id: str - name of the function
+            return_type: Optional[Type] - return type of the function
+            arguments: Union[Dict[str, Type], List[Type], None] - arguments to the function
+            *statements - all statements that should be in the body of the function
+        """  # noqa
         raise NotImplementedError
 
     @abstractmethod
@@ -275,37 +337,60 @@ class Language(ABC):
     # TODO: add loads of non-abstract common things like
     # equals, less than, array indexing, calling (), addition
     def increment(self, id: str, inc: Expression = None):
+        """Increment a variable identified with `id`, with an optional increment value.
+        If not specified, defaults to 1.
+        """
         return f"{id} = {id} + {1 if inc is None else inc}{self.terminator}"
 
     def decrement(self, id: str, dec: Expression = None):
+        """Decrement a variable identified with `id`, with an optional decrement value.
+        If not specified, defaults to 1.
+        """
         return f"{id} = {id} - {1 if dec is None else dec}{self.terminator}"
 
     def add(self, lhs, rhs):
+        """Add 2 expressions"""
         return f"{lhs} + {rhs}"
 
     def sub(self, lhs, rhs):
+        """Subtract 2 expressions"""
         return f"{lhs} - {rhs}"
 
     def lt(self, lhs: Expression, rhs: Expression):
+        """Less than between 2 expressions"""
         return f"{lhs} < {rhs}"
 
     def leq(self, lhs: Expression, rhs: Expression):
+        """Less than or equal between 2 expressions"""
         return f"{lhs} <= {rhs}"
 
     def gt(self, lhs: Expression, rhs: Expression):
+        """Greater than between 2 expressions"""
         return f"{lhs} > {rhs}"
 
     def geq(self, lhs: Expression, rhs: Expression):
+        """Greater than or equal between 2 expressions"""
         return f"{lhs} >= {rhs}"
 
     def eq(self, lhs: Expression, rhs: Expression):
+        """Equate 2 expressions"""
         return f"{lhs} == {rhs}"
 
     def neq(self, lhs: Expression, rhs: Expression):
+        """Not equal for 2 expressions"""
         return f"{lhs} != {rhs}"
 
     def negate(self, expr: Expression):
+        """Negate an expressions"""
         return f"!({expr})"
+
+    def bool_and(self, expr1, expr2):
+        """Boolean AND operation between 2 expressions"""
+        return f"{expr1} && {expr2}"
+
+    def bool_or(self, expr1, expr2):
+        """Boolean AND operation between 2 expressions"""
+        return f"{expr1} || {expr2}"
 
     # TODO: stdlib like fileio, readlines, read/write etc.
 

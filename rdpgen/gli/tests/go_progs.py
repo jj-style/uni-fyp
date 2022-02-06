@@ -102,11 +102,11 @@ func bubblesort(arr []int) []int {
 
 func main() {
   var original []int
-  original = []int{5, 2, 4, 1, 3}
+  original = []int{9, 6, 7, 4, 5}
   var sorted []int
   sorted = bubblesort(original)
   var i int
-  for i = 0; i < len(sorted); i = i + 1 {
+  for i, _ = range sorted {
     fmt.Print(sorted[i], " ")
 }
   fmt.Println()
