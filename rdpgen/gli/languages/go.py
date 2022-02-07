@@ -55,6 +55,16 @@ class Go(Language):
     def array_append(self, id: str, item):
         return self.assign(id, self.call("append", id, str(item)))
 
+    def array_remove(self, id: str, idx: int):
+        return self.assign(
+            id,
+            self.call(
+                "append",
+                self.index(id, f":{idx}"),
+                f"{self.index(id, str(idx+1) + ':')}...",
+            ),
+        )
+
     def array_iterate(
         self,
         id: str,

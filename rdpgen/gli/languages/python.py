@@ -63,10 +63,13 @@ class Python(Language):
         return f"[{joined}]"
 
     def array_length(self, expression):
-        return f"len({expression})"
+        return self.call("len", expression)
 
     def array_append(self, id: str, item):
         return self.call(f"{id}.append", str(item))
+
+    def array_remove(self, id: str, idx: int):
+        return self.call(f"{id}.pop", idx)
 
     @expression
     def array_iterate(

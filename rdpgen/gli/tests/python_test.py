@@ -335,3 +335,9 @@ def test_python_string_split():
         == """"hello,world".split(",")"""
     )
     assert p.string_split("list", p.string(":")) == """list.split(":")"""
+
+
+def test_python_array_remove():
+    p = Python(Context(expand_tabs=True))
+    assert p.array_remove("mylist", 0) == "mylist.pop(0)"
+    assert p.array_remove("mylist", 10) == "mylist.pop(10)"

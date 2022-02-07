@@ -101,6 +101,11 @@ class Language(ABC):
         raise NotImplementedError
 
     @abstractmethod
+    def array_remove(self, id: str, idx: int):
+        """Delete the item at index idx from the array called id"""
+        raise NotImplementedError
+
+    @abstractmethod
     def array_iterate(
         self,
         id: str,

@@ -280,3 +280,11 @@ def test_go_string_split():
     )
     assert g.string_split("list", g.string(":")) == """strings.Split(list, ":")"""
     assert "strings" in g.imports
+
+
+def test_go_array_remove():
+    g = Go(Context(expand_tabs=True))
+    assert g.array_remove("mylist", 0) == "mylist = append(mylist[:0], mylist[1:]...)"
+    assert (
+        g.array_remove("mylist", 10) == "mylist = append(mylist[:10], mylist[11:]...)"
+    )

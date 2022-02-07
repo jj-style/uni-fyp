@@ -72,6 +72,12 @@ class Cpp(Language):
     def array_append(self, id: str, item):
         return self.call(f"{id}.push_back", str(item)) + self.terminator
 
+    def array_remove(self, id: str, idx: int):
+        return (
+            self.call(f"{id}.erase", self.add(self.call(f"{id}.begin"), idx))
+            + self.terminator
+        )
+
     @expression
     def array_iterate(
         self,

@@ -284,3 +284,9 @@ def test_cpp_string_split():
     should_import = ["sstream"]
     for imp in should_import:
         assert imp in cpp.imports
+
+
+def test_cpp_array_remove():
+    cpp = Cpp(Context(expand_tabs=True))
+    assert cpp.array_remove("mylist", 0) == "mylist.erase(mylist.begin() + 0);"
+    assert cpp.array_remove("mylist", 10) == "mylist.erase(mylist.begin() + 10);"
