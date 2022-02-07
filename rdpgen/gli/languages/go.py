@@ -1,13 +1,7 @@
-from ..language import (
-    Language,
-    Type,
-    imports,
-    expression,
-    Primitive,
-    Composite,
-    Expression,
-    MissingTypeError,
-)
+from ..language import Language
+from ..types import Type, Primitive, Composite, Expression
+from ..utils import imports, expression
+from ..errors import MissingTypeError
 from .utils import format_function_arguments
 from typing import Dict, Union, Optional, List, Any
 import shlex

@@ -1,5 +1,5 @@
 from typing import Union, Dict, List
-from ..language import Type
+from ..types import Type
 
 
 def format_function_arguments(

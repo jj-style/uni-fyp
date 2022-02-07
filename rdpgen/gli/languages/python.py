@@ -1,14 +1,7 @@
-from ..language import (
-    Language,
-    Type,
-    imports,
-    expression,
-    Primitive,
-    Composite,
-    Context,
-    Expression,
-    MissingTypeError,
-)
+from ..language import Language, Context
+from ..types import Type, Composite, Primitive, Expression
+from ..utils import imports, expression
+from ..errors import MissingTypeError
 from .utils import format_function_arguments
 from typing import Dict, Union, Optional, List, Any
 import regex as re

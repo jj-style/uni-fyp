@@ -1,74 +1,8 @@
 from abc import ABC, abstractmethod
-from enum import Enum, auto
-from typing import Union, Dict, List, Optional, Any, TypeVar
+from typing import Union, Dict, List, Optional, Any
 import os
 
-
-class MissingTypeError(Exception):
-    def __init__(self):
-        super().__init__("type must be provided")
-
-
-class Primitive(Enum):
-    Int = auto()
-    Float = auto()
-    String = auto()
-
-
-class Composite:
-    class CType(Enum):
-        Array = auto()
-
-    def __init__(self, base: CType, sub):
-        self.base = base
-        self.sub = sub
-
-    def __repr__(self):
-        return f"{self.base}<{self.sub}>"
-
-    @classmethod
-    def array(cls, t):
-        return cls(Composite.CType.Array, t)
-
-
-# TODO: make this a Union and make custom expression types so can check types
-# of arguments
-Type = TypeVar("Type", Primitive, Composite)
-
-
-def imports(*packages):
-    def import_wrapper(func):
-        def wrap(self, *args, **kwargs):
-            for pkg in packages:
-                self.import_package(pkg)
-            return func(self, *args, **kwargs)
-
-        return wrap
-
-    return import_wrapper
-
-
-def expression(func):
-    def wrap(*args, **kwargs):
-        def lazy():
-            return func(*args, **kwargs)
-
-        return Expression(lazy)
-
-    return wrap
-
-
-class Expression:
-    def __init__(self, expr_func):
-        self.__f = expr_func
-
-    def __str__(self):
-        return self.__f()
-
-    def __eq__(self, o):
-        if type(o) is str:
-            return str(self) == o
-        return False
+from .types import Type, Expression
 
 
 class Context:

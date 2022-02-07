@@ -1,5 +1,5 @@
 from rdpgen.gli.languages.utils import format_function_arguments
-from rdpgen.gli.language import Type, Primitive, Composite
+from rdpgen.gli import Type, Primitive, Composite
 
 
 def test_format_function_arguments():
