@@ -1,5 +1,5 @@
 from enum import Enum, auto
-from typing import Dict
+from typing import Dict, Set
 
 """ EBNF grammar:
    expression ::= term ( "|" term )+
@@ -40,6 +40,19 @@ class Node:
 
     def __repr__(self):
         return f"{self._type}{':' + self._value if self._value else ''}"
+
+    def __eq__(self, other):
+        if isinstance(other, NodeType):
+            return self._type == other
+        return False
+
+    @property
+    def children(self):
+        return self._children
+
+    @property
+    def value(self):
+        return self._value
 
 
 class Parser:
@@ -124,6 +137,7 @@ class Parser:
             node_type = NodeType.NONTERMINAL
             if value[0] == value[-1] and value[0] == '"':
                 node_type = NodeType.TERMINAL
+                value = value[1 : len(value) - 1]  # noqa
             return Node(node_type, value=value)
 
     def consume(self, expected: str):
@@ -149,7 +163,7 @@ class Grammar:
         return grammar_bnf
 
     @classmethod
-    def from_bnf(cls):
+    def from_bnf(cls, rules):
         productions = {}
         for rule in rules.splitlines():
             name, rhs = rule.split(" ::= ")
@@ -170,6 +184,25 @@ class Grammar:
 
     def __str__(self) -> str:
         return "\n".join(f"{k} ->\n{v}" for k, v in self.productions.items())
+
+    def __left_set(self, node: Node, terminals: Set[str]):
+        if node == NodeType.TERM:
+            terminals = self.__left_set(node.children[0], terminals)
+        elif node == NodeType.OR:
+            for child in node.children:
+                terminals = self.__left_set(child, terminals)
+        elif node == NodeType.TERMINAL:
+            terminals.add(node.value)
+        elif node == NodeType.NONTERMINAL:
+            new_start = self.productions.get(node.value)
+            terminals = self.__left_set(new_start, terminals)
+        return terminals
+
+    def left_set(self, rule: str) -> Set[str]:
+        start = self.productions.get(rule, None)
+        if start is None:
+            raise ValueError(f"{rule} is not a production in the grammar")
+        return self.__left_set(start, set([]))
 
 
 if __name__ == "__main__":
