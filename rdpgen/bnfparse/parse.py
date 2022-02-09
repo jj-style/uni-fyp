@@ -1,5 +1,5 @@
 from enum import Enum, auto
-from typing import Dict, Set
+from typing import Dict, Set, List
 
 """ EBNF grammar:
    expression ::= term ( "|" term )+
@@ -13,19 +13,22 @@ from typing import Dict, Set
 class NodeType(Enum):
     TERMINAL = auto()
     NONTERMINAL = auto()
-    OPTIONAL = auto()
-    ONE_OR_MORE = auto()
-    ZERO_OR_MORE = auto()
-    GROUP = auto()
     OR = auto()
     TERM = auto()
 
 
+class Quantifier(Enum):
+    OPTIONAL = auto()
+    ONE_OR_MORE = auto()
+    ZERO_OR_MORE = auto()
+
+
 class Node:
-    def __init__(self, node_type, value=None, *children):
+    def __init__(self, node_type, value=None, quantifier: Quantifier = None, *children):
         self._value = value
         self._type = node_type
         self._children = [c for c in children]
+        self._quantifier = None
 
     def add_children(self, *children):
         for child in children:
@@ -39,7 +42,9 @@ class Node:
         return ret
 
     def __repr__(self):
-        return f"{self._type}{':' + self._value if self._value else ''}"
+        base = f"{self._type}{':' + self._value if self._value else ''}"
+        extra = "" if self._quantifier is None else f"\nQUANTITY:{self._quantifier}"
+        return base + extra
 
     def __eq__(self, other):
         if isinstance(other, NodeType):
@@ -53,6 +58,14 @@ class Node:
     @property
     def value(self):
         return self._value
+
+    @property
+    def quantifier(self):
+        return self._quantifier
+
+    @quantifier.setter
+    def quantifier(self, value):
+        self._quantifier = value
 
 
 class Parser:
@@ -87,14 +100,13 @@ class Parser:
         return node
 
     def term(self):
-        old, right = None, None
         """term ::= factor suffix? (" " factor suffix?)+"""
         node = self.factor()
         if self.peek() in ["?", "+", "*"]:
-            old = node
-            node = Node(NodeType.TERM)
-            right = self.suffix()
-            node.add_children(old, right)
+            # old = node
+            # node = Node(NodeType.TERM)
+            node.quantifier = self.suffix()
+            # node.add_children(old, right)
 
         while self.peek() not in ["|", ")", None]:  # TODO: confirm this is right
             left = node
@@ -102,10 +114,10 @@ class Parser:
             node.add_children(left)
             next_node = self.factor()
             if self.peek() in ["?", "+", "*"]:
-                old = next_node
-                next_node = Node(NodeType.TERM)
-                right = self.suffix()
-                next_node.add_children(old, right)
+                # old = next_node
+                # next_node = Node(NodeType.TERM)
+                node.quantifier = self.suffix()
+                # next_node.add_children(old, right)
             node.add_children(next_node)
 
         return node
@@ -116,12 +128,12 @@ class Parser:
         if n in ["?", "+", "*"]:
             node_type = None
             if n == "?":
-                node_type = NodeType.OPTIONAL
+                node_type = Quantifier.OPTIONAL
             elif n == "+":
-                node_type = NodeType.ONE_OR_MORE
+                node_type = Quantifier.ONE_OR_MORE
             elif n == "*":
-                node_type = NodeType.ZERO_OR_MORE
-            return Node(node_type)
+                node_type = Quantifier.ZERO_OR_MORE
+            return node_type
         else:
             raise Exception(f"unknown suffix: {n}")
 
@@ -185,31 +197,39 @@ class Grammar:
     def __str__(self) -> str:
         return "\n".join(f"{k} ->\n{v}" for k, v in self.productions.items())
 
-    def __left_set(self, node: Node, terminals: Set[str]):
+    def __left_set(self, node: Node, terminals: Set[str], completed: List[Node]):
+        if node in completed:
+            # prevent infinite recursion by computing possible terminals
+            # from node we've already computed and added to the terminal set
+            return terminals
+        if node not in completed:
+            completed.append(node)
+
         if node == NodeType.TERM:
-            terminals = self.__left_set(node.children[0], terminals)
+            terminals = self.__left_set(node.children[0], terminals, completed)
+            c = 1
+            while len(terminals) == 0:
+                terminals = self.__left_set(node.children[c], terminals, completed)
+                c += 1
+
         elif node == NodeType.OR:
             for child in node.children:
-                terminals = self.__left_set(child, terminals)
+                terminals = self.__left_set(child, terminals, completed)
+
         elif node == NodeType.TERMINAL:
-            terminals.add(node.value)
+            if node.quantifier != Quantifier.OPTIONAL:
+                terminals.add(node.value)
         elif node == NodeType.NONTERMINAL:
+            # TODO: check if new_start is a grammar rule or a token defined in lexer
             new_start = self.productions.get(node.value)
-            terminals = self.__left_set(new_start, terminals)
+            terminals = self.__left_set(new_start, terminals, completed)
         return terminals
 
     def left_set(self, rule: str) -> Set[str]:
+        """Compute the left set of a grammar rule, returning a set of
+        all possible terminals that we can expect to see
+        """
         start = self.productions.get(rule, None)
         if start is None:
             raise ValueError(f"{rule} is not a production in the grammar")
-        return self.__left_set(start, set([]))
-
-
-if __name__ == "__main__":
-    # p = Parser("( x | y ) ? | z")
-    # p = Parser('( x | y ) | "z" ?')
-    # p = Parser("( x * y ) ? | z")
-
-    rules = {"noun-phrase": "article noun", "article": '"the" | "a" | "an"'}
-    g = Grammar(rules)
-    print(g)
+        return self.__left_set(start, set([]), [])
