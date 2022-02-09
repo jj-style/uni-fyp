@@ -114,6 +114,8 @@ def parser_from_grammar(
         # either-or-construction
         if prod == NodeType.OR:
             left_set = grammar.left_set(rule)
+            tok = list(left_set.keys())[0]
+            tok_func = left_set[tok]
             f = l.function(
                 rule,
                 None,
@@ -121,9 +123,9 @@ def parser_from_grammar(
                 l.declare("next_token", Composite.array(Primitive.String)),
                 l.assign("next_token", l.call("peek")),
                 l.if_else(
-                    l.eq(l.index("next_token", 1), l.string(list(left_set)[0])),
+                    l.eq(l.index("next_token", 1), l.string(tok)),
                     [
-                        l.call(list(left_set)[0]),
+                        l.call(tok_func),
                     ],
                     false_stmts=[],
                 ),
@@ -131,6 +133,6 @@ def parser_from_grammar(
         else:
             f = l.function(rule, None, [], l.do_return(None))
         prog.add(f)
-        print(f)
+        # print(f)
     print(prog.generate())
     return prog

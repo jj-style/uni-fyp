@@ -30,40 +30,40 @@ def test_grammar_parse_bnf():
 def test_grammar_left_set():
     g = Grammar.from_bnf(GRAMMAR_BNF)
     ls = g.left_set("E")
-    assert ls == set(["(", "i"])
+    assert ls == {"i": "F", "(": "F"}
 
     ls = g.left_set("R")
-    assert ls == set(["+", "#"])
+    assert ls == {"+": "R", "#": "R"}
 
     ls = g.left_set("T")
-    assert ls == set(["(", "i"])
+    assert ls == {"i": "F", "(": "F"}
 
     ls = g.left_set("Y")
-    assert ls == set(["*", "#"])
+    assert ls == {"*": "Y", "#": "Y"}
 
     ls = g.left_set("F")
-    assert ls == set(["(", "i"])
+    assert ls == {"i": "F", "(": "F"}
 
 
 def test_grammar_left_set_with_groups():
     g = Grammar.from_bnf(GRAMMAR_GROUPS)
     ls = g.left_set("A")
-    assert ls == set(["b", "c", "a"])
+    assert ls == {"a": "A", "b": "B", "c": "C"}
     ls = g.left_set("B")
-    assert ls == set(["b"])
+    assert ls == {"b": "B"}
     ls = g.left_set("C")
-    assert ls == set(["c", "a", "b"])
+    assert ls == {"c": "C", "a": "A", "b": "B"}
 
 
 def test_grammar_optionals():
     g = Grammar.from_bnf(GRAMMAR_OPTIONALS)
     ls = g.left_set("IF")
-    assert ls == set(["if"])
+    assert ls == {"if": "IF"}
     ls = g.left_set("ELSE")
-    assert ls == set(["else"])
+    assert ls == {"else": "ELSE"}
 
 
 def test_grammar_optional_start():
     g = Grammar.from_bnf(GRAMMAR_OPTIONAL_START)
     ls = g.left_set("FACTOR")
-    assert ls == set(["0", "1", "2", "3"])
+    assert ls == {"0": "DIGIT", "1": "DIGIT", "2": "DIGIT", "3": "DIGIT"}

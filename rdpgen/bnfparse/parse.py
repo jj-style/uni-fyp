@@ -1,5 +1,5 @@
 from enum import Enum, auto
-from typing import Dict, Set, List
+from typing import Dict, List
 
 """ EBNF grammar:
    expression ::= term ( "|" term )+
@@ -199,7 +199,13 @@ class Grammar:
     def __str__(self) -> str:
         return "\n".join(f"{k} ->\n{v}" for k, v in self.productions.items())
 
-    def __left_set(self, node: Node, terminals: Set[str], completed: List[Node]):
+    def __left_set(
+        self,
+        node: Node,
+        terminals: Dict[str, List[str]],
+        completed: List[Node],
+        parent: Node,
+    ) -> Dict[str, str]:
         if node in completed:
             # prevent infinite recursion by computing possible terminals
             # from node we've already computed and added to the terminal set
@@ -208,33 +214,37 @@ class Grammar:
             completed.append(node)
 
         if node == NodeType.TERM:
-            terminals = self.__left_set(node.children[0], terminals, completed)
+            terminals = self.__left_set(node.children[0], terminals, completed, parent)
             c = 1
             while len(terminals) == 0:
-                terminals = self.__left_set(node.children[c], terminals, completed)
+                terminals = self.__left_set(
+                    node.children[c], terminals, completed, parent
+                )
                 c += 1
 
         elif node == NodeType.OR:
             for child in node.children:
-                terminals = self.__left_set(child, terminals, completed)
+                terminals = self.__left_set(child, terminals, completed, parent)
 
         elif node == NodeType.TERMINAL:
             if node.quantifier != Quantifier.OPTIONAL:
-                terminals.add(node.value)
+                terminals[node.value] = parent.value
+
         elif node == NodeType.NONTERMINAL:
             # TODO: check if new_start is a grammar rule or a token defined in lexer
             new_start = self.productions.get(node.value)
-            terminals = self.__left_set(new_start, terminals, completed)
+            terminals = self.__left_set(new_start, terminals, completed, node)
         return terminals
 
-    def left_set(self, rule: str) -> Set[str]:
+    def left_set(self, rule: str) -> Dict[str, str]:
         """Compute the left set of a grammar rule, returning a set of
         all possible terminals that we can expect to see
         """
         start = self.productions.get(rule, None)
         if start is None:
             raise ValueError(f"{rule} is not a production in the grammar")
-        return self.__left_set(start, set([]), [])
+
+        return self.__left_set(start, {}, [], Node(NodeType.NONTERMINAL, value=rule))
 
     @property
     def start(self) -> str:
