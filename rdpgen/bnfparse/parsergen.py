@@ -42,6 +42,21 @@ def parser_from_grammar(
         l.command("command", exit_on_failure=True),
     )
 
+    load_tokens = l.function(
+        "load_tokens",
+        None,
+        None,
+        l.declare("token_lines", Composite.array(Primitive.String)),
+        l.assign("token_lines", l.read_lines(l.string(outdir / "lexer" / "out.jl"))),
+        l.array_iterate(
+            "token_lines",
+            "idx",
+            l.array_append(
+                "tokens", l.string_split(l.index("token_lines", "idx"), l.string(":"))
+            ),
+        ),
+    )
+
     peek = l.function(
         "peek",
         Composite.array(Primitive.String),
@@ -68,12 +83,25 @@ def parser_from_grammar(
         l.do_return(l.array(Primitive.String, [])),
     )
 
+    parse = l.function(
+        "parse",
+        Primitive.Int,
+        {"file": Primitive.String},
+        l.declare("source", Primitive.String),
+        l.comment("TODO: source = load_file(file)"),
+        l.call("generate_tokens", "source"),
+        l.call("load_tokens"),
+        l.comment(l.call(grammar.start)),
+    )
+
     prog.add(call_lexer)
+    prog.add(load_tokens)
     prog.add(peek)
     prog.add(get_token)
+    prog.add(parse)
 
-    # for rule, prod in grammar.productions.items():
-    # f = l.function(rule, None, [], l.do_return(None))
-    # prog.add(f)
+    for rule, prod in grammar.productions.items():
+        f = l.function(rule, None, [], l.do_return(None))
+        prog.add(f)
     print(prog.generate())
     return prog

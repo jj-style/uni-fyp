@@ -185,10 +185,12 @@ class Grammar:
     def __init__(self, rules: Dict[str, str]):
         self.__rules = rules
         self.productions = {}
+        self.__start = None
         for name, production in rules.items():
             production_parser = Parser(production)
             production_parser.parse()
             self.productions[name] = production_parser.tree
+        self.__start = list(rules.keys())[0]
 
     @property
     def bnf(self) -> str:
@@ -233,3 +235,7 @@ class Grammar:
         if start is None:
             raise ValueError(f"{rule} is not a production in the grammar")
         return self.__left_set(start, set([]), [])
+
+    @property
+    def start(self) -> str:
+        return self.__start
