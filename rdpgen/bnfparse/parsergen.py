@@ -1,6 +1,7 @@
 from .parse import Grammar
 from rdpgen.lexgen import Token
 from rdpgen.gli import Program, Language, Context, Go, Python, Cpp, Composite, Primitive
+from rdpgen.bnfparse.parse import NodeType
 
 from typing import List
 from pathlib import Path
@@ -83,6 +84,14 @@ def parser_from_grammar(
         l.do_return(l.array(Primitive.String, [])),
     )
 
+    expect = l.function(
+        "expect",
+        None,
+        {"e": Primitive.String},
+        l.println(l.string("Error: expected "), "e", l.string(" at this position")),
+        l.exit(code=1),
+    )
+
     parse = l.function(
         "parse",
         Primitive.Int,
@@ -98,10 +107,30 @@ def parser_from_grammar(
     prog.add(load_tokens)
     prog.add(peek)
     prog.add(get_token)
+    prog.add(expect)
     prog.add(parse)
 
     for rule, prod in grammar.productions.items():
-        f = l.function(rule, None, [], l.do_return(None))
+        # either-or-construction
+        if prod == NodeType.OR:
+            left_set = grammar.left_set(rule)
+            f = l.function(
+                rule,
+                None,
+                None,
+                l.declare("next_token", Composite.array(Primitive.String)),
+                l.assign("next_token", l.call("peek")),
+                l.if_else(
+                    l.eq(l.index("next_token", 1), l.string(list(left_set)[0])),
+                    [
+                        l.call(list(left_set)[0]),
+                    ],
+                    false_stmts=[],
+                ),
+            )
+        else:
+            f = l.function(rule, None, [], l.do_return(None))
         prog.add(f)
+        print(f)
     print(prog.generate())
     return prog
