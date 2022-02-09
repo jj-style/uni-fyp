@@ -25,7 +25,7 @@ def parser_from_grammar(
     print(f"\nparser in {l.name}\n===================\n")
 
     # setup lexing stuff
-    prog.add(l.declare("tokens", Composite.array(Primitive.String)))
+    prog.add(l.declare("tokens", Composite.array(Composite.array(Primitive.String))))
 
     # shell out to the lexer to create tokens
     call_lexer = l.function(
@@ -41,7 +41,36 @@ def parser_from_grammar(
         l.assign("command", l.add("command", l.string(" | ./lexer"))),
         l.command("command", exit_on_failure=True),
     )
+
+    peek = l.function(
+        "peek",
+        Composite.array(Primitive.String),
+        None,
+        l.if_else(
+            l.gt(l.array_length("tokens"), 0),
+            [l.do_return(expression=l.index("tokens", 0))],
+        ),
+        l.do_return(expression=l.array(Primitive.String, [])),
+    )
+    get_token = l.function(
+        "get_token",
+        Composite.array(Primitive.String),
+        None,
+        l.if_else(
+            l.gt(l.array_length("tokens"), 0),
+            [
+                l.declare("next", Composite.array(Primitive.String)),
+                l.assign("next", l.index("tokens", 0)),
+                l.array_remove("tokens", 0),
+                l.do_return(expression="next"),
+            ],
+        ),
+        l.do_return(l.array(Primitive.String, [])),
+    )
+
     prog.add(call_lexer)
+    prog.add(peek)
+    prog.add(get_token)
 
     # for rule, prod in grammar.productions.items():
     # f = l.function(rule, None, [], l.do_return(None))
