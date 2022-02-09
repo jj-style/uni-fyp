@@ -136,23 +136,23 @@ def test_go_command():
     g = Go(Context(expand_tabs=True))
 
     # test it produces correct call for running ls -l
-    c = g.command("ls -l", exit_on_failure=False)
+    c = g.command(g.string("ls -l"), exit_on_failure=False)
     assert "os/exec" in g.imports
     assert c == COMMAND_NO_OUTPUT
 
     # test it produces correct call for running ls -l with output
-    c = g.command("ls -l", suppress_output=False, exit_on_failure=False)
+    c = g.command(g.string("ls -l"), suppress_output=False, exit_on_failure=False)
     assert "os/exec" in g.imports
     assert c == COMMAND_OUTPUT
 
 
 def test_go_command_exit_on_failure():
     g = Go(Context(expand_tabs=True))
-
-    c = g.command("ls -l", exit_on_failure=True)
+    c = g.command(g.string("ls -l"), exit_on_failure=True)
     assert c == COMMAND_NO_OUTPUT_WITH_EXIT
 
-    c = g.command("ls -l", suppress_output=False, exit_on_failure=True)
+    g = Go(Context(expand_tabs=True))
+    c = g.command(g.string("ls -l"), suppress_output=False, exit_on_failure=True)
     assert c == COMMAND_OUTPUT_WITH_EXIT
 
 

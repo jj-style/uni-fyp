@@ -8,14 +8,10 @@ from .bnfparse.parsergen import parser_from_grammar
 @click.command()
 @click.argument("file")
 @click.argument("outdir")
-def cli(file: str, outdir: str):
-    """Interface to the recursive descent parser generator
-
-    Args:
-
-        file (str):             path to TOML file with token and grammar rules
-        outdir (Optional[str]): directory to output parser program
-    """
+@click.argument(
+    "language", type=click.Choice(["c++", "go", "python"], case_sensitive=False)
+)
+def cli(file: str, outdir: str, language: str):
     with open(file) as f:
         config = tomli.load(f)
 
@@ -27,4 +23,4 @@ def cli(file: str, outdir: str):
     # parse the bnf grammar rules
     grammar_cfg = config.get("grammar", {})
     grammar = Grammar(grammar_cfg)
-    parser_from_grammar(grammar)
+    parser_from_grammar(grammar, tokens, language, outdir)

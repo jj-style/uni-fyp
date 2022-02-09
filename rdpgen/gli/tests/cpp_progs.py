@@ -100,16 +100,27 @@ int main() {
 
 """
 
-COMMAND_OUTPUT = """system("ls -l");"""
-COMMAND_NO_OUTPUT = """system("ls -l > /dev/null 2>&1");"""
-COMMAND_OUTPUT_WITH_EXIT = """int rc;
-rc = system("ls -l");
+COMMAND_OUTPUT = """std::string cmd;
+cmd = "ls -l";
+system(cmd);"""
+COMMAND_NO_OUTPUT = """std::string cmd;
+cmd = "ls -l";
+cmd = cmd + " > /dev/null 2>&1";
+system(cmd);"""
+
+COMMAND_OUTPUT_WITH_EXIT = """std::string cmd;
+cmd = "ls -l";
+int rc;
+rc = system(cmd);
 if (rc != 0) {
   exit(1);
 }"""
 
-COMMAND_NO_OUTPUT_WITH_EXIT = """int rc;
-rc = system("ls -l > /dev/null 2>&1");
+COMMAND_NO_OUTPUT_WITH_EXIT = """std::string cmd;
+cmd = "ls -l";
+cmd = cmd + " > /dev/null 2>&1";
+int rc;
+rc = system(cmd);
 if (rc != 0) {
   exit(1);
 }"""
