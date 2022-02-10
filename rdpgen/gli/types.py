@@ -6,6 +6,7 @@ class Primitive(Enum):
     Int = auto()
     Float = auto()
     String = auto()
+    Bool = auto()
 
 
 class Composite:

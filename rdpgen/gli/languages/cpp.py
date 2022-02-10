@@ -28,6 +28,8 @@ class Cpp(Language):
             elif t is Primitive.String:
                 self.import_package("string")
                 return "std::string"
+            elif t is Primitive.Bool:
+                return "bool"
         elif isinstance(t, Composite):
             if t.base is Composite.CType.Array:
                 self.import_package("vector")
@@ -159,6 +161,7 @@ class Cpp(Language):
             if id == "main":
                 ret_part = self.types(Primitive.Int)
                 statements = [*statements, self.do_return("0")]
+                arg_list = "int argc, char* argv[]"
             else:
                 ret_part = "void"
         else:
@@ -281,3 +284,44 @@ class Cpp(Language):
 
         self.register_helper(func_name, lib())
         return self.call(func_name, file)
+
+    @imports("iostream", "fstream")
+    def read_file(self, file: str):
+        func_name = "read_file"
+
+        def lib():
+            s1 = self.declare("f", "std::fstream")
+            s2 = self.declare("content", Primitive.String)
+            s3 = self.call("f.open", "file", "std::ios::in") + self.terminator
+            s4 = self.if_else(
+                self.call("f.is_open"),
+                [
+                    self.declare("line", Primitive.String),
+                    self.while_loop(
+                        self.increment(
+                            "content",
+                            inc=self.add("line", self.string(r"\n")),
+                        ),
+                        condition=self.call("getline", "f", "line"),
+                    ),
+                    self.call("f.close") + self.terminator,
+                ],
+                false_stmts=[self.exit(1)],
+            )
+            s5 = self.do_return(expression="content")
+            stmts = [s1, s2, s3, s4, s5]
+            return self.function(
+                func_name,
+                Primitive.String,
+                {"file": Primitive.String},
+                *stmts,
+            )
+
+        self.register_helper(func_name, lib())
+        return self.call(func_name, file)
+
+    def argc(self):
+        return "argc"
+
+    def argv(self):
+        return "argv"

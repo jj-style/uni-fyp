@@ -332,6 +332,14 @@ class Language(ABC):
         """Boolean AND operation between 2 expressions"""
         return f"{expr1} || {expr2}"
 
+    def true(self):
+        """True boolean. Defaults to lowercase C-like booleans"""
+        return "true"
+
+    def false(self):
+        """False boolean. Defaults to lowercase C-like booleans"""
+        return "false"
+
     # TODO: stdlib like fileio, readlines, read/write etc.
 
     @abstractmethod
@@ -356,4 +364,19 @@ class Language(ABC):
     @abstractmethod
     def read_lines(self, file: str):
         """Open a file and read the lines into a list of strings"""
+        raise NotImplementedError
+
+    @abstractmethod
+    def read_file(self, file: str):
+        """Open a file and read the contents into a string"""
+        raise NotImplementedError
+
+    @abstractmethod
+    def argc(self):
+        """Access to command line argument count."""
+        raise NotImplementedError
+
+    @abstractmethod
+    def argv(self):
+        """Access to command line argument as a list of strings."""
         raise NotImplementedError

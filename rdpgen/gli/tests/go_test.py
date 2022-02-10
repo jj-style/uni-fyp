@@ -288,3 +288,17 @@ def test_go_array_remove():
     assert (
         g.array_remove("mylist", 10) == "mylist = append(mylist[:10], mylist[11:]...)"
     )
+
+
+def test_go_booleans():
+    g = Go(Context(expand_tabs=True))
+    assert g.types(Primitive.Bool) == "bool"
+    assert g.true() == "true"
+    assert g.false() == "false"
+
+
+def test_go_argc_argv():
+    g = Go(Context(expand_tabs=True))
+    assert g.argc() == "len(os.Args)"
+    assert g.argv() == "os.Args"
+    assert "os" in g.imports

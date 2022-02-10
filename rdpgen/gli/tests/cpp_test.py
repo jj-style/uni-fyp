@@ -290,3 +290,16 @@ def test_cpp_array_remove():
     cpp = Cpp(Context(expand_tabs=True))
     assert cpp.array_remove("mylist", 0) == "mylist.erase(mylist.begin() + 0);"
     assert cpp.array_remove("mylist", 10) == "mylist.erase(mylist.begin() + 10);"
+
+
+def test_cpp_booleans():
+    cpp = Cpp(Context(expand_tabs=True))
+    assert cpp.types(Primitive.Bool) == "bool"
+    assert cpp.true() == "true"
+    assert cpp.false() == "false"
+
+
+def test_cpp_argc_argv():
+    cpp = Cpp(Context(expand_tabs=True))
+    assert cpp.argc() == "argc"
+    assert cpp.argv() == "argv"
