@@ -97,10 +97,22 @@ def parser_from_grammar(
         Primitive.Int,
         {"file": Primitive.String},
         l.declare("source", Primitive.String),
-        l.comment("TODO: source = load_file(file)"),
+        l.assign("source", l.read_file("file")),
         l.call("generate_tokens", "source"),
         l.call("load_tokens"),
-        l.comment(l.call(grammar.start)),
+        l.call(grammar.start),
+    )
+
+    main = l.function(
+        "main",
+        None,
+        None,
+        l.if_else(
+            l.lt(l.argc(), 2), [l.println(l.string("usage: parser FILE")), l.exit(1)]
+        ),
+        l.declare("filename", Primitive.String),
+        l.assign("filename", l.index(l.argv(), 1)),
+        l.call("parse", "filename"),
     )
 
     prog.add(call_lexer)
@@ -108,7 +120,6 @@ def parser_from_grammar(
     prog.add(peek)
     prog.add(get_token)
     prog.add(expect)
-    prog.add(parse)
 
     for rule, prod in grammar.productions.items():
         # either-or-construction
@@ -134,5 +145,9 @@ def parser_from_grammar(
             f = l.function(rule, None, [], l.do_return(None))
         prog.add(f)
         # print(f)
+
+    prog.add(parse)
+    prog.add(main)
+
     print(prog.generate())
     return prog
