@@ -140,17 +140,6 @@ def parser_from_grammar(
                     ],
                 )
 
-            ifs = [
-                l.if_else(
-                    l.eq(l.index("next_token", 1), l.string(tokens[i])),
-                    [
-                        l.call(left_set[tokens[i]]),
-                    ],
-                    false_stmts=[],
-                )
-                for i in range(len(tokens))
-            ]
-
             if_stmt = recurse(tokens)
             f = l.function(
                 rule,
