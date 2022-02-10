@@ -35,8 +35,8 @@ class Cpp(Language):
         else:
             return str(t)
 
-    def string(self, s: str):
-        return f'"{s}"'
+    def string(self, s: str, double: bool = True):
+        return f'"{s}"' if double else f"'{s}'"
 
     @imports("sstream")
     def string_split(self, s: str, delim: str):
@@ -225,22 +225,26 @@ class Cpp(Language):
         return f"if ({condition}) {self.block(*true_stmts)}{(' else ' + self.block(*false_stmts)) if false_stmts else ''}"  # noqa
 
     @imports("stdlib.h")
+    @expression
     def command(
         self, command: str, suppress_output: bool = True, exit_on_failure: bool = True
     ):
-        cmd = command.replace('"', '\\"')
-        if suppress_output:
-            cmd += " > /dev/null 2>&1"
         stmts = []
+        stmts.append(self.declare("cmd", Primitive.String))
+        stmts.append(self.assign("cmd", command))
+        if suppress_output:
+            stmts.append(
+                self.assign("cmd", self.add("cmd", self.string(" > /dev/null 2>&1")))
+            )
         if exit_on_failure:
             stmts.append(self.declare("rc", Primitive.Int))
-            stmts.append(self.assign("rc", self.call("system", self.string(cmd))))
+            stmts.append(self.assign("rc", self.call("system", "cmd")))
         else:
-            stmts.append(self.call("system", self.string(cmd)) + self.terminator)
+            stmts.append(self.call("system", "cmd") + self.terminator)
         if exit_on_failure:
             stmts.append(self.if_else(self.neq("rc", 0), [self.exit(1)]))
 
-        return self.linesep.join([self.indent(s) for s in stmts])
+        return self.linesep.join([stmts[0]] + [self.indent(s) for s in stmts[1:]])
 
     @imports("stdlib.h")
     def exit(self, code: int = 0):

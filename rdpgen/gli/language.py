@@ -67,11 +67,12 @@ class Language(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def string(self, s: str):
+    def string(self, s: str, double: bool = True):
         """Construct a string in a language
 
         Args:
             s (str): the string to construct
+            double (bool): whether to surround in double quotes or single
         """
         raise NotImplementedError
 

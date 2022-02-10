@@ -1,16 +1,29 @@
-from ..language import Language
+from ..language import Language, Context
 from ..types import Type, Primitive, Composite, Expression
 from ..utils import imports, expression
 from ..errors import MissingTypeError
 from .utils import format_function_arguments
 from typing import Dict, Union, Optional, List, Any
 import shlex
+import regex
 
 
 class Go(Language):
+    def __init__(self, ctx: Context = None):
+        super().__init__(ctx)
+        self.__var_dec_count = {}
+
     @property
     def name(self) -> str:
         return "golang"
+
+    def varn(self, var: str) -> str:
+        if var not in self.__var_dec_count:
+            self.__var_dec_count[var] = 0
+            return var
+
+        self.__var_dec_count[var] += 1
+        return f"{var}{self.__var_dec_count}"
 
     def prelude(self, **kwargs):
         package = kwargs.get("package", "main")
@@ -38,8 +51,8 @@ class Go(Language):
             # e.g. command() needs type Cmd
             return str(t)
 
-    def string(self, s: str):
-        return f'"{s}"'
+    def string(self, s: str, double: bool = True):
+        return f'"{s}"' if double else f"`{s}`"
 
     @imports("strings")
     def string_split(self, s: str, delim: str):
@@ -181,15 +194,23 @@ class Go(Language):
         return f"if {condition} {self.block(*true_stmts)}{(' else ' + self.block(*false_stmts)) if false_stmts else ''}"  # noqa
 
     @imports("os/exec")
+    @expression
     def command(
         self, command: str, suppress_output: bool = True, exit_on_failure: bool = True
     ):
         stmts = []
-        args = [f'"{a}"' for a in shlex.split(command)]
+        m = regex.match(r"""\"(?P<inner>.*)\"""", command)
+        if m:
+            groups = m.groupdict()
+            args = [self.string(a) for a in shlex.split(groups["inner"])]
+        else:
+            args = [command]
         if suppress_output:
-            stmts.append(self.declare("cmd", "*exec.Cmd"))
+            cmd_var = self.varn("cmd")
+            stmts.append(self.declare(cmd_var, "*exec.Cmd"))
             if exit_on_failure:
-                stmts.append(self.declare("err", "error"))
+                err_var = self.varn("err")
+                stmts.append(self.declare(err_var, "error"))
             stmts.append(
                 self.assign(
                     "cmd",
@@ -216,7 +237,7 @@ class Go(Language):
                 stmts.append(self.if_else(self.neq("err", "nil"), [self.exit(1)]))
             stmts.append(self.println("string(out)"))
 
-        return self.linesep.join([self.indent(s) for s in stmts])
+        return self.linesep.join([stmts[0]] + [self.indent(s) for s in stmts[1:]])
 
     @imports("os")
     def exit(self, code: int = 0):

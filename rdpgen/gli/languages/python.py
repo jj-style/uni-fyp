@@ -52,8 +52,8 @@ class Python(Language):
                 self.import_package("typing.List")
                 return f"List[{self.types(t.sub)}]"
 
-    def string(self, s: str):
-        return f'"{s}"'
+    def string(self, s: str, double: bool = True):
+        return f'"{s}"' if double else f"'{s}'"
 
     def string_split(self, s: str, delim: str):
         return f"{s}.{self.call('split', delim)}"
@@ -250,10 +250,11 @@ class Python(Language):
         return f"{expr1} or {expr2}"
 
     @imports("subprocess")
+    @expression
     def command(
         self, command: str, suppress_output: bool = True, exit_on_failure: bool = True
     ):
-        cmd = command.replace('"', '\\"')
+        cmd = command.replace('"', '"')
         subprocess_opts = [
             "shell=True",
             "stdout=subprocess.DEVNULL",
@@ -267,15 +268,15 @@ class Python(Language):
             stmts.append(
                 self.assign(
                     "response",
-                    self.call("subprocess.run", f'"{cmd}"', *subprocess_opts),
+                    self.call("subprocess.run", cmd, *subprocess_opts),
                 )
             )
             stmts.append(
                 self.if_else(self.neq("response.returncode", 0), [self.exit(code=1)])
             )
         else:
-            stmts.append(self.call("subprocess.run", f'"{cmd}"', *subprocess_opts))
-        return self.linesep.join([self.indent(s) for s in stmts])
+            stmts.append(self.call("subprocess.run", cmd, *subprocess_opts))
+        return self.linesep.join([stmts[0]] + [self.indent(s) for s in stmts[1:]])
 
     def exit(self, code: int = 0):
         return self.call("exit", code)

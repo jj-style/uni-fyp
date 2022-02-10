@@ -130,12 +130,12 @@ def test_cpp_command():
     cpp = Cpp(Context(expand_tabs=True))
 
     # test it produces correct call for running ls -l
-    c = cpp.command("ls -l", exit_on_failure=False)
+    c = cpp.command(cpp.string("ls -l"), exit_on_failure=False)
     assert "stdlib.h" in cpp.imports
-    assert c == COMMAND_NO_OUTPUT
+    assert str(c) == COMMAND_NO_OUTPUT
 
     # test it produces correct call for running ls -l with output
-    c = cpp.command("ls -l", suppress_output=False, exit_on_failure=False)
+    c = cpp.command(cpp.string("ls -l"), suppress_output=False, exit_on_failure=False)
     assert "stdlib.h" in cpp.imports
     assert c == COMMAND_OUTPUT
 
@@ -144,12 +144,12 @@ def test_cpp_command_with_exit():
     cpp = Cpp(Context(expand_tabs=True))
 
     # test it produces correct call for running ls -l
-    c = cpp.command("ls -l", exit_on_failure=True)
+    c = cpp.command(cpp.string("ls -l"), exit_on_failure=True)
     assert "stdlib.h" in cpp.imports
     assert c == COMMAND_NO_OUTPUT_WITH_EXIT
 
     # test it produces correct call for running ls -l with output
-    c = cpp.command("ls -l", suppress_output=False, exit_on_failure=True)
+    c = cpp.command(cpp.string("ls -l"), suppress_output=False, exit_on_failure=True)
     assert "stdlib.h" in cpp.imports
     assert c == COMMAND_OUTPUT_WITH_EXIT
 

@@ -176,15 +176,15 @@ def test_python_command():
     p = Python(Context(expand_tabs=True))
 
     # test it produces correct call for running ls -l
-    c = p.command("ls -l", exit_on_failure=False)
+    c = p.command(p.string("ls -l"), exit_on_failure=False)
     assert "subprocess" in p.imports
     assert (
-        c
+        str(c)
         == """subprocess.run("ls -l", shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)"""
     )
 
     # test without supressing output
-    c = p.command("ls -l", suppress_output=False, exit_on_failure=False)
+    c = p.command(p.string("ls -l"), suppress_output=False, exit_on_failure=False)
     assert c == """subprocess.run("ls -l", shell=True)"""
 
     # get a write-only file, run command to write text to it and check it now contains text
@@ -192,14 +192,16 @@ def test_python_command():
     path = Path(file.name)
     assert path.exists()
     assert path.read_text() == ""
-    cmd = p.command(f'echo "some text" > {str(path)}', exit_on_failure=False)
+    cmd = p.command(
+        p.string(f'echo "some text" > {str(path)}', double=False), exit_on_failure=False
+    )
     assert (
-        cmd
-        == f"""subprocess.run("echo \\"some text\\" > {str(path)}", shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)"""
+        str(cmd)
+        == f"""subprocess.run('echo "some text" > {str(path)}', shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)"""
     )
     import subprocess
 
-    eval(cmd)  # run the command
+    eval(str(cmd))  # run the command
     assert path.read_text() == "some text\n"
 
     file.close()
@@ -208,10 +210,10 @@ def test_python_command():
 def test_python_command_exit_on_failure():
     p = Python(Context(expand_tabs=True))
     file = "/some/random/file/that/probably/doesnt/exist"
-    c = p.command(f"cat {file}", exit_on_failure=False, suppress_output=False)
-    assert str(c) == f"""subprocess.run("cat {file}", shell=True)"""
+    c = p.command(p.string(f"cat {file}"), exit_on_failure=False, suppress_output=False)
+    assert str(c) == f'subprocess.run("cat {file}", shell=True)'
 
-    c = p.command(f"cat {file}", exit_on_failure=True, suppress_output=False)
+    c = p.command(p.string(f"cat {file}"), exit_on_failure=True, suppress_output=False)
     assert (
         str(c)
         == f"""response = subprocess.run("cat {file}", shell=True)\nif response.returncode != 0:\n  exit(1)"""
