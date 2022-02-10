@@ -237,6 +237,14 @@ class Python(Language):
         true_stmts,
         false_stmts=None,
     ):
+        else_if = (
+            false_stmts
+            and len(false_stmts) == 1
+            and re.match(r"if\s.*", str(false_stmts[0]))
+        )
+        if else_if:
+            return f"if {condition}{self.block(*true_stmts)}{self.linesep}{self.indent('el'+str(false_stmts[0]))}"  # noqa
+
         expr = f"if {condition}{self.block(*true_stmts)}"
         if false_stmts:
             expr += self.linesep + self.indent(f"{('else' + self.block(*false_stmts))}")

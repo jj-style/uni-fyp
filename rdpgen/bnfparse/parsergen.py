@@ -125,21 +125,40 @@ def parser_from_grammar(
         # either-or-construction
         if prod == NodeType.OR:
             left_set = grammar.left_set(rule)
-            tok = list(left_set.keys())[0]
-            tok_func = left_set[tok]
+            tokens = list(left_set.keys())
+
+            def recurse(left):
+                return l.if_else(
+                    l.eq(l.index("next_token", 1), l.string(left[0])),
+                    [
+                        l.call(left_set[left[0]]),
+                    ],
+                    false_stmts=[
+                        recurse(left[1:])
+                        if len(left) > 1
+                        else l.call("expect", l.string(",".join(tokens)))
+                    ],
+                )
+
+            ifs = [
+                l.if_else(
+                    l.eq(l.index("next_token", 1), l.string(tokens[i])),
+                    [
+                        l.call(left_set[tokens[i]]),
+                    ],
+                    false_stmts=[],
+                )
+                for i in range(len(tokens))
+            ]
+
+            if_stmt = recurse(tokens)
             f = l.function(
                 rule,
                 None,
                 None,
                 l.declare("next_token", Composite.array(Primitive.String)),
                 l.assign("next_token", l.call("peek")),
-                l.if_else(
-                    l.eq(l.index("next_token", 1), l.string(tok)),
-                    [
-                        l.call(tok_func),
-                    ],
-                    false_stmts=[],
-                ),
+                if_stmt,
             )
         else:
             f = l.function(rule, None, [], l.do_return(None))

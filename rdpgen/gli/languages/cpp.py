@@ -4,6 +4,7 @@ from ..utils import imports, expression
 from ..errors import MissingTypeError
 from .utils import format_function_arguments
 from typing import Dict, Union, Optional, List, Any
+import regex
 
 
 class Cpp(Language):
@@ -225,6 +226,14 @@ class Cpp(Language):
         true_stmts,
         false_stmts=None,
     ):
+        else_if = (
+            false_stmts
+            and len(false_stmts) == 1
+            and regex.match(r"if\s.*", str(false_stmts[0]))
+        )
+        if else_if:
+            return f"if ({condition}) {self.block(*true_stmts)} else {false_stmts[0]}"
+
         return f"if ({condition}) {self.block(*true_stmts)}{(' else ' + self.block(*false_stmts)) if false_stmts else ''}"  # noqa
 
     @imports("stdlib.h")

@@ -193,6 +193,13 @@ class Go(Language):
         true_stmts,
         false_stmts=None,
     ):
+        else_if = (
+            false_stmts
+            and len(false_stmts) == 1
+            and regex.match(r"if\s.*", str(false_stmts[0]))
+        )
+        if else_if:
+            return f"if {condition} {self.block(*true_stmts)} else {false_stmts[0]}"
         return f"if {condition} {self.block(*true_stmts)}{(' else ' + self.block(*false_stmts)) if false_stmts else ''}"  # noqa
 
     @imports("os/exec")

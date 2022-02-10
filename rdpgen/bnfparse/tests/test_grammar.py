@@ -66,4 +66,4 @@ def test_grammar_optionals():
 def test_grammar_optional_start():
     g = Grammar.from_bnf(GRAMMAR_OPTIONAL_START)
     ls = g.left_set("FACTOR")
-    assert ls == {"0": "DIGIT", "1": "DIGIT", "2": "DIGIT", "3": "DIGIT"}
+    assert ls == {"-": "FACTOR", "0": "DIGIT", "1": "DIGIT", "2": "DIGIT", "3": "DIGIT"}
