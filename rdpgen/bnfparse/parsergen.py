@@ -94,13 +94,25 @@ def parser_from_grammar(
 
     parse = l.function(
         "parse",
-        Primitive.Int,
+        None,
         {"file": Primitive.String},
         l.declare("source", Primitive.String),
-        l.comment("TODO: source = load_file(file)"),
+        l.assign("source", l.read_file("file")),
         l.call("generate_tokens", "source"),
         l.call("load_tokens"),
-        l.comment(l.call(grammar.start)),
+        l.call(grammar.start),
+    )
+
+    main = l.function(
+        "main",
+        None,
+        None,
+        l.if_else(
+            l.lt(l.argc(), 2), [l.println(l.string("usage: parser FILE")), l.exit(1)]
+        ),
+        l.declare("filename", Primitive.String),
+        l.assign("filename", l.index(l.argv(), 1)),
+        l.call("parse", "filename"),
     )
 
     prog.add(call_lexer)
@@ -108,31 +120,42 @@ def parser_from_grammar(
     prog.add(peek)
     prog.add(get_token)
     prog.add(expect)
-    prog.add(parse)
 
     for rule, prod in grammar.productions.items():
         # either-or-construction
         if prod == NodeType.OR:
             left_set = grammar.left_set(rule)
-            tok = list(left_set.keys())[0]
-            tok_func = left_set[tok]
+            tokens = list(left_set.keys())
+
+            def recurse(left):
+                return l.if_else(
+                    l.eq(l.index("next_token", 1), l.string(left[0])),
+                    [
+                        l.call(left_set[left[0]]),
+                    ],
+                    false_stmts=[
+                        recurse(left[1:])
+                        if len(left) > 1
+                        else l.call("expect", l.string(",".join(tokens)))
+                    ],
+                )
+
+            if_stmt = recurse(tokens)
             f = l.function(
                 rule,
                 None,
                 None,
                 l.declare("next_token", Composite.array(Primitive.String)),
                 l.assign("next_token", l.call("peek")),
-                l.if_else(
-                    l.eq(l.index("next_token", 1), l.string(tok)),
-                    [
-                        l.call(tok_func),
-                    ],
-                    false_stmts=[],
-                ),
+                if_stmt,
             )
         else:
             f = l.function(rule, None, [], l.do_return(None))
         prog.add(f)
         # print(f)
+
+    prog.add(parse)
+    prog.add(main)
+
     print(prog.generate())
     return prog

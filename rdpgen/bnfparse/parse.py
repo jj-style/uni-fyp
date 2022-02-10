@@ -216,10 +216,12 @@ class Grammar:
         if node == NodeType.TERM:
             terminals = self.__left_set(node.children[0], terminals, completed, parent)
             c = 1
-            while len(terminals) == 0:
+            was_optional = node.children[0].quantifier == Quantifier.OPTIONAL
+            while len(terminals) == 0 or (len(terminals) > 0 and was_optional):
                 terminals = self.__left_set(
                     node.children[c], terminals, completed, parent
                 )
+                was_optional = node.children[c].quantifier == Quantifier.OPTIONAL
                 c += 1
 
         elif node == NodeType.OR:
@@ -227,8 +229,7 @@ class Grammar:
                 terminals = self.__left_set(child, terminals, completed, parent)
 
         elif node == NodeType.TERMINAL:
-            if node.quantifier != Quantifier.OPTIONAL:
-                terminals[node.value] = parent.value
+            terminals[node.value] = parent.value
 
         elif node == NodeType.NONTERMINAL:
             # TODO: check if new_start is a grammar rule or a token defined in lexer
