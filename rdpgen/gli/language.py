@@ -357,3 +357,8 @@ class Language(ABC):
     def read_lines(self, file: str):
         """Open a file and read the lines into a list of strings"""
         raise NotImplementedError
+
+    @abstractmethod
+    def read_file(self, file: str):
+        """Open a file and read the contents into a string"""
+        raise NotImplementedError

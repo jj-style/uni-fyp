@@ -176,3 +176,35 @@ STRING_SPLIT_FUNC = """std::vector<std::string> split_string(std::string s, char
   }
   return words;
 }"""
+
+
+def READ_FILE_PROGRAM(fname: str):
+    return rf"""#include <fstream>
+#include <iostream>
+#include <stdlib.h>
+#include <string>
+
+std::string read_file(std::string file) {{
+  std::fstream f;
+  std::string content;
+  f.open(file, std::ios::in);
+  if (f.is_open()) {{
+    std::string line;
+    while (getline(f, line)) {{
+      content = content + line + "\n";
+    }}
+    f.close();
+  }} else {{
+    exit(1);
+  }}
+  return content;
+}}
+
+int main() {{
+  std::string text;
+  text = read_file("{fname}");
+  std::cout << text << std::endl;
+  return 0;
+}}
+
+"""

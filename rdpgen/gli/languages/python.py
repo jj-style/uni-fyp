@@ -299,3 +299,19 @@ class Python(Language):
 
         self.register_helper(func_name, lib())
         return self.call(func_name, file)
+
+    def read_file(self, file: str):
+        func_name = "read_file"
+
+        def lib():
+            s1 = self.assign("f", self.call("open", "file", self.string("r")))
+            s2 = self.assign("content", self.call("f.read"))
+            s3 = self.call("f.close")
+            s4 = self.do_return(expression="content")
+            stmts = [s1, s2, s3, s4]
+            return self.function(
+                func_name, Primitive.String, {"file": Primitive.String}, *stmts
+            )
+
+        self.register_helper(func_name, lib())
+        return self.call(func_name, file)

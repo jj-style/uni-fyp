@@ -197,3 +197,35 @@ func main() {
 """
         % fname
     )
+
+
+def READ_FILE_PROGRAM(fname: str):
+    return (
+        """package main
+
+import (
+  "fmt"
+  "io/ioutil"
+  "os"
+)
+
+func readFile(file string) string {
+  var content []byte
+  var err error
+  content, err = ioutil.ReadFile(file)
+  if err != nil {
+    fmt.Println(err)
+    os.Exit(1)
+  }
+  return string(content)
+}
+
+func main() {
+  var text string
+  text = readFile("%s")
+  fmt.Println(text)
+}
+
+"""
+        % fname
+    )

@@ -124,3 +124,22 @@ def main():
 
 if __name__ == "__main__":
   main()"""
+
+
+def READ_FILE_PROGRAM(fname: str):
+    return f"""from typing import get_type_hints
+
+
+def read_file(file: str) -> str:
+  f = open(file, "r")
+  content = f.read()
+  f.close()
+  return content
+
+def main():
+  text: str
+  text = read_file("{fname}")
+  print(text)
+
+if __name__ == "__main__":
+  main()"""

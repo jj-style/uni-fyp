@@ -271,3 +271,26 @@ class Go(Language):
 
         self.register_helper(func_name, lib())
         return self.call(func_name, file)
+
+    @imports("io/ioutil")
+    def read_file(self, file: str):
+        func_name = "readFile"
+
+        def lib():
+            s1 = self.declare("content", Composite.array("byte"))
+            s2 = self.declare("err", "error")
+            s3 = self.assign("content, err", self.call("ioutil.ReadFile", "file"))
+            s4 = self.if_else(
+                self.neq("err", "nil"), [self.println("err"), self.exit(1)]
+            )
+            s5 = self.do_return(expression=self.call("string", "content"))
+            stmts = [s1, s2, s3, s4, s5]
+            return self.function(
+                func_name,
+                Primitive.String,
+                {"file": Primitive.String},
+                *stmts,
+            )
+
+        self.register_helper(func_name, lib())
+        return self.call(func_name, file)

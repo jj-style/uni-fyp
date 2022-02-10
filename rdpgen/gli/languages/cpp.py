@@ -281,3 +281,38 @@ class Cpp(Language):
 
         self.register_helper(func_name, lib())
         return self.call(func_name, file)
+
+    @imports("iostream", "fstream")
+    def read_file(self, file: str):
+        func_name = "read_file"
+
+        def lib():
+            s1 = self.declare("f", "std::fstream")
+            s2 = self.declare("content", Primitive.String)
+            s3 = self.call("f.open", "file", "std::ios::in") + self.terminator
+            s4 = self.if_else(
+                self.call("f.is_open"),
+                [
+                    self.declare("line", Primitive.String),
+                    self.while_loop(
+                        self.increment(
+                            "content",
+                            inc=self.add("line", self.string(r"\n")),
+                        ),
+                        condition=self.call("getline", "f", "line"),
+                    ),
+                    self.call("f.close") + self.terminator,
+                ],
+                false_stmts=[self.exit(1)],
+            )
+            s5 = self.do_return(expression="content")
+            stmts = [s1, s2, s3, s4, s5]
+            return self.function(
+                func_name,
+                Primitive.String,
+                {"file": Primitive.String},
+                *stmts,
+            )
+
+        self.register_helper(func_name, lib())
+        return self.call(func_name, file)
