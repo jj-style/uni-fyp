@@ -94,7 +94,7 @@ def parser_from_grammar(
 
     parse = l.function(
         "parse",
-        Primitive.Int,
+        None,
         {"file": Primitive.String},
         l.declare("source", Primitive.String),
         l.assign("source", l.read_file("file")),
