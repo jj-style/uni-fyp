@@ -295,3 +295,10 @@ def test_go_booleans():
     assert g.types(Primitive.Bool) == "bool"
     assert g.true() == "true"
     assert g.false() == "false"
+
+
+def test_go_argc_argv():
+    g = Go(Context(expand_tabs=True))
+    assert g.argc() == "len(os.Args)"
+    assert g.argv() == "os.Args"
+    assert "os" in g.imports

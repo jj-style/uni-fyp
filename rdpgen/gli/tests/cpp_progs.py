@@ -1,4 +1,4 @@
-HELLO_WORLD = """int main() {
+HELLO_WORLD = """int main(int argc, char* argv[]) {
   std::cout << "hello world" << std::endl;
   return 0;
 }"""
@@ -25,7 +25,7 @@ IF_NO_ELSE = """if (mode == "debug") {
   std::cout << "=== RUNNING IN DEBUG MODE ===" << std::endl;
 }"""
 
-ARRAY_DECLARE_ASSIGN = """int main() {
+ARRAY_DECLARE_ASSIGN = """int main(int argc, char* argv[]) {
   std::vector<int> mylist;
   mylist = {1, 2, 3};
   std::cout << "mylist is " << mylist << std::endl;
@@ -38,7 +38,7 @@ HELLO_WORLD_PRELUDE = """#include <iostream>
 
 PROG_HELLO_WORLD = """#include <iostream>
 
-int main() {
+int main(int argc, char* argv[]) {
   std::cout << "hello world" << std::endl;
   return 0;
 }
@@ -56,7 +56,7 @@ INFINITE_LOOP = """while (1) {
   std::cout << "i am in an infinite loop" << std::endl;
 }"""
 
-WHILE_CONDITIONAL_LOOP = """int main() {
+WHILE_CONDITIONAL_LOOP = """int main(int argc, char* argv[]) {
   int x;
   x = 0;
   while (x < 10) {
@@ -85,7 +85,7 @@ std::vector<int> bubblesort(std::vector<int> arr) {
   return arr;
 }
 
-int main() {
+int main(int argc, char* argv[]) {
   std::vector<int> original;
   original = {9, 6, 7, 4, 5};
   std::vector<int> sorted;
@@ -151,7 +151,7 @@ def READ_LINES_PROGRAM(fname: str):
 
 %s
 
-int main() {
+int main(int argc, char* argv[]) {
   std::vector<std::string> lines;
   lines = read_lines("%s");
   int i;
@@ -200,7 +200,7 @@ std::string read_file(std::string file) {{
   return content;
 }}
 
-int main() {{
+int main(int argc, char* argv[]) {{
   std::string text;
   text = read_file("{fname}");
   std::cout << text << std::endl;

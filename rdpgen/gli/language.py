@@ -370,3 +370,13 @@ class Language(ABC):
     def read_file(self, file: str):
         """Open a file and read the contents into a string"""
         raise NotImplementedError
+
+    @abstractmethod
+    def argc(self):
+        """Access to command line argument count."""
+        raise NotImplementedError
+
+    @abstractmethod
+    def argv(self):
+        """Access to command line argument as a list of strings."""
+        raise NotImplementedError

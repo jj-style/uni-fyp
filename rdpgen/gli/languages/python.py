@@ -323,3 +323,11 @@ class Python(Language):
 
         self.register_helper(func_name, lib())
         return self.call(func_name, file)
+
+    @imports("sys")
+    def argc(self):
+        return self.array_length("sys.argv")
+
+    @imports("sys")
+    def argv(self):
+        return "sys.argv"

@@ -296,3 +296,11 @@ class Go(Language):
 
         self.register_helper(func_name, lib())
         return self.call(func_name, file)
+
+    @imports("os")
+    def argc(self):
+        return self.array_length("os.Args")
+
+    @imports("os")
+    def argv(self):
+        return "os.Args"

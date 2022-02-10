@@ -161,6 +161,7 @@ class Cpp(Language):
             if id == "main":
                 ret_part = self.types(Primitive.Int)
                 statements = [*statements, self.do_return("0")]
+                arg_list = "int argc, char* argv[]"
             else:
                 ret_part = "void"
         else:
@@ -318,3 +319,9 @@ class Cpp(Language):
 
         self.register_helper(func_name, lib())
         return self.call(func_name, file)
+
+    def argc(self):
+        return "argc"
+
+    def argv(self):
+        return "argv"

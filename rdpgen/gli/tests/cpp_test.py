@@ -297,3 +297,9 @@ def test_cpp_booleans():
     assert cpp.types(Primitive.Bool) == "bool"
     assert cpp.true() == "true"
     assert cpp.false() == "false"
+
+
+def test_cpp_argc_argv():
+    cpp = Cpp(Context(expand_tabs=True))
+    assert cpp.argc() == "argc"
+    assert cpp.argv() == "argv"
