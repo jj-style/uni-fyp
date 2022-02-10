@@ -332,6 +332,14 @@ class Language(ABC):
         """Boolean AND operation between 2 expressions"""
         return f"{expr1} || {expr2}"
 
+    def true(self):
+        """True boolean. Defaults to lowercase C-like booleans"""
+        return "true"
+
+    def false(self):
+        """False boolean. Defaults to lowercase C-like booleans"""
+        return "false"
+
     # TODO: stdlib like fileio, readlines, read/write etc.
 
     @abstractmethod

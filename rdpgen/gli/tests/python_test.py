@@ -343,3 +343,10 @@ def test_python_array_remove():
     p = Python(Context(expand_tabs=True))
     assert p.array_remove("mylist", 0) == "mylist.pop(0)"
     assert p.array_remove("mylist", 10) == "mylist.pop(10)"
+
+
+def test_python_booleans():
+    p = Python(Context(expand_tabs=True))
+    assert p.types(Primitive.Bool) == "bool"
+    assert p.true() == "True"
+    assert p.false() == "False"

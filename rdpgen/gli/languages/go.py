@@ -43,6 +43,8 @@ class Go(Language):
                 return "float64"
             elif t is Primitive.String:
                 return "string"
+            elif t is Primitive.Bool:
+                return "bool"
         elif isinstance(t, Composite):
             if t.base is Composite.CType.Array:
                 return f"[]{self.types(t.sub)}"

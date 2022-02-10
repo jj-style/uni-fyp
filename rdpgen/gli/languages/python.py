@@ -47,6 +47,8 @@ class Python(Language):
                 return "float"
             elif t is Primitive.String:
                 return "str"
+            elif t is Primitive.Bool:
+                return "bool"
         elif isinstance(t, Composite):
             if t.base is Composite.CType.Array:
                 self.import_package("typing.List")
@@ -248,6 +250,12 @@ class Python(Language):
 
     def bool_or(self, expr1, expr2):
         return f"{expr1} or {expr2}"
+
+    def true(self):
+        return "True"
+
+    def false(self):
+        return "False"
 
     @imports("subprocess")
     @expression

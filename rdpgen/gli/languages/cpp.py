@@ -28,6 +28,8 @@ class Cpp(Language):
             elif t is Primitive.String:
                 self.import_package("string")
                 return "std::string"
+            elif t is Primitive.Bool:
+                return "bool"
         elif isinstance(t, Composite):
             if t.base is Composite.CType.Array:
                 self.import_package("vector")
