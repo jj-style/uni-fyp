@@ -123,37 +123,38 @@ def parser_from_grammar(
 
     def handle_term(t):
         stmts = []
-        for factor in t.children:
+        idx = 0
+        while idx < len(t.children):
+            factor = t.children[idx]
             if factor == NodeType.TERMINAL:
-                stmts.extend(handle_terminal(factor))
+                following = []
+                if idx + 1 < len(t.children):
+                    for i in range(idx + 1, len(t.children)):
+                        if t.children[i] == NodeType.NONTERMINAL:
+                            following.append(t.children[i])
+                            idx += 1
+                stmts.extend(handle_terminal(factor, *following))
             elif factor == NodeType.NONTERMINAL:
                 stmts.extend(handle_nonterminal(factor))
+            idx += 1
         return stmts
 
-    def handle_terminal(factor):
+    def handle_terminal(factor, *following_factors):
+        following = []
+        for f in following_factors:
+            following.extend(handle_nonterminal(f))
+
         s1 = l.declare("next_token", Composite.array(Primitive.String))
         s2 = l.assign(
             "next_token",
             l.call("get_token" if factor.quantifier is None else "peek"),
         )
-        if factor.quantifier is None:
-            s3 = l.if_else(
-                l.eq(l.index("next_token", 1), l.string(factor.value)),
-                [l.comment("TODO")],
-                false_stmts=[l.call("expect", l.string(factor.value)) + l.terminator],
-            )
-        elif factor.quantifier is Quantifier.OPTIONAL:
-            s3 = l.if_else(
-                l.eq(l.index("next_token", 1), l.string(factor.value)),
-                [l.call("get_token") + l.terminator],
-                false_stmts=[l.call("expect", l.string(factor.value)) + l.terminator],
-            )
-        elif factor.quantifier is Quantifier.ZERO_OR_MORE:
-            s3 = l.while_loop(
-                l.call("get_token") + l.terminator,
-                l.assign("next_token", l.call("peek")),
-                condition=l.eq(l.index("next_token", 1), l.string(factor.value)),
-            )
+        s3 = l.if_else(
+            l.eq(l.index("next_token", 1), l.string(factor.value)),
+            [l.comment("TODO")] if len(following) == 0 else following,
+            false_stmts=[l.call("expect", l.string(factor.value)) + l.terminator],
+        )
+
         return [s1, s2, s3]
 
     def handle_nonterminal(factor):
