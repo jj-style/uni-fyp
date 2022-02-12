@@ -20,6 +20,10 @@ class Python(Language):
     def extension(self) -> str:
         return "py"
 
+    def varn(self, var: str) -> str:
+        """don't need to prevent redeclaration for python"""
+        return var
+
     def prelude(self, **kwargs):
         imports = sorted(self.imports)
         includes = ""

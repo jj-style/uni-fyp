@@ -8,7 +8,6 @@ from pathlib import Path
 
 
 def lang_from_name(name: str, ctx: Context) -> Language:
-    print("name is", name)
     if name == "c++":
         return Cpp(ctx)
     elif name == "go":
@@ -42,11 +41,9 @@ def parser_from_grammar(
     )
 
     load_tokens_stmts = [
-        l.assign(
-            "tokens", l.array(Composite.array(Composite.array(Primitive.String)), [])
-        ),
+        l.assign("tokens", l.array(Composite.array(Primitive.String), [])),
         l.declare("token_lines", Composite.array(Primitive.String)),
-        l.assign("token_lines", l.read_lines(l.string("lexer/out.jl"))),
+        l.assign("token_lines", l.read_lines(l.string("out.jl"))),
         l.array_iterate(
             "token_lines",
             "idx",
@@ -149,16 +146,17 @@ def parser_from_grammar(
         for f in following_factors:
             following.extend(handle_nonterminal(f))
 
-        s1 = l.declare("next_token", Composite.array(Primitive.String))
+        next_term_name = l.varn("next_token")
+        s1 = l.declare(next_term_name, Composite.array(Primitive.String))
         s2 = l.assign(
-            "next_token",
+            next_term_name,
             l.call("get_token" if factor.quantifier is None else "peek"),
         )
         s3 = l.if_else(
-            l.eq(l.index("next_token", 1), l.string(factor.value)),
+            l.eq(l.index(next_term_name, 1), l.string(factor.value)),
             [l.do_nothing()] if len(following) == 0 else following,
             false_stmts=[
-                l.call("expect", l.index("next_token", 2), l.string(factor.value))
+                l.call("expect", l.index(next_term_name, 2), l.string(factor.value))
                 + l.terminator
             ],
         )

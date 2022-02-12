@@ -16,6 +16,7 @@ class Context:
 
 class Language(ABC):
     def __init__(self, ctx: Context = None):
+        self.__var_dec_count = {}
         self.imports = set()
         self.helper_funcs = {}
         self.ctx = Context() if not ctx else ctx
@@ -34,6 +35,15 @@ class Language(ABC):
     def extension(self) -> str:
         """Extension of files for this language without the dot"""
         raise NotImplementedError
+
+    def varn(self, var: str) -> str:
+        """Obtain a numbered variable to prevent redeclaration"""
+        if var not in self.__var_dec_count:
+            self.__var_dec_count[var] = 0
+            return var
+
+        self.__var_dec_count[var] += 1
+        return f"{var}{self.__var_dec_count[var]}"
 
     @property
     def terminator(self) -> str:
