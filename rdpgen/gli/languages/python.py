@@ -16,6 +16,10 @@ class Python(Language):
     def name(self) -> str:
         return "python"
 
+    @property
+    def extension(self) -> str:
+        return "py"
+
     def prelude(self, **kwargs):
         imports = sorted(self.imports)
         includes = ""
@@ -159,6 +163,9 @@ class Python(Language):
             block += self.indent(str(stmt)) + self.linesep
         self.ctx.indent_lvl -= 1
         return block.rstrip(self.linesep)
+
+    def do_nothing(self):
+        return "pass"
 
     def comment(self, comment: str):
         lines = comment.split(self.linesep)

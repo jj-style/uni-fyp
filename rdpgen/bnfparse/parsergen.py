@@ -1,7 +1,7 @@
 from .parse import Grammar
 from rdpgen.lexgen import Token
 from rdpgen.gli import Program, Language, Context, Go, Python, Cpp, Composite, Primitive
-from rdpgen.bnfparse.parse import NodeType, Quantifier
+from rdpgen.bnfparse.parse import NodeType
 
 from typing import List
 from pathlib import Path
@@ -23,7 +23,6 @@ def parser_from_grammar(
     outdir = Path(outdir)
     l = lang_from_name(language, Context(expand_tabs=True))  # noqa
     prog = Program(l)
-    print(f"\nparser in {l.name}\n===================\n")
 
     # setup lexing stuff
     prog.add(l.declare("tokens", Composite.array(Composite.array(Primitive.String))))
@@ -32,23 +31,22 @@ def parser_from_grammar(
     call_lexer = l.function(
         "generate_tokens",
         None,
-        {"text": Primitive.String},
+        {"file": Primitive.String},
         l.declare("command", Primitive.String),
         l.assign(
             "command",
-            l.string(f"""cd {outdir / "lexer"} && make && echo """),
+            l.string("""cd lexer && make --silent && ./lexer """),
         ),
-        l.assign("command", l.add("command", "text")),
-        l.assign("command", l.add("command", l.string(" | ./lexer"))),
-        l.command("command", exit_on_failure=True),
+        l.increment("command", inc="file"),
+        l.command("command", exit_on_failure=True, suppress_output=True),
     )
 
-    load_tokens = l.function(
-        "load_tokens",
-        None,
-        None,
+    load_tokens_stmts = [
+        l.assign(
+            "tokens", l.array(Composite.array(Composite.array(Primitive.String)), [])
+        ),
         l.declare("token_lines", Composite.array(Primitive.String)),
-        l.assign("token_lines", l.read_lines(l.string(outdir / "lexer" / "out.jl"))),
+        l.assign("token_lines", l.read_lines(l.string("lexer/out.jl"))),
         l.array_iterate(
             "token_lines",
             "idx",
@@ -56,7 +54,11 @@ def parser_from_grammar(
                 "tokens", l.string_split(l.index("token_lines", "idx"), l.string(":"))
             ),
         ),
-    )
+    ]
+    # HACK: for python global tokens variable
+    if isinstance(l, Python):
+        load_tokens_stmts.insert(0, "global tokens")
+    load_tokens = l.function("load_tokens", None, None, *load_tokens_stmts)
 
     peek = l.function(
         "peek",
@@ -87,8 +89,13 @@ def parser_from_grammar(
     expect = l.function(
         "expect",
         None,
-        {"e": Primitive.String},
-        l.println(l.string("Error: expected "), "e", l.string(" at this position")),
+        {"line_num": Primitive.String, "e": Primitive.String},
+        l.println(
+            l.string("Error: line"),
+            "line_num",
+            l.string("- expected"),
+            "e",
+        ),
         l.exit(code=1),
     )
 
@@ -96,9 +103,7 @@ def parser_from_grammar(
         "parse",
         None,
         {"file": Primitive.String},
-        l.declare("source", Primitive.String),
-        l.assign("source", l.read_file("file")),
-        l.call("generate_tokens", "source") + l.terminator,
+        l.call("generate_tokens", "file") + l.terminator,
         l.call("load_tokens") + l.terminator,
         l.call(grammar.start) + l.terminator,
     )
@@ -151,8 +156,11 @@ def parser_from_grammar(
         )
         s3 = l.if_else(
             l.eq(l.index("next_token", 1), l.string(factor.value)),
-            [l.comment("TODO")] if len(following) == 0 else following,
-            false_stmts=[l.call("expect", l.string(factor.value)) + l.terminator],
+            [l.do_nothing()] if len(following) == 0 else following,
+            false_stmts=[
+                l.call("expect", l.index("next_token", 2), l.string(factor.value))
+                + l.terminator
+            ],
         )
 
         return [s1, s2, s3]
@@ -174,12 +182,17 @@ def parser_from_grammar(
                     [
                         l.call(left_set[left[0]]) + l.terminator
                         if not terminals
-                        else l.comment("TODO"),
+                        else l.do_nothing(),
                     ],
                     false_stmts=[
                         recurse(left[1:])
                         if len(left) > 1
-                        else l.call("expect", l.string(",".join(tokens))) + l.terminator
+                        else l.call(
+                            "expect",
+                            l.index("next_token", 2),
+                            l.string(",".join(tokens)),
+                        )
+                        + l.terminator
                     ],
                 )
 
@@ -201,7 +214,7 @@ def parser_from_grammar(
         else:
             f = l.function(rule, None, [], l.do_return(None))
         prog.add(f)
-        print(f)
+        # print(f)
 
     prog.add(parse)
     prog.add(main)

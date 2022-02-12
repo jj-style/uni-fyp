@@ -17,6 +17,10 @@ class Go(Language):
     def name(self) -> str:
         return "golang"
 
+    @property
+    def extension(self) -> str:
+        return "go"
+
     def varn(self, var: str) -> str:
         if var not in self.__var_dec_count:
             self.__var_dec_count[var] = 0

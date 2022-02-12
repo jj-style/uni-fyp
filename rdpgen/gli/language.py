@@ -30,6 +30,12 @@ class Language(ABC):
         raise NotImplementedError
 
     @property
+    @abstractmethod
+    def extension(self) -> str:
+        """Extension of files for this language without the dot"""
+        raise NotImplementedError
+
+    @property
     def terminator(self) -> str:
         """Statement terminator"""
         return ""
@@ -201,6 +207,10 @@ class Language(ABC):
         defining a scope and indentation for statements
         """
         raise NotImplementedError
+
+    def do_nothing(self):
+        """Do nothing"""
+        return ""
 
     def comment(self, comment: str):
         """Insert a comment in the language.

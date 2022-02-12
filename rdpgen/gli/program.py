@@ -35,3 +35,7 @@ class Program:
     def __str__(self):
         """Generate the source file when converted to a string"""
         return self.generate()
+
+    @property
+    def extension(self) -> str:
+        return self.lang.extension

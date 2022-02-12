@@ -13,6 +13,10 @@ class Cpp(Language):
         return "c++"
 
     @property
+    def extension(self) -> str:
+        return "cpp"
+
+    @property
     def terminator(self) -> str:
         return ";"
 
