@@ -98,9 +98,9 @@ def parser_from_grammar(
         {"file": Primitive.String},
         l.declare("source", Primitive.String),
         l.assign("source", l.read_file("file")),
-        l.call("generate_tokens", "source"),
-        l.call("load_tokens"),
-        l.call(grammar.start),
+        l.call("generate_tokens", "source") + l.terminator,
+        l.call("load_tokens") + l.terminator,
+        l.call(grammar.start) + l.terminator,
     )
 
     main = l.function(
@@ -112,7 +112,7 @@ def parser_from_grammar(
         ),
         l.declare("filename", Primitive.String),
         l.assign("filename", l.index(l.argv(), 1)),
-        l.call("parse", "filename"),
+        l.call("parse", "filename") + l.terminator,
     )
 
     prog.add(call_lexer)
@@ -133,30 +133,31 @@ def parser_from_grammar(
     def handle_terminal(factor):
         s1 = l.declare("next_token", Composite.array(Primitive.String))
         s2 = l.assign(
-            "next_token", l.call("get_token" if factor.quantifier is None else "peek")
+            "next_token",
+            l.call("get_token" if factor.quantifier is None else "peek"),
         )
         if factor.quantifier is None:
             s3 = l.if_else(
                 l.eq(l.index("next_token", 1), l.string(factor.value)),
                 [l.comment("TODO")],
-                false_stmts=[l.call("expect", l.string(factor.value))],
+                false_stmts=[l.call("expect", l.string(factor.value)) + l.terminator],
             )
         elif factor.quantifier is Quantifier.OPTIONAL:
             s3 = l.if_else(
                 l.eq(l.index("next_token", 1), l.string(factor.value)),
-                [l.call("get_token")],
-                false_stmts=[l.call("expect", l.string(factor.value))],
+                [l.call("get_token") + l.terminator],
+                false_stmts=[l.call("expect", l.string(factor.value)) + l.terminator],
             )
         elif factor.quantifier is Quantifier.ZERO_OR_MORE:
             s3 = l.while_loop(
-                l.call("get_token"),
+                l.call("get_token") + l.terminator,
                 l.assign("next_token", l.call("peek")),
                 condition=l.eq(l.index("next_token", 1), l.string(factor.value)),
             )
         return [s1, s2, s3]
 
     def handle_nonterminal(factor):
-        return [l.call(factor.value)]
+        return [l.call(factor.value) + l.terminator]
 
     for rule, prod in grammar.productions.items():
         # either-or-construction
@@ -170,14 +171,14 @@ def parser_from_grammar(
                 return l.if_else(
                     l.eq(l.index("next_token", 1), l.string(left[0])),
                     [
-                        l.call(left_set[left[0]])
+                        l.call(left_set[left[0]]) + l.terminator
                         if not terminals
                         else l.comment("TODO"),
                     ],
                     false_stmts=[
                         recurse(left[1:])
                         if len(left) > 1
-                        else l.call("expect", l.string(",".join(tokens)))
+                        else l.call("expect", l.string(",".join(tokens))) + l.terminator
                     ],
                 )
 
