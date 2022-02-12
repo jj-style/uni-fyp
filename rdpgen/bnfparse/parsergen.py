@@ -1,7 +1,7 @@
 from .parse import Grammar
 from rdpgen.lexgen import Token
 from rdpgen.gli import Program, Language, Context, Go, Python, Cpp, Composite, Primitive
-from rdpgen.bnfparse.parse import NodeType
+from rdpgen.bnfparse.parse import NodeType, Quantifier
 
 from typing import List
 from pathlib import Path
@@ -121,17 +121,58 @@ def parser_from_grammar(
     prog.add(get_token)
     prog.add(expect)
 
+    def handle_term(t):
+        stmts = []
+        for factor in t.children:
+            if factor == NodeType.TERMINAL:
+                stmts.extend(handle_terminal(factor))
+            elif factor == NodeType.NONTERMINAL:
+                stmts.extend(handle_nonterminal(factor))
+        return stmts
+
+    def handle_terminal(factor):
+        s1 = l.declare("next_token", Composite.array(Primitive.String))
+        s2 = l.assign(
+            "next_token", l.call("get_token" if factor.quantifier is None else "peek")
+        )
+        if factor.quantifier is None:
+            s3 = l.if_else(
+                l.eq(l.index("next_token", 1), l.string(factor.value)),
+                [l.comment("TODO")],
+                false_stmts=[l.call("expect", l.string(factor.value))],
+            )
+        elif factor.quantifier is Quantifier.OPTIONAL:
+            s3 = l.if_else(
+                l.eq(l.index("next_token", 1), l.string(factor.value)),
+                [l.call("get_token")],
+                false_stmts=[l.call("expect", l.string(factor.value))],
+            )
+        elif factor.quantifier is Quantifier.ZERO_OR_MORE:
+            s3 = l.while_loop(
+                l.call("get_token"),
+                l.assign("next_token", l.call("peek")),
+                condition=l.eq(l.index("next_token", 1), l.string(factor.value)),
+            )
+        return [s1, s2, s3]
+
+    def handle_nonterminal(factor):
+        return [l.call(factor.value)]
+
     for rule, prod in grammar.productions.items():
         # either-or-construction
         if prod == NodeType.OR:
             left_set = grammar.left_set(rule)
             tokens = list(left_set.keys())
 
+            terminals = all([c == NodeType.TERMINAL for c in prod.children])
+
             def recurse(left):
                 return l.if_else(
                     l.eq(l.index("next_token", 1), l.string(left[0])),
                     [
-                        l.call(left_set[left[0]]),
+                        l.call(left_set[left[0]])
+                        if not terminals
+                        else l.comment("TODO"),
                     ],
                     false_stmts=[
                         recurse(left[1:])
@@ -140,22 +181,28 @@ def parser_from_grammar(
                     ],
                 )
 
-            if_stmt = recurse(tokens)
             f = l.function(
                 rule,
                 None,
                 None,
                 l.declare("next_token", Composite.array(Primitive.String)),
-                l.assign("next_token", l.call("peek")),
-                if_stmt,
+                l.assign(
+                    "next_token",
+                    l.call("peek") if not terminals else l.call("get_token"),
+                ),
+                recurse(tokens),
             )
+        elif prod == NodeType.TERM:
+            f = l.function(rule, None, None, *handle_term(prod))
+        elif prod == NodeType.TERMINAL:
+            f = l.function(rule, None, None, *handle_terminal(prod))
         else:
             f = l.function(rule, None, [], l.do_return(None))
         prog.add(f)
-        # print(f)
+        print(f)
 
     prog.add(parse)
     prog.add(main)
 
-    print(prog.generate())
+    # print(prog.generate())
     return prog
