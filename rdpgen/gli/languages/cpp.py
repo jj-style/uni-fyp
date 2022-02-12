@@ -254,9 +254,11 @@ class Cpp(Language):
             )
         if exit_on_failure:
             stmts.append(self.declare("rc", Primitive.Int))
-            stmts.append(self.assign("rc", self.call("system", "cmd")))
+            stmts.append(self.assign("rc", self.call("system", self.call("cmd.c_str"))))
         else:
-            stmts.append(self.call("system", "cmd") + self.terminator)
+            stmts.append(
+                self.call("system", self.call("cmd.c_str()")) + self.terminator
+            )
         if exit_on_failure:
             stmts.append(self.if_else(self.neq("rc", 0), [self.exit(1)]))
 

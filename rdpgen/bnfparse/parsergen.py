@@ -43,7 +43,7 @@ def parser_from_grammar(
     load_tokens_stmts = [
         l.assign("tokens", l.array(Composite.array(Primitive.String), [])),
         l.declare("token_lines", Composite.array(Primitive.String)),
-        l.assign("token_lines", l.read_lines(l.string("out.jl"))),
+        l.assign("token_lines", l.read_lines(l.string("lexer/out.jl"))),
         l.array_iterate(
             "token_lines",
             "idx",
@@ -88,9 +88,9 @@ def parser_from_grammar(
         None,
         {"line_num": Primitive.String, "e": Primitive.String},
         l.println(
-            l.string("Error: line"),
+            l.string("Error: line "),
             "line_num",
-            l.string("- expected"),
+            l.string("- expected "),
             "e",
         ),
         l.exit(code=1),
