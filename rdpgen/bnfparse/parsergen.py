@@ -37,7 +37,7 @@ def parser_from_grammar(
             l.string("""cd lexer && make --silent && ./lexer """),
         ),
         l.increment("command", inc="file"),
-        l.command("command", exit_on_failure=True, suppress_output=True),
+        l.command("command", exit_on_failure=True, suppress_output=False),
     )
 
     load_tokens_stmts = [
@@ -126,9 +126,11 @@ def parser_from_grammar(
     def handle_term(t):
         stmts = []
         idx = 0
+        # loop through children, but if there's following non-terminals,
+        # consume them too and skip ahead
         while idx < len(t.children):
             factor = t.children[idx]
-            if factor == NodeType.TERMINAL:
+            if factor == NodeType.TERMINAL or NodeType.TOKEN:
                 following = []
                 if idx + 1 < len(t.children):
                     for i in range(idx + 1, len(t.children)):
@@ -159,8 +161,10 @@ def parser_from_grammar(
                 + l.terminator
             ],
         )
+
+        token_idx = 1 if factor == NodeType.TERMINAL else 0
         s4 = l.if_else(
-            l.eq(l.index(next_term_name, 1), l.string(factor.value)),
+            l.eq(l.index(next_term_name, token_idx), l.string(factor.value)),
             [l.do_nothing()] if len(following) == 0 else following,
             false_stmts=[
                 l.call("expect", l.index(next_term_name, 2), l.string(factor.value))
@@ -232,7 +236,7 @@ def parser_from_grammar(
                 l.comment(grammar.bnf_from_rule(rule)),
                 *handle_term(prod),
             )
-        elif prod == NodeType.TERMINAL:
+        elif prod == NodeType.TERMINAL or prod == NodeType.TOKEN:
             f = l.function(
                 rule,
                 None,
