@@ -69,6 +69,8 @@ WHILE_CONDITIONAL_LOOP = """int main(int argc, char* argv[]) {
 BUBBLE_SORT_PROG = """#include <iostream>
 #include <vector>
 
+std::vector<int> bubblesort(std::vector<int> arr);
+
 std::vector<int> bubblesort(std::vector<int> arr) {
   int i;
   int j;
@@ -102,16 +104,16 @@ int main(int argc, char* argv[]) {
 
 COMMAND_OUTPUT = """std::string cmd;
 cmd = "ls -l";
-system(cmd);"""
+system(cmd.c_str());"""
 COMMAND_NO_OUTPUT = """std::string cmd;
 cmd = "ls -l";
 cmd = cmd + " > /dev/null 2>&1";
-system(cmd);"""
+system(cmd.c_str());"""
 
 COMMAND_OUTPUT_WITH_EXIT = """std::string cmd;
 cmd = "ls -l";
 int rc;
-rc = system(cmd);
+rc = system(cmd.c_str());
 if (rc != 0) {
   exit(1);
 }"""
@@ -120,7 +122,7 @@ COMMAND_NO_OUTPUT_WITH_EXIT = """std::string cmd;
 cmd = "ls -l";
 cmd = cmd + " > /dev/null 2>&1";
 int rc;
-rc = system(cmd);
+rc = system(cmd.c_str());
 if (rc != 0) {
   exit(1);
 }"""
@@ -148,6 +150,8 @@ def READ_LINES_PROGRAM(fname: str):
 #include <stdlib.h>
 #include <string>
 #include <vector>
+
+std::vector<std::string> read_lines(std::string file);
 
 %s
 
@@ -183,6 +187,8 @@ def READ_FILE_PROGRAM(fname: str):
 #include <iostream>
 #include <stdlib.h>
 #include <string>
+
+std::string read_file(std::string file);
 
 std::string read_file(std::string file) {{
   std::fstream f;

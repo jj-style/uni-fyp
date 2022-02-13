@@ -115,24 +115,24 @@ func main() {
 """
 
 COMMAND_NO_OUTPUT = """var cmd *exec.Cmd
-cmd = exec.Command("ls", "-l")
+cmd = exec.Command("bash", "-c", "ls -l")
 _ = cmd.Run()"""
 
 COMMAND_NO_OUTPUT_WITH_EXIT = """var cmd *exec.Cmd
 var err error
-cmd = exec.Command("ls", "-l")
+cmd = exec.Command("bash", "-c", "ls -l")
 err = cmd.Run()
 if err != nil {
   os.Exit(1)
 }"""
 
 COMMAND_OUTPUT = """var out []byte
-out, _ = exec.Command("ls", "-l").Output()
+out, _ = exec.Command("bash", "-c", "ls -l").Output()
 fmt.Println(string(out))"""
 
 COMMAND_OUTPUT_WITH_EXIT = """var out []byte
 var err error
-out, err = exec.Command("ls", "-l").Output()
+out, err = exec.Command("bash", "-c", "ls -l").Output()
 if err != nil {
   os.Exit(1)
 }

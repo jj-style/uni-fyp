@@ -2,9 +2,8 @@
 any = "[a-zA-Z0-9]+"
 
 [grammar]
-A = 'B | C | D | E | F'
+A = 'B | C | D | G'
 B = '"b" | "c"'
 C = 'B C'
 D = '"a" "b"'
-E = '"e" *'
-F = '"f" ?'
+G = '"g" C'
