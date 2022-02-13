@@ -4,7 +4,6 @@ from ..utils import imports, expression
 from ..errors import MissingTypeError
 from .utils import format_function_arguments
 from typing import Dict, Union, Optional, List, Any
-import shlex
 import regex
 
 
@@ -200,12 +199,6 @@ class Go(Language):
         self, command: str, suppress_output: bool = True, exit_on_failure: bool = True
     ):
         stmts = []
-        m = regex.match(r"""\"(?P<inner>.*)\"""", command)
-        if m:
-            groups = m.groupdict()
-            args = [self.string(a) for a in shlex.split(groups["inner"])]
-        else:
-            args = [command]
         if suppress_output:
             cmd_var = self.varn("cmd")
             stmts.append(self.declare(cmd_var, "*exec.Cmd"))
@@ -215,7 +208,12 @@ class Go(Language):
             stmts.append(
                 self.assign(
                     "cmd",
-                    self.call("exec.Command", *args),
+                    self.call(
+                        "exec.Command",
+                        self.string("bash"),
+                        self.string("-c"),
+                        command,
+                    ),
                 )
             )
             to_assign = "err" if exit_on_failure else "_"
@@ -231,7 +229,13 @@ class Go(Language):
             stmts.append(
                 self.assign(
                     f"out, {to_assign}",
-                    self.call("exec.Command", *args) + f".{self.call('Output')}",
+                    self.call(
+                        "exec.Command",
+                        self.string("bash"),
+                        self.string("-c"),
+                        command,
+                    )
+                    + f".{self.call('Output')}",
                 )
             )
             if exit_on_failure:
