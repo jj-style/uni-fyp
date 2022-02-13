@@ -37,7 +37,7 @@ def parser_from_grammar(
             l.string("""cd lexer && make --silent && ./lexer """),
         ),
         l.increment("command", inc="file"),
-        l.command("command", exit_on_failure=True, suppress_output=True),
+        l.command("command", exit_on_failure=True, suppress_output=False),
     )
 
     load_tokens_stmts = [
@@ -126,9 +126,11 @@ def parser_from_grammar(
     def handle_term(t):
         stmts = []
         idx = 0
+        # loop through children, but if there's following non-terminals,
+        # consume them too and skip ahead
         while idx < len(t.children):
             factor = t.children[idx]
-            if factor == NodeType.TERMINAL:
+            if factor == NodeType.TERMINAL or NodeType.TOKEN:
                 following = []
                 if idx + 1 < len(t.children):
                     for i in range(idx + 1, len(t.children)):
@@ -150,10 +152,19 @@ def parser_from_grammar(
         s1 = l.declare(next_term_name, Composite.array(Primitive.String))
         s2 = l.assign(
             next_term_name,
-            l.call("get_token" if factor.quantifier is None else "peek"),
+            l.call("get_token"),
         )
         s3 = l.if_else(
-            l.eq(l.index(next_term_name, 1), l.string(factor.value)),
+            l.eq(l.array_length(next_term_name), 0),
+            [
+                l.call("expect", l.string("?"), l.string(f"{factor.value}, got EOF"))
+                + l.terminator
+            ],
+        )
+
+        token_idx = 1 if factor == NodeType.TERMINAL else 0
+        s4 = l.if_else(
+            l.eq(l.index(next_term_name, token_idx), l.string(factor.value)),
             [l.do_nothing()] if len(following) == 0 else following,
             false_stmts=[
                 l.call("expect", l.index(next_term_name, 2), l.string(factor.value))
@@ -161,7 +172,7 @@ def parser_from_grammar(
             ],
         )
 
-        return [s1, s2, s3]
+        return [s1, s2, s3, s4]
 
     def handle_nonterminal(factor):
         return [l.call(factor.value) + l.terminator]
@@ -198,21 +209,44 @@ def parser_from_grammar(
                 rule,
                 None,
                 None,
+                l.comment(grammar.bnf_from_rule(rule)),
                 l.declare("next_token", Composite.array(Primitive.String)),
                 l.assign(
                     "next_token",
                     l.call("peek") if not terminals else l.call("get_token"),
                 ),
+                l.if_else(
+                    l.eq(l.array_length("next_token"), 0),
+                    [
+                        l.call(
+                            "expect",
+                            l.string("?"),
+                            l.string(f"{','.join(tokens)}, got EOF"),
+                        )
+                        + l.terminator
+                    ],
+                ),
                 recurse(tokens),
             )
         elif prod == NodeType.TERM:
-            f = l.function(rule, None, None, *handle_term(prod))
-        elif prod == NodeType.TERMINAL:
-            f = l.function(rule, None, None, *handle_terminal(prod))
+            f = l.function(
+                rule,
+                None,
+                None,
+                l.comment(grammar.bnf_from_rule(rule)),
+                *handle_term(prod),
+            )
+        elif prod == NodeType.TERMINAL or prod == NodeType.TOKEN:
+            f = l.function(
+                rule,
+                None,
+                None,
+                l.comment(grammar.bnf_from_rule(rule)),
+                *handle_terminal(prod),
+            )
         else:
             f = l.function(rule, None, [], l.do_return(None))
         prog.add(f)
-        # print(f)
 
     prog.add(parse)
     prog.add(main)

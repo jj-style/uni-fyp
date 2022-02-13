@@ -1,11 +1,11 @@
 from enum import Enum, auto
 from typing import Dict, List
+from copy import deepcopy
 
 """ EBNF grammar:
    expression ::= term ( "|" term )+
-   term ::= factor suffix? (" " factor suffix?)+
-   suffix ::= "?" | "+" | "*"
-   factor ::= ("(" expression ")") | expression
+   term ::= factor  (" " factor )+
+   factor ::=  expression
    factor ::= RULE
 """
 
@@ -13,22 +13,16 @@ from typing import Dict, List
 class NodeType(Enum):
     TERMINAL = auto()
     NONTERMINAL = auto()
+    TOKEN = auto()
     OR = auto()
     TERM = auto()
 
 
-class Quantifier(Enum):
-    OPTIONAL = auto()
-    ONE_OR_MORE = auto()
-    ZERO_OR_MORE = auto()
-
-
 class Node:
-    def __init__(self, node_type, value=None, quantifier: Quantifier = None, *children):
+    def __init__(self, node_type, value=None, *children):
         self._value = value
         self._type = node_type
         self._children = [c for c in children]
-        self._quantifier = None
 
     def add_children(self, *children):
         for child in children:
@@ -42,9 +36,7 @@ class Node:
         return ret
 
     def __repr__(self):
-        base = f"{self._type}{':' + self._value if self._value else ''}"
-        extra = "" if self._quantifier is None else f"\nQUANTITY:{self._quantifier}"
-        return base + extra
+        return f"{self._type}{':' + self._value if self._value else ''}"
 
     def __eq__(self, other):
         if isinstance(other, NodeType):
@@ -58,14 +50,6 @@ class Node:
     @property
     def value(self):
         return self._value
-
-    @property
-    def quantifier(self):
-        return self._quantifier
-
-    @quantifier.setter
-    def quantifier(self, value):
-        self._quantifier = value
 
 
 class Parser:
@@ -90,67 +74,40 @@ class Parser:
         """expression ::= term ( "|" term )+"""
         node = self.term()
         while self.peek() == "|":
-            old = node
-            node = Node(NodeType.OR)
+            if node != NodeType.OR:
+                old = node
+                node = Node(NodeType.OR)
+                node.add_children(old)
             self.next()  # consume "|"
             right = self.term()
-
-            node.add_children(old, right)
+            node.add_children(right)
 
         return node
 
     def term(self):
-        """term ::= factor suffix? (" " factor suffix?)+"""
+        """term ::= factor  (" " factor )+"""
         node = self.factor()
-        if self.peek() in ["?", "+", "*"]:
-            # old = node
-            # node = Node(NodeType.TERM)
-            node.quantifier = self.suffix()
-            # node.add_children(old, right)
 
-        while self.peek() not in ["|", ")", None]:  # TODO: confirm this is right
-            left = node
-            node = Node(NodeType.TERM)
-            node.add_children(left)
+        while self.peek() not in ["|", None]:  # TODO: confirm this is right
+            if node != NodeType.TERM:
+                old = node
+                node = Node(NodeType.TERM)
+                node.add_children(old)
             next_node = self.factor()
-            if self.peek() in ["?", "+", "*"]:
-                # old = next_node
-                # next_node = Node(NodeType.TERM)
-                node.quantifier = self.suffix()
-                # next_node.add_children(old, right)
             node.add_children(next_node)
 
         return node
 
-    def suffix(self):
-        """suffix ::= "?" | "+" | "*" """
-        n = self.next()
-        if n in ["?", "+", "*"]:
-            node_type = None
-            if n == "?":
-                node_type = Quantifier.OPTIONAL
-            elif n == "+":
-                node_type = Quantifier.ONE_OR_MORE
-            elif n == "*":
-                node_type = Quantifier.ZERO_OR_MORE
-            return node_type
-        else:
-            raise Exception(f"unknown suffix: {n}")
-
     def factor(self):
-        """factor ::= "(" expression ")" """
-        if self.peek() == "(":
-            self.consume("(")
-            grouped = self.expression()
-            self.consume(")")
-            return grouped  # Node(grouped, "grouped")
-        else:
-            value = self.next()
-            node_type = NodeType.NONTERMINAL
-            if value[0] == value[-1] and value[0] == '"':
-                node_type = NodeType.TERMINAL
-                value = value[1 : len(value) - 1]  # noqa
-            return Node(node_type, value=value)
+        value = self.next()
+        node_type = NodeType.NONTERMINAL
+        if value[0] == value[-1] and value[0] == '"':
+            node_type = NodeType.TERMINAL
+            value = value[1 : len(value) - 1]  # noqa
+        elif value[0] == "<" and value[-1] == ">":
+            node_type = NodeType.TOKEN
+            value = value[1 : len(value) - 1]  # noqa
+        return Node(node_type, value=value)
 
     def consume(self, expected: str):
         n = self.next()
@@ -192,6 +149,9 @@ class Grammar:
             self.productions[name] = production_parser.tree
         self.__start = list(rules.keys())[0]
 
+    def bnf_from_rule(self, rule: str) -> str:
+        return f"{rule} ::= {self.__rules[rule]}"
+
     @property
     def bnf(self) -> str:
         return Grammar.bnf_from_grammar_dict(self.__rules)
@@ -213,16 +173,14 @@ class Grammar:
         if node not in completed:
             completed.append(node)
 
+        terminals = deepcopy(terminals)
+
         if node == NodeType.TERM:
-            terminals = self.__left_set(node.children[0], terminals, completed, parent)
-            c = 1
-            was_optional = node.children[0].quantifier == Quantifier.OPTIONAL
-            while len(terminals) == 0 or (len(terminals) > 0 and was_optional):
-                terminals = self.__left_set(
-                    node.children[c], terminals, completed, parent
-                )
-                was_optional = node.children[c].quantifier == Quantifier.OPTIONAL
-                c += 1
+            for child in node.children:
+                new_terminals = self.__left_set(child, terminals, completed, parent)
+                if new_terminals != terminals:
+                    terminals = new_terminals
+                    break
 
         elif node == NodeType.OR:
             for child in node.children:
@@ -232,7 +190,6 @@ class Grammar:
             terminals[node.value] = parent.value
 
         elif node == NodeType.NONTERMINAL:
-            # TODO: check if new_start is a grammar rule or a token defined in lexer
             new_start = self.productions.get(node.value)
             terminals = self.__left_set(new_start, terminals, completed, node)
         return terminals
