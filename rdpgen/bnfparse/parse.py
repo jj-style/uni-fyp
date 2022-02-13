@@ -3,9 +3,8 @@ from typing import Dict, List
 
 """ EBNF grammar:
    expression ::= term ( "|" term )+
-   term ::= factor suffix? (" " factor suffix?)+
-   suffix ::= "?" | "+" | "*"
-   factor ::= ("(" expression ")") | expression
+   term ::= factor  (" " factor )+
+   factor ::=  expression
    factor ::= RULE
 """
 
@@ -90,67 +89,37 @@ class Parser:
         """expression ::= term ( "|" term )+"""
         node = self.term()
         while self.peek() == "|":
-            old = node
-            node = Node(NodeType.OR)
+            if node != NodeType.OR:
+                old = node
+                node = Node(NodeType.OR)
+                node.add_children(old)
             self.next()  # consume "|"
             right = self.term()
-
-            node.add_children(old, right)
+            node.add_children(right)
 
         return node
 
     def term(self):
-        """term ::= factor suffix? (" " factor suffix?)+"""
+        """term ::= factor  (" " factor )+"""
         node = self.factor()
-        if self.peek() in ["?", "+", "*"]:
-            # old = node
-            # node = Node(NodeType.TERM)
-            node.quantifier = self.suffix()
-            # node.add_children(old, right)
 
-        while self.peek() not in ["|", ")", None]:  # TODO: confirm this is right
-            left = node
-            node = Node(NodeType.TERM)
-            node.add_children(left)
+        while self.peek() not in ["|", None]:  # TODO: confirm this is right
+            if node != NodeType.TERM:
+                old = node
+                node = Node(NodeType.TERM)
+                node.add_children(old)
             next_node = self.factor()
-            if self.peek() in ["?", "+", "*"]:
-                # old = next_node
-                # next_node = Node(NodeType.TERM)
-                node.quantifier = self.suffix()
-                # next_node.add_children(old, right)
             node.add_children(next_node)
 
         return node
 
-    def suffix(self):
-        """suffix ::= "?" | "+" | "*" """
-        n = self.next()
-        if n in ["?", "+", "*"]:
-            node_type = None
-            if n == "?":
-                node_type = Quantifier.OPTIONAL
-            elif n == "+":
-                node_type = Quantifier.ONE_OR_MORE
-            elif n == "*":
-                node_type = Quantifier.ZERO_OR_MORE
-            return node_type
-        else:
-            raise Exception(f"unknown suffix: {n}")
-
     def factor(self):
-        """factor ::= "(" expression ")" """
-        if self.peek() == "(":
-            self.consume("(")
-            grouped = self.expression()
-            self.consume(")")
-            return grouped  # Node(grouped, "grouped")
-        else:
-            value = self.next()
-            node_type = NodeType.NONTERMINAL
-            if value[0] == value[-1] and value[0] == '"':
-                node_type = NodeType.TERMINAL
-                value = value[1 : len(value) - 1]  # noqa
-            return Node(node_type, value=value)
+        value = self.next()
+        node_type = NodeType.NONTERMINAL
+        if value[0] == value[-1] and value[0] == '"':
+            node_type = NodeType.TERMINAL
+            value = value[1 : len(value) - 1]  # noqa
+        return Node(node_type, value=value)
 
     def consume(self, expected: str):
         n = self.next()
