@@ -1,5 +1,6 @@
 from enum import Enum, auto
 from typing import Dict, List
+from copy import deepcopy
 
 """ EBNF grammar:
    expression ::= term ( "|" term )+
@@ -12,22 +13,16 @@ from typing import Dict, List
 class NodeType(Enum):
     TERMINAL = auto()
     NONTERMINAL = auto()
+    TOKEN = auto()
     OR = auto()
     TERM = auto()
 
 
-class Quantifier(Enum):
-    OPTIONAL = auto()
-    ONE_OR_MORE = auto()
-    ZERO_OR_MORE = auto()
-
-
 class Node:
-    def __init__(self, node_type, value=None, quantifier: Quantifier = None, *children):
+    def __init__(self, node_type, value=None, *children):
         self._value = value
         self._type = node_type
         self._children = [c for c in children]
-        self._quantifier = None
 
     def add_children(self, *children):
         for child in children:
@@ -41,9 +36,7 @@ class Node:
         return ret
 
     def __repr__(self):
-        base = f"{self._type}{':' + self._value if self._value else ''}"
-        extra = "" if self._quantifier is None else f"\nQUANTITY:{self._quantifier}"
-        return base + extra
+        return f"{self._type}{':' + self._value if self._value else ''}"
 
     def __eq__(self, other):
         if isinstance(other, NodeType):
@@ -57,14 +50,6 @@ class Node:
     @property
     def value(self):
         return self._value
-
-    @property
-    def quantifier(self):
-        return self._quantifier
-
-    @quantifier.setter
-    def quantifier(self, value):
-        self._quantifier = value
 
 
 class Parser:
@@ -119,6 +104,9 @@ class Parser:
         if value[0] == value[-1] and value[0] == '"':
             node_type = NodeType.TERMINAL
             value = value[1 : len(value) - 1]  # noqa
+        elif value[0] == "<" and value[-1] == ">":
+            node_type = NodeType.TOKEN
+            value = value[1 : len(value) - 1]  # noqa
         return Node(node_type, value=value)
 
     def consume(self, expected: str):
@@ -161,6 +149,9 @@ class Grammar:
             self.productions[name] = production_parser.tree
         self.__start = list(rules.keys())[0]
 
+    def bnf_from_rule(self, rule: str) -> str:
+        return f"{rule} ::= {self.__rules[rule]}"
+
     @property
     def bnf(self) -> str:
         return Grammar.bnf_from_grammar_dict(self.__rules)
@@ -182,16 +173,14 @@ class Grammar:
         if node not in completed:
             completed.append(node)
 
+        terminals = deepcopy(terminals)
+
         if node == NodeType.TERM:
-            terminals = self.__left_set(node.children[0], terminals, completed, parent)
-            c = 1
-            was_optional = node.children[0].quantifier == Quantifier.OPTIONAL
-            while len(terminals) == 0 or (len(terminals) > 0 and was_optional):
-                terminals = self.__left_set(
-                    node.children[c], terminals, completed, parent
-                )
-                was_optional = node.children[c].quantifier == Quantifier.OPTIONAL
-                c += 1
+            for child in node.children:
+                new_terminals = self.__left_set(child, terminals, completed, parent)
+                if new_terminals != terminals:
+                    terminals = new_terminals
+                    break
 
         elif node == NodeType.OR:
             for child in node.children:
@@ -201,7 +190,6 @@ class Grammar:
             terminals[node.value] = parent.value
 
         elif node == NodeType.NONTERMINAL:
-            # TODO: check if new_start is a grammar rule or a token defined in lexer
             new_start = self.productions.get(node.value)
             terminals = self.__left_set(new_start, terminals, completed, node)
         return terminals

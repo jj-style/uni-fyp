@@ -1,5 +1,5 @@
 [tokens]
-any = "[a-zA-Z0-9]+"
+any = "[a-zA-Z0-9;]+"
 
 [grammar]
 A = 'B | C | D | G'
