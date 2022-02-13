@@ -69,6 +69,8 @@ WHILE_CONDITIONAL_LOOP = """int main(int argc, char* argv[]) {
 BUBBLE_SORT_PROG = """#include <iostream>
 #include <vector>
 
+std::vector<int> bubblesort(std::vector<int> arr);
+
 std::vector<int> bubblesort(std::vector<int> arr) {
   int i;
   int j;
@@ -149,6 +151,8 @@ def READ_LINES_PROGRAM(fname: str):
 #include <string>
 #include <vector>
 
+std::vector<std::string> read_lines(std::string file);
+
 %s
 
 int main(int argc, char* argv[]) {
@@ -183,6 +187,8 @@ def READ_FILE_PROGRAM(fname: str):
 #include <iostream>
 #include <stdlib.h>
 #include <string>
+
+std::string read_file(std::string file);
 
 std::string read_file(std::string file) {{
   std::fstream f;

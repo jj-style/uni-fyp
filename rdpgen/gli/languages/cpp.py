@@ -1,4 +1,4 @@
-from ..language import Language
+from ..language import Language, Context
 from ..types import Type, Primitive, Composite
 from ..utils import imports, expression
 from ..errors import MissingTypeError
@@ -8,6 +8,10 @@ import regex
 
 
 class Cpp(Language):
+    def __init__(self, ctx: Context):
+        super().__init__(ctx=ctx)
+        self.__signatures = []
+
     @property
     def name(self) -> str:
         return "c++"
@@ -22,7 +26,12 @@ class Cpp(Language):
 
     def prelude(self, **kwargs):
         includes = "\n".join(f"#include <{pkg}>" for pkg in sorted(self.imports))
-        return includes + "\n\n"
+        signatures = self.linesep.join(sorted(self.__signatures))
+        return (
+            includes
+            + ("\n\n" + signatures if len(self.__signatures) > 0 else "")
+            + "\n\n"
+        )
 
     def types(self, t: Type) -> str:
         if isinstance(t, Primitive):
@@ -171,6 +180,11 @@ class Cpp(Language):
                 ret_part = "void"
         else:
             ret_part = self.types(return_type)
+
+        if id != "main":
+            signature = f"{ret_part} {id}({arg_list}){self.terminator}"
+            self.__signatures.append(signature)
+
         stmts = self.block(*statements)
         func = f"{ret_part} {id}({arg_list}) {stmts}"
         return func
