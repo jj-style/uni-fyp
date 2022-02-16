@@ -183,13 +183,17 @@ def parser_from_grammar(
             left_set = grammar.left_set(rule)
             tokens = list(left_set.keys())
 
-            terminals = all([c == NodeType.TERMINAL for c in prod.children])
+            terminals = all(
+                [c == NodeType.TERMINAL or c == NodeType.TOKEN for c in prod.children]
+            )
 
             def recurse(left):
+                tok_idx = 0 if left_set[left[0]].get("token", False) else 1
+
                 return l.if_else(
-                    l.eq(l.index("next_token", 1), l.string(left[0])),
+                    l.eq(l.index("next_token", tok_idx), l.string(left[0])),
                     [
-                        l.call(left_set[left[0]]) + l.terminator
+                        l.call(left_set[left[0]]["parent"]) + l.terminator
                         if not terminals
                         else l.do_nothing(),
                     ],
