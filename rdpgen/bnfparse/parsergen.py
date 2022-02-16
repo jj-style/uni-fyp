@@ -130,7 +130,7 @@ def parser_from_grammar(
         # consume them too and skip ahead
         while idx < len(t.children):
             factor = t.children[idx]
-            if factor == NodeType.TERMINAL or NodeType.TOKEN:
+            if factor == NodeType.TERMINAL or factor == NodeType.TOKEN:
                 following = []
                 if idx + 1 < len(t.children):
                     for i in range(idx + 1, len(t.children)):
