@@ -36,8 +36,9 @@ jobs:
       with:
         go-version: ${{ matrix.go-version }}
     - name: Install Other Dependencies
-      run:
-        sudo apt update && sudo apt install -y flex
+      run: |
+        sudo apt update
+        sudo apt install -y flex
     - name: Lint with flake8
       run: |
         # stop the build if there are Python syntax errors or undefined names
