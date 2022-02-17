@@ -1,0 +1,13 @@
+# grammar to parse assigning numbers to identifiers
+
+[tokens]
+IDENTIFIER = "[a-zA-Z_][a-zA-Z0-9_]*"
+NUMBER = "[0-9]+"
+SYMBOLS = "[a-zA-Z_0-9=]"
+
+[grammar]
+# PROGRAM = ASSIGN *
+#PROGRAM = 'ASSIGN | PROGRAM ASSIGN'
+PROGRAM = 'ASSIGN ASSIGN_PRIME'
+ASSIGN_PRIME = 'ASSIGN ASSIGN_PRIME | "¬"'
+ASSIGN = '<IDENTIFIER> "=" <NUMBER>'

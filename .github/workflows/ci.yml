@@ -35,6 +35,10 @@ jobs:
       uses: actions/setup-go@v2
       with:
         go-version: ${{ matrix.go-version }}
+    - name: Install Other Dependencies
+      run: |
+        sudo apt update
+        sudo apt install -y flex libfl-dev
     - name: Lint with flake8
       run: |
         # stop the build if there are Python syntax errors or undefined names

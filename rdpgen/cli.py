@@ -13,7 +13,7 @@ from .bnfparse.parsergen import parser_from_grammar
     "language", type=click.Choice(["c++", "go", "python"], case_sensitive=False)
 )
 def cli(file: str, outdir: str, language: str):
-    with open(file) as f:
+    with open(file, "rb") as f:
         config = tomli.load(f)
 
     tokens = tokens_from_config_map(config.get("tokens", {}).items())
@@ -28,3 +28,4 @@ def cli(file: str, outdir: str, language: str):
 
     outpath = Path(outdir) / f"parser.{prog.extension}"
     prog.write_file(str(outpath))
+    print(f"parser generated at {outpath}")

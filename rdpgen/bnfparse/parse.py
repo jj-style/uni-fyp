@@ -187,7 +187,10 @@ class Grammar:
                 terminals = self.__left_set(child, terminals, completed, parent)
 
         elif node == NodeType.TERMINAL:
-            terminals[node.value] = parent.value
+            terminals[node.value] = {"parent": parent.value}
+
+        elif node == NodeType.TOKEN:
+            terminals[node.value] = {"parent": parent.value, "token": True}
 
         elif node == NodeType.NONTERMINAL:
             new_start = self.productions.get(node.value)

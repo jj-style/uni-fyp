@@ -3,5 +3,6 @@ click
 toml
 regex
 pytest
+pytest-bdd
 flake8
 black
