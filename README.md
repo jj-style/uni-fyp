@@ -9,6 +9,7 @@ University Final Year Project - Generating a Recursive Descent Parser
 ## Installing
 TODO (add setup.py)
 
+## Usage
 ```
 parsergen grammar.toml output/directory [python|go|c++]
 python parser.py $(realpath file/to/parse)
