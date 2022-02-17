@@ -28,3 +28,4 @@ def cli(file: str, outdir: str, language: str):
 
     outpath = Path(outdir) / f"parser.{prog.extension}"
     prog.write_file(str(outpath))
+    print(f"parser generated at {outpath}")

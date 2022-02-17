@@ -123,6 +123,14 @@ def parser_from_grammar(
     prog.add(get_token)
     prog.add(expect)
 
+    def handle_rule(t):
+        if t == NodeType.TERM:
+            return handle_term(t)
+        elif t == NodeType.NONTERMINAL:
+            return handle_nonterminal(t)
+        elif t == NodeType.TERMINAL or t == NodeType.TOKEN:
+            return handle_terminal(t)
+
     def handle_term(t):
         stmts = []
         idx = 0
@@ -183,20 +191,38 @@ def parser_from_grammar(
             left_set = grammar.left_set(rule)
             tokens = list(left_set.keys())
 
-            terminals = all(
-                [c == NodeType.TERMINAL or c == NodeType.TOKEN for c in prod.children]
-            )
+            has_epsilon = "¬" in left_set
+            if has_epsilon:
+                left_set.pop("¬")
+                tokens.remove("¬")
+
+            non_terminals = False
+            for child in prod.children:
+                if child == NodeType.TERM:
+                    for factor in child.children:
+                        non_terminals |= factor == NodeType.NONTERMINAL
+                else:
+                    non_terminals |= child == NodeType.NONTERMINAL
+
+            def get_or_term(first):
+                for child in prod.children:
+                    if child == NodeType.TERM:
+                        for factor in child.children:
+                            if factor.value == first:
+                                return child
+                    elif child.value == first:
+                        return child
 
             def recurse(left):
                 tok_idx = 0 if left_set[left[0]].get("token", False) else 1
 
                 return l.if_else(
                     l.eq(l.index("next_token", tok_idx), l.string(left[0])),
-                    [
-                        l.call(left_set[left[0]]["parent"]) + l.terminator
-                        if not terminals
-                        else l.do_nothing(),
-                    ],
+                    handle_rule(get_or_term(left_set[left[0]]["parent"]))
+                    if non_terminals
+                    else [l.call("get_token")]
+                    if non_terminals
+                    else [l.do_nothing()],
                     false_stmts=[
                         recurse(left[1:])
                         if len(left) > 1
@@ -206,6 +232,18 @@ def parser_from_grammar(
                             l.string(",".join(tokens)),
                         )
                         + l.terminator
+                        if not has_epsilon
+                        else l.if_else(
+                            l.neq(l.index("next_token", 1), l.string("¬")),
+                            [
+                                l.call(
+                                    "expect",
+                                    l.index("next_token", 2),
+                                    l.string(",".join([*tokens, "¬"])),
+                                )
+                                + l.terminator,
+                            ],
+                        ),
                     ],
                 )
 
@@ -217,7 +255,7 @@ def parser_from_grammar(
                 l.declare("next_token", Composite.array(Primitive.String)),
                 l.assign(
                     "next_token",
-                    l.call("peek") if not terminals else l.call("get_token"),
+                    l.call("peek") if non_terminals else l.call("get_token"),
                 ),
                 l.if_else(
                     l.eq(l.array_length("next_token"), 0),
@@ -228,6 +266,14 @@ def parser_from_grammar(
                             l.string(f"{','.join(tokens)}, got EOF"),
                         )
                         + l.terminator
+                        if not has_epsilon
+                        else l.assign(
+                            "next_token",
+                            l.array(
+                                Primitive.String,
+                                [l.string("TERMINAL"), l.string("¬"), l.string("0")],
+                            ),
+                        ),
                     ],
                 ),
                 recurse(tokens),

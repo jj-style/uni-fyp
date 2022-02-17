@@ -20,6 +20,8 @@ Feature: Generate Parser
 
     Scenario: Parser Rejects Invalid Input
     When I run the parser with "<command>" and input:
+        x = 10
+        number = 3
         2x = 5
     Then I get a 1 return code
 
