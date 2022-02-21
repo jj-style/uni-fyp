@@ -216,13 +216,19 @@ def parser_from_grammar(
             def recurse(left):
                 tok_idx = 0 if left_set[left[0]].get("token", False) else 1
 
+                or_term_1 = get_or_term(left_set[left[0]]["parent"])
+                or_term_2 = get_or_term(left[0])
+                or_term = or_term_1 if or_term_1 else or_term_2
+
                 return l.if_else(
                     l.eq(l.index("next_token", tok_idx), l.string(left[0])),
-                    handle_rule(get_or_term(left_set[left[0]]["parent"]))
+                    handle_rule(or_term)
                     if non_terminals
-                    else [l.call("get_token")]
-                    if non_terminals
-                    else [l.do_nothing()],
+                    else [
+                        l.call("get_token") + l.terminator
+                        if has_epsilon
+                        else l.do_nothing()
+                    ],
                     false_stmts=[
                         recurse(left[1:])
                         if len(left) > 1
@@ -255,7 +261,9 @@ def parser_from_grammar(
                 l.declare("next_token", Composite.array(Primitive.String)),
                 l.assign(
                     "next_token",
-                    l.call("peek") if non_terminals else l.call("get_token"),
+                    l.call("peek")
+                    if non_terminals or has_epsilon
+                    else l.call("get_token"),
                 ),
                 l.if_else(
                     l.eq(l.array_length("next_token"), 0),
