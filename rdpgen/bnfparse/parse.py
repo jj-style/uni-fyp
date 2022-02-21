@@ -1,5 +1,5 @@
 from enum import Enum, auto
-from typing import Dict, List
+from typing import Dict
 from copy import deepcopy
 
 """ EBNF grammar:
