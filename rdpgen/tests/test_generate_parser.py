@@ -1,6 +1,6 @@
 import pytest
 
-from pytest_bdd import given, scenario, then, when, parsers
+from pytest_bdd import given, scenarios, then, when, parsers
 from pathlib import Path
 import os
 import tempfile
@@ -32,16 +32,7 @@ def return_code():
     pass
 
 
-@scenario("features/generate_parser.feature", "Parser Accepts Valid Input")
-def test_parser_accepts_valid_input():
-    """Parser Accepts Valid Input."""
-    pass
-
-
-@scenario("features/generate_parser.feature", "Parser Rejects Invalid Input")
-def test_parser_rejects_invalid_input():
-    """Parser Rejects Invalid Input."""
-    pass
+scenarios("features")
 
 
 @given(parsers.parse("I have a grammar {name}"), target_fixture="grammar")

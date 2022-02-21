@@ -1,4 +1,4 @@
-Feature: Generate Parser
+Feature: Generate Parser for G1
     Background: Generate Parser in Languages
     Given I have a grammar G1
     When I generate a parser in <language>
@@ -10,7 +10,7 @@ Feature: Generate Parser
     | go       | go        | go run           |
     | c++      | cpp       | g++ _ && ./a.out |
     
-    Scenario: Parser Accepts Valid Input
+    Scenario Outline: Parser Accepts Valid Input
     When I run the parser with "<command>" and input:
         x = 10
         number = 3
@@ -18,7 +18,7 @@ Feature: Generate Parser
     Then I get a 0 return code
     Examples:
 
-    Scenario: Parser Rejects Invalid Input
+    Scenario Outline: Parser Rejects Invalid Input
     When I run the parser with "<command>" and input:
         x = 10
         number = 3
