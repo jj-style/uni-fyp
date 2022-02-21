@@ -159,7 +159,7 @@ class Grammar:
     def __str__(self) -> str:
         return "\n".join(f"{k} ->\n{v}" for k, v in self.productions.items())
 
-    def __left_set(
+    def __left_set_old(
         self,
         node: Node,
         terminals: Dict[str, List[str]],
@@ -197,7 +197,58 @@ class Grammar:
             terminals = self.__left_set(new_start, terminals, completed, node)
         return terminals
 
-    def left_set(self, rule: str) -> Dict[str, str]:
+    def __left_set(
+        self, node: Node, parent: Node, completed, terminals
+    ) -> Dict[str, str]:
+        completed.append(node)
+        terminals = deepcopy(terminals)
+
+        if node == NodeType.TERMINAL or node == NodeType.TOKEN:
+            return {
+                **terminals,
+                node.value: {"parent": parent.value, "token": node == NodeType.TOKEN},
+            }
+
+        if node == NodeType.NONTERMINAL:
+            next_node = self.productions.get(node.value)
+            if next_node not in completed:
+                nt_ls = self.__left_set(
+                    self.productions.get(node.value), node, completed, terminals
+                )
+                terminals = {**terminals, **nt_ls}
+            return terminals
+
+        if node == NodeType.TERM:
+            i = 0
+            ls = {}
+            next_ls = {}
+            next_has_epsilon = True
+            while i < len(node.children) and next_has_epsilon:
+                next_has_epsilon = False
+                if node.children[i] not in completed:
+                    next_ls = self.__left_set(node.children[i], parent, completed, ls)
+                    if "¬" in next_ls and "¬" not in ls:
+                        next_has_epsilon = True
+                    ls = {**ls, **next_ls}
+                i += 1
+            return {**terminals, **ls}
+
+        if node == NodeType.OR:
+            ls = {}
+            for term in node.children:
+                if term not in completed:
+                    t_ls = self.__left_set(term, parent, completed, ls)
+                    ls = {**ls, **t_ls}
+            return {**terminals, **ls}
+
+    def left_set(self, rule):
+        start = self.productions.get(rule, None)
+        if start is None:
+            raise ValueError(f"{rule} is not a production in the grammar")
+
+        return self.__left_set(start, Node(NodeType.NONTERMINAL, value=rule), [], {})
+
+    def left_set_old(self, rule: str) -> Dict[str, str]:
         """Compute the left set of a grammar rule, returning a set of
         all possible terminals that we can expect to see
         """
@@ -205,7 +256,9 @@ class Grammar:
         if start is None:
             raise ValueError(f"{rule} is not a production in the grammar")
 
-        return self.__left_set(start, {}, [], Node(NodeType.NONTERMINAL, value=rule))
+        return self.__left_set_old(
+            start, {}, [], Node(NodeType.NONTERMINAL, value=rule)
+        )
 
     @property
     def start(self) -> str:
