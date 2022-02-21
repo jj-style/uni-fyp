@@ -76,10 +76,9 @@ def test_math_grammar_left_set_with_epsilons():
     ls = g.left_set("program")
     print(ls)
     assert ls == {
-        "-": {"parent": "minusOpt"},
-        "¬": {"parent": "minusOpt"},
+        "-": {"parent": "minusOpt", "token": False},
+        "¬": {"parent": "minusOpt", "token": False},
         "int": {"parent": "operand", "token": True},
         "float": {"parent": "operand", "token": True},
         "identifier": {"parent": "operand", "token": True},
     }
-    assert False
