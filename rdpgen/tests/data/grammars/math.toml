@@ -5,15 +5,20 @@ float = '{int}\.[0-9]+'
 operation = '[=<>+\-\*/]'
 
 [grammar]
+program = 'expression expression_star'
+expression_star = 'expression expression_star | "¬"'
+
 expression = 'arithmeticExpression arithmeticStar'
 arithmeticStar = 'arithmeticOp arithmeticExpression | "¬"'
 arithmeticOp = '"=" | ">" | "<"'
 arithmeticExpression = 'term termStar'
+
 termStar ='termOp term | "¬"'
 termOp = '"+" | "-"'
-term = 'factor factorStar'
-factorStar = 'factorOp factor | "¬"'
+term = 'operand factorStar'
+
+factorStar = 'factorOp operand | "¬"'
 factorOp = '"*" | "/"'
-factor = 'minusOpt operand'
-minusOpt = '"-" | "¬"'
+# factor = 'minusOpt operand'
+# minusOpt = '"-" | "¬"'
 operand = '<int> | <float> | <identifier>'

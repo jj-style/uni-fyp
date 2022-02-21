@@ -115,6 +115,16 @@ def parser_from_grammar(
         l.declare("filename", Primitive.String),
         l.assign("filename", l.index(l.argv(), 1)),
         l.call("parse", "filename") + l.terminator,
+        # check for EOF
+        l.declare("next_token", Composite.array(Primitive.String)),
+        l.assign("next_token", l.call("get_token")),
+        l.if_else(
+            l.bool_or(
+                l.eq(l.array_length("next_token"), 0),
+                l.neq(l.index("next_token", 0), l.string("EOF")),
+            ),
+            [l.call("expect", l.string("?"), l.string("EOF")) + l.terminator],
+        ),
     )
 
     prog.add(call_lexer)
@@ -162,16 +172,9 @@ def parser_from_grammar(
             next_term_name,
             l.call("get_token"),
         )
-        s3 = l.if_else(
-            l.eq(l.array_length(next_term_name), 0),
-            [
-                l.call("expect", l.string("?"), l.string(f"{factor.value}, got EOF"))
-                + l.terminator
-            ],
-        )
 
         token_idx = 1 if factor == NodeType.TERMINAL else 0
-        s4 = l.if_else(
+        s3 = l.if_else(
             l.eq(l.index(next_term_name, token_idx), l.string(factor.value)),
             [l.do_nothing()] if len(following) == 0 else following,
             false_stmts=[
@@ -180,7 +183,7 @@ def parser_from_grammar(
             ],
         )
 
-        return [s1, s2, s3, s4]
+        return [s1, s2, s3]
 
     def handle_nonterminal(factor):
         return [l.call(factor.value) + l.terminator]
@@ -205,13 +208,19 @@ def parser_from_grammar(
                     non_terminals |= child == NodeType.NONTERMINAL
 
             def get_or_term(first):
+                """given an element in the first set, return the term in a group of or'd terms
+                that derives that element
+                """
                 for child in prod.children:
+                    if child.value == first:
+                        return child
+                    if child == NodeType.NONTERMINAL:
+                        return get_or_term(grammar.productions[child.value])
                     if child == NodeType.TERM:
                         for factor in child.children:
                             if factor.value == first:
                                 return child
-                    elif child.value == first:
-                        return child
+                        return get_or_term(child.children[0].value)
 
             def recurse(left):
                 tok_idx = 0 if left_set[left[0]].get("token", False) else 1
@@ -229,28 +238,18 @@ def parser_from_grammar(
                         if has_epsilon
                         else l.do_nothing()
                     ],
-                    false_stmts=[
-                        recurse(left[1:])
-                        if len(left) > 1
-                        else l.call(
+                    false_stmts=[recurse(left[1:])]
+                    if len(left) > 1
+                    else [
+                        l.call(
                             "expect",
                             l.index("next_token", 2),
                             l.string(",".join(tokens)),
                         )
                         + l.terminator
-                        if not has_epsilon
-                        else l.if_else(
-                            l.neq(l.index("next_token", 1), l.string("¬")),
-                            [
-                                l.call(
-                                    "expect",
-                                    l.index("next_token", 2),
-                                    l.string(",".join([*tokens, "¬"])),
-                                )
-                                + l.terminator,
-                            ],
-                        ),
-                    ],
+                    ]
+                    if not has_epsilon
+                    else None,
                 )
 
             f = l.function(
@@ -264,25 +263,6 @@ def parser_from_grammar(
                     l.call("peek")
                     if non_terminals or has_epsilon
                     else l.call("get_token"),
-                ),
-                l.if_else(
-                    l.eq(l.array_length("next_token"), 0),
-                    [
-                        l.call(
-                            "expect",
-                            l.string("?"),
-                            l.string(f"{','.join(tokens)}, got EOF"),
-                        )
-                        + l.terminator
-                        if not has_epsilon
-                        else l.assign(
-                            "next_token",
-                            l.array(
-                                Primitive.String,
-                                [l.string("TERMINAL"), l.string("¬"), l.string("0")],
-                            ),
-                        ),
-                    ],
                 ),
                 recurse(tokens),
             )
@@ -309,5 +289,4 @@ def parser_from_grammar(
     prog.add(parse)
     prog.add(main)
 
-    # print(prog.generate())
     return prog
