@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Union, Dict, List, Optional, Any
+from typing import Union, Dict, List, Optional, Any, Callable
 import os
 
 from .types import Type, Expression
@@ -8,10 +8,16 @@ from .types import Type, Expression
 class Context:
     """Context for language"""
 
-    def __init__(self, expand_tabs: bool = False, tab_size: int = 2):
+    def __init__(
+        self,
+        expand_tabs: bool = False,
+        tab_size: int = 2,
+        case_converter: Callable[[str], str] = None,
+    ):
         self.indent_lvl: int = 0
         self.expand_tabs: bool = expand_tabs
         self.tab_size: int = tab_size
+        self.case_convert = lambda s: s if case_converter is None else case_converter
 
 
 class Language(ABC):

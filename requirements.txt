@@ -2,6 +2,7 @@ jinja2
 click
 toml
 regex
+case-convert
 pytest
 pytest-bdd
 flake8
