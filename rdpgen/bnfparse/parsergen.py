@@ -119,11 +119,11 @@ def parser_from_grammar(
         l.declare("next_token", Composite.array(Primitive.String)),
         l.assign("next_token", l.call("get_token")),
         l.if_else(
-            l.bool_or(
-                l.eq(l.array_length("next_token"), 0),
-                l.neq(l.index("next_token", 0), l.string("EOF")),
-            ),
-            [l.call("expect", l.string("?"), l.string("EOF")) + l.terminator],
+            l.neq(l.index("next_token", 0), l.string("EOF")),
+            [
+                l.call("expect", l.index("next_token", 2), l.string("EOF"))
+                + l.terminator
+            ],
         ),
     )
 
