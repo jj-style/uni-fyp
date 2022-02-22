@@ -38,7 +38,7 @@ def parser_from_grammar(
         l.declare("command", Primitive.String),
         l.assign(
             "command",
-            l.string("""cd lexer && make --silent && ./lexer """),
+            l.s("""cd lexer && make --silent && ./lexer """),
         ),
         l.increment("command", inc="file"),
         l.command("command", exit_on_failure=True, suppress_output=False),
@@ -47,13 +47,13 @@ def parser_from_grammar(
     load_tokens_stmts = [
         l.assign("tokens", l.array(Composite.array(Primitive.String), [])),
         l.declare("token_lines", Composite.array(Primitive.String)),
-        l.assign("token_lines", l.read_lines(l.string("lexer/out.jl"))),
+        l.assign("token_lines", l.read_lines(l.s("lexer/out.jl"))),
         l.array_iterate(
             "token_lines",
             "idx",
             l.array_append(
                 "tokens",
-                l.string_split(l.index(l.cc("token_lines"), "idx"), l.string(":")),
+                l.string_split(l.index(l.cc("token_lines"), "idx"), l.s(":")),
             ),
         ),
     ]
@@ -93,9 +93,9 @@ def parser_from_grammar(
         None,
         {"line_num": Primitive.String, "e": Primitive.String},
         l.println(
-            l.string("Error: line "),
+            l.s("Error: line "),
             "line_num",
-            l.string("- expected "),
+            l.s("- expected "),
             "e",
         ),
         l.exit(code=1),
@@ -115,9 +115,7 @@ def parser_from_grammar(
         "main",
         None,
         None,
-        l.if_else(
-            l.lt(l.argc(), 2), [l.println(l.string("usage: parser FILE")), l.exit(1)]
-        ),
+        l.if_else(l.lt(l.argc(), 2), [l.println(l.s("usage: parser FILE")), l.exit(1)]),
         l.declare("filename", Primitive.String),
         l.assign("filename", l.index(l.argv(), 1)),
         l.call("parse", "filename") + l.terminator,
@@ -125,8 +123,8 @@ def parser_from_grammar(
         l.declare(nt, Composite.array(Primitive.String)),
         l.assign(nt, l.call(l.cc("get_token"))),
         l.if_else(
-            l.neq(l.index(nt, 0), l.string("EOF")),
-            [l.call("expect", l.index(nt, 2), l.string("EOF")) + l.terminator],
+            l.neq(l.index(nt, 0), l.s("EOF")),
+            [l.call("expect", l.index(nt, 2), l.s("EOF")) + l.terminator],
         ),
     )
 
@@ -178,10 +176,10 @@ def parser_from_grammar(
 
         token_idx = 1 if factor == NodeType.TERMINAL else 0
         s3 = l.if_else(
-            l.eq(l.index(next_term_name, token_idx), l.string(factor.value)),
+            l.eq(l.index(next_term_name, token_idx), l.s(factor.value)),
             [l.do_nothing()] if len(following) == 0 else following,
             false_stmts=[
-                l.call("expect", l.index(next_term_name, 2), l.string(factor.value))
+                l.call("expect", l.index(next_term_name, 2), l.s(factor.value))
                 + l.terminator
             ],
         )
@@ -234,7 +232,7 @@ def parser_from_grammar(
                 get_tok = l.cc("get_token")
 
                 return l.if_else(
-                    l.eq(l.index(next_tok, tok_idx), l.string(left[0])),
+                    l.eq(l.index(next_tok, tok_idx), l.s(left[0])),
                     handle_rule(or_term)
                     if non_terminals
                     else [
@@ -248,7 +246,7 @@ def parser_from_grammar(
                         l.call(
                             "expect",
                             l.index(next_tok, 2),
-                            l.string(",".join(tokens)),
+                            l.s(",".join(tokens)),
                         )
                         + l.terminator
                     ]
