@@ -1,25 +1,39 @@
 from abc import ABC, abstractmethod
-from typing import Union, Dict, List, Optional, Any
+from typing import Union, Dict, List, Optional, Any, Callable
+from case_convert import camel_case, snake_case
 import os
 
+from .utils import convert_case, expression
 from .types import Type, Expression
 
 
-class Context:
-    """Context for language"""
-
-    def __init__(self, expand_tabs: bool = False, tab_size: int = 2):
-        self.indent_lvl: int = 0
-        self.expand_tabs: bool = expand_tabs
-        self.tab_size: int = tab_size
+def case_converter_function_from_name(name: str = None) -> Callable[[str], str]:
+    if name is None:
+        return lambda s: s
+    elif name == "snake":
+        return snake_case
+    elif name == "camel":
+        return camel_case
+    else:
+        raise ValueError(
+            f"unknown case converter: {name}. Choose from 'snake' or 'camel'"
+        )
 
 
 class Language(ABC):
-    def __init__(self, ctx: Context = None):
+    def __init__(
+        self,
+        expand_tabs: bool = False,
+        tab_size: int = 2,
+        case: str = None,
+    ):
         self.__var_dec_count = {}
         self.imports = set()
         self.helper_funcs = {}
-        self.ctx = Context() if not ctx else ctx
+        self.indent_lvl: int = 0
+        self.expand_tabs: bool = expand_tabs
+        self.tab_size: int = tab_size
+        self.convert_case = case_converter_function_from_name(case)
 
     def register_helper(self, name, func):
         self.helper_funcs[name] = func
@@ -36,6 +50,7 @@ class Language(ABC):
         """Extension of files for this language without the dot"""
         raise NotImplementedError
 
+    @convert_case(0)
     def varn(self, var: str) -> str:
         """Obtain a numbered variable to prevent redeclaration"""
         if var not in self.__var_dec_count:
@@ -52,14 +67,14 @@ class Language(ABC):
 
     @property
     def whitespace_char(self) -> str:
-        return " " * self.ctx.tab_size if self.ctx.expand_tabs else "\t"
+        return " " * self.tab_size if self.expand_tabs else "\t"
 
     @property
     def linesep(self) -> str:
         return os.linesep
 
     def indent(self, stmt: str) -> str:
-        return (self.ctx.indent_lvl * self.whitespace_char) + str(stmt)
+        return (self.indent_lvl * self.whitespace_char) + str(stmt)
 
     def import_package(self, pkg: str):
         """Adds a package to the list of imports
@@ -166,11 +181,13 @@ class Language(ABC):
         """  # noqa
         raise NotImplementedError
 
+    @expression
     def index(self, expression, offset):
         """Index an array"""
         return f"{expression}[{offset}]"
 
-    def call(self, expression, *args):
+    @convert_case(0)
+    def call(self, expression, *args, **kwargs):
         """Call a function/method"""
         return f"{expression}({', '.join(str(a) for a in list(args))})"
 
@@ -296,12 +313,14 @@ class Language(ABC):
 
     # TODO: add loads of non-abstract common things like
     # equals, less than, array indexing, calling (), addition
+    @convert_case(0)
     def increment(self, id: str, inc: Expression = None):
         """Increment a variable identified with `id`, with an optional increment value.
         If not specified, defaults to 1.
         """
         return f"{id} = {id} + {1 if inc is None else inc}{self.terminator}"
 
+    @convert_case(0)
     def decrement(self, id: str, dec: Expression = None):
         """Decrement a variable identified with `id`, with an optional decrement value.
         If not specified, defaults to 1.
@@ -405,3 +424,11 @@ class Language(ABC):
     def argv(self):
         """Access to command line argument as a list of strings."""
         raise NotImplementedError
+
+    def cc(self, s: str):
+        """Shorthand to case convert function"""
+        return self.convert_case(s)
+
+    def s(self, s: str):
+        """Short hand to language.String"""
+        return self.string(s)

@@ -9,3 +9,7 @@ SYMBOLS = "[=]"
 PROGRAM = 'ASSIGN ASSIGN_PRIME'
 ASSIGN_PRIME = 'ASSIGN ASSIGN_PRIME | "¬"'
 ASSIGN = '<IDENTIFIER> "=" <NUMBER>'
+
+[language_options]
+expand_tabs=true
+tab_size=2

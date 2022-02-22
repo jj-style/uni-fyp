@@ -30,19 +30,19 @@ def test_read_file_program():
     f1.close()
     tests = {
         "python": {
-            "lang": Python(Context(expand_tabs=True)),
+            "lang": Python(expand_tabs=True, tab_size=2),
             "suffix": ".py",
             "cmd": "python3 _",
             "src": PY_SRC(f1.name),
         },
         "go": {
-            "lang": Go(Context(expand_tabs=True)),
+            "lang": Go(expand_tabs=True, tab_size=2),
             "suffix": ".go",
             "cmd": "go run _",
             "src": GO_SRC(f1.name),
         },
         "cpp": {
-            "lang": Cpp(Context(expand_tabs=True)),
+            "lang": Cpp(expand_tabs=True, tab_size=2),
             "suffix": ".cpp",
             "cmd": "cd ~ && g++ _ && ./a.out",
             "src": CPP_SRC(f1.name),

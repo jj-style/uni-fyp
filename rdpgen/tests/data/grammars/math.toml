@@ -22,3 +22,7 @@ factorOp = '"*" | "/"'
 factor = 'minusOpt operand'
 minusOpt = '"-" | "¬"'
 operand = '<int> | <float> | <identifier>'
+
+[language_options]
+expand_tabs=true
+tab_size=2

@@ -16,7 +16,7 @@ while True:
   if not (i < 10):
     break
   print("i is ", i)
-  i = doSomething(i)"""
+  i = do_something(i)"""
 
 FOR_LOOP_RANGED_INC = """for i in range(0, 10, 1):
   print("in a classic python for loop")"""

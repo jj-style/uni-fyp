@@ -1,17 +1,17 @@
-from rdpgen.gli import Go, Context, Type, Primitive, Composite, MissingTypeError
+from rdpgen.gli import Go, Type, Primitive, Composite, MissingTypeError
 
 from .go_progs import *
 import pytest
 
 
 def test_go_hello_world():
-    g = Go(Context(expand_tabs=True))
+    g = Go(expand_tabs=True, tab_size=2)
     f = g.function("main", None, None, g.println(g.string("hello world")))
     assert f == HELLO_WORLD
 
 
 def test_go_variables_in_function():
-    g = Go(Context(expand_tabs=True))
+    g = Go(expand_tabs=True, tab_size=2)
     f = g.function(
         "variables",
         None,
@@ -25,7 +25,7 @@ def test_go_variables_in_function():
 
 
 def test_go_inner_functions():
-    g = Go(Context(expand_tabs=True))
+    g = Go(expand_tabs=True, tab_size=2)
     f = g.function(
         "function",
         None,
@@ -38,7 +38,7 @@ def test_go_inner_functions():
 
 
 def test_go_for_loop():
-    g = Go(Context(expand_tabs=True))
+    g = Go(expand_tabs=True, tab_size=2)
     f = g.for_loop(
         "i",
         0,
@@ -50,7 +50,7 @@ def test_go_for_loop():
 
 
 def test_go_if_else():
-    g = Go(Context(expand_tabs=True))
+    g = Go(expand_tabs=True, tab_size=2)
     first = g.if_else(
         g.eq("i", "0"),
         [g.println(g.string("i is zero"))],
@@ -66,13 +66,13 @@ def test_go_if_else():
 
 
 def test_go_types_array():
-    g = Go(Context(expand_tabs=True))
+    g = Go(expand_tabs=True, tab_size=2)
     assert g.types(Composite.array(Primitive.Int)) == "[]int"
     assert g.types(Composite.array(Primitive.String)) == "[]string"
 
 
 def test_go_array_declare():
-    g = Go(Context(expand_tabs=True))
+    g = Go(expand_tabs=True, tab_size=2)
     f = g.function(
         "main",
         None,
@@ -85,18 +85,18 @@ def test_go_array_declare():
 
 
 def test_go_prelude():
-    g = Go(Context(expand_tabs=True))
+    g = Go(expand_tabs=True, tab_size=2)
     f = g.function("main", None, None, g.println(g.string("hello world")))
     assert g.prelude() == HELLO_WORLD_PRELUDE
 
 
 def test_go_comment_oneline():
-    g = Go(Context(expand_tabs=True))
+    g = Go(expand_tabs=True, tab_size=2)
     assert g.comment("i am a comment") == "// i am a comment"
 
 
 def test_go_comment_multiline():
-    g = Go(Context(expand_tabs=True))
+    g = Go(expand_tabs=True, tab_size=2)
     assert (
         g.comment("i am first line\ni am second line\ni am third line")
         == MULTI_LINE_COMMENT
@@ -104,14 +104,14 @@ def test_go_comment_multiline():
 
 
 def test_go_while_true_loop():
-    g = Go(Context(expand_tabs=True))
+    g = Go(expand_tabs=True, tab_size=2)
     assert (
         g.while_loop(g.println(g.string("i am in an infinite loop"))) == INFINITE_LOOP
     )
 
 
 def test_go_while_condition():
-    g = Go(Context(expand_tabs=True))
+    g = Go(expand_tabs=True, tab_size=2)
     f = g.function(
         "main",
         None,
@@ -128,12 +128,12 @@ def test_go_while_condition():
 
 
 def test_go_array_length():
-    g = Go(Context(expand_tabs=True))
+    g = Go(expand_tabs=True, tab_size=2)
     assert g.array_length("mylist") == "len(mylist)"
 
 
 def test_go_command():
-    g = Go(Context(expand_tabs=True))
+    g = Go(expand_tabs=True, tab_size=2)
 
     # test it produces correct call for running ls -l
     c = g.command(g.string("ls -l"), exit_on_failure=False)
@@ -147,17 +147,17 @@ def test_go_command():
 
 
 def test_go_command_exit_on_failure():
-    g = Go(Context(expand_tabs=True))
+    g = Go(expand_tabs=True, tab_size=2)
     c = g.command(g.string("ls -l"), exit_on_failure=True)
     assert c == COMMAND_NO_OUTPUT_WITH_EXIT
 
-    g = Go(Context(expand_tabs=True))
+    g = Go(expand_tabs=True, tab_size=2)
     c = g.command(g.string("ls -l"), suppress_output=False, exit_on_failure=True)
     assert c == COMMAND_OUTPUT_WITH_EXIT
 
 
 def test_go_exit():
-    g = Go(Context(expand_tabs=True))
+    g = Go(expand_tabs=True, tab_size=2)
     assert g.exit() == "os.Exit(0)"
     assert "os" in g.imports
     cases = range(100)
@@ -166,7 +166,7 @@ def test_go_exit():
 
 
 def test_go_read_lines():
-    g = Go(Context(expand_tabs=True))
+    g = Go(expand_tabs=True, tab_size=2)
     g.read_lines("myfile.txt")
     g.read_lines("myfile.txt")
     assert len(g.helper_funcs) == 1
@@ -178,23 +178,23 @@ def test_go_read_lines():
 
 
 def test_go_array_append():
-    g = Go(Context(expand_tabs=True))
+    g = Go(expand_tabs=True, tab_size=2)
     assert g.array_append("mylist", 5) == "mylist = append(mylist, 5)"
     assert g.array_append("mylist", g.string("hi")) == 'mylist = append(mylist, "hi")'
 
 
 def test_go_boolean_and():
-    go = Go(Context(expand_tabs=True))
+    go = Go(expand_tabs=True, tab_size=2)
     assert go.bool_and(go.gt("x", 10), go.lt("x", 20)) == "x > 10 && x < 20"
 
 
 def test_go_boolean_or():
-    go = Go(Context(expand_tabs=True))
+    go = Go(expand_tabs=True, tab_size=2)
     assert go.bool_or(go.lt("x", 10), go.gt("x", 20)) == "x < 10 || x > 20"
 
 
 def test_go_array_iterate():
-    g = Go(Context(expand_tabs=True))
+    g = Go(expand_tabs=True, tab_size=2)
     i1 = g.array_iterate("mylist", "i", g.println("i"))
     assert (
         str(i1)
@@ -232,7 +232,7 @@ for _, elem = range mylist {
 
 
 def test_go_array_enumerate():
-    g = Go(Context(expand_tabs=True))
+    g = Go(expand_tabs=True, tab_size=2)
 
     e1 = g.array_enumerate("mylist", "i", "elem", g.println("i", "elem"))
     assert (
@@ -273,7 +273,7 @@ for i, elem = range mylist {
 
 
 def test_go_string_split():
-    g = Go(Context(expand_tabs=True))
+    g = Go(expand_tabs=True, tab_size=2)
     assert (
         g.string_split(g.string("hello,world"), g.string(","))
         == """strings.Split("hello,world", ",")"""
@@ -283,7 +283,7 @@ def test_go_string_split():
 
 
 def test_go_array_remove():
-    g = Go(Context(expand_tabs=True))
+    g = Go(expand_tabs=True, tab_size=2)
     assert g.array_remove("mylist", 0) == "mylist = append(mylist[:0], mylist[1:]...)"
     assert (
         g.array_remove("mylist", 10) == "mylist = append(mylist[:10], mylist[11:]...)"
@@ -291,14 +291,14 @@ def test_go_array_remove():
 
 
 def test_go_booleans():
-    g = Go(Context(expand_tabs=True))
+    g = Go(expand_tabs=True, tab_size=2)
     assert g.types(Primitive.Bool) == "bool"
     assert g.true() == "true"
     assert g.false() == "false"
 
 
 def test_go_argc_argv():
-    g = Go(Context(expand_tabs=True))
+    g = Go(expand_tabs=True, tab_size=2)
     assert g.argc() == "len(os.Args)"
     assert g.argv() == "os.Args"
     assert "os" in g.imports
