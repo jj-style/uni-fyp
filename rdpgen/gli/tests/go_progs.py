@@ -229,3 +229,31 @@ func main() {
 """
         % fname
     )
+
+
+READ_FILE_STDIN_PROGRAM = r"""package main
+
+import (
+  "bufio"
+  "fmt"
+  "os"
+)
+
+func readFileStdin() string {
+  var scanner *bufio.Scanner
+  scanner = bufio.NewScanner(os.Stdin)
+  scanner.Split(bufio.ScanLines)
+  var content string
+  for scanner.Scan() {
+    content = content + scanner.Text() + "\n"
+  }
+  return content
+}
+
+func main() {
+  var text string
+  text = readFileStdin()
+  fmt.Println(text)
+}
+
+"""

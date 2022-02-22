@@ -300,6 +300,31 @@ class Go(Language):
         self.register_helper(func_name, lib())
         return self.call(func_name, file)
 
+    @imports("bufio", "os")
+    def read_file_stdin(self):
+        func_name = "readFileStdin"
+        rnl = r"\n"
+
+        def lib():
+            s1 = self.declare("scanner", "*bufio.Scanner")
+            s2 = self.assign("scanner", self.call("bufio.NewScanner", "os.Stdin"))
+            s3 = self.call("scanner.Split", "bufio.ScanLines")
+            s4 = self.declare("content", Primitive.String)
+            s5 = Expression(
+                lambda: f"for {self.call('scanner.Scan')} {self.block(self.increment('content', self.add(self.call('scanner.Text'), self.string(rnl))))}"  # noqa
+            )
+            s6 = self.do_return(expression="content")
+            stmts = [s1, s2, s3, s4, s5, s6]
+            return self.function(
+                func_name,
+                Primitive.String,
+                None,
+                *stmts,
+            )
+
+        self.register_helper(func_name, lib())
+        return self.call(func_name)
+
     @imports("os")
     def argc(self):
         return self.array_length("os.Args")
