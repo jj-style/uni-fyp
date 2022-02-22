@@ -392,6 +392,11 @@ class Language(ABC):
         raise NotImplementedError
 
     @abstractmethod
+    def read_file_stdin(self):
+        """Read until EOF from standard input"""
+        raise NotImplementedError
+
+    @abstractmethod
     def argc(self):
         """Access to command line argument count."""
         raise NotImplementedError

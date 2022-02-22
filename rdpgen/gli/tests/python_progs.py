@@ -143,3 +143,22 @@ def main():
 
 if __name__ == "__main__":
   main()"""
+
+
+READ_FILE_STDIN_PROGRAM = """import sys
+from typing import get_type_hints
+
+
+def read_file_stdin() -> str:
+  content = ""
+  for line in sys.stdin:
+    content = content + line
+  return content
+
+def main():
+  text: str
+  text = read_file_stdin()
+  print(text)
+
+if __name__ == "__main__":
+  main()"""

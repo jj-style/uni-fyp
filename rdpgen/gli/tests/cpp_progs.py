@@ -214,3 +214,27 @@ int main(int argc, char* argv[]) {{
 }}
 
 """
+
+
+READ_FILE_STDIN_PROGRAM = rf"""#include <iostream>
+#include <string>
+
+std::string read_file_stdin();
+
+std::string read_file_stdin() {{
+  std::string content;
+  std::string line;
+  while (getline(std::cin, line)) {{
+    content = content + line + "\n";
+  }}
+  return content;
+}}
+
+int main(int argc, char* argv[]) {{
+  std::string text;
+  text = read_file_stdin();
+  std::cout << text << std::endl;
+  return 0;
+}}
+
+"""

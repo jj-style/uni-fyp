@@ -101,15 +101,13 @@ class Python(Language):
                 stmts.append(self.declare(it, Primitive.Int))
 
         if iterate_items:
-            stmts.append(self.indent(f"for {it} in {id}{self.block(*statements)}"))
+            stmts.append(f"for {it} in {id}{self.block(*statements)}")
         else:
             stmts.append(
-                self.indent(
-                    f"for {it} in {self.call('range', self.array_length(id))}{self.block(*statements)}"  # noqa
-                )
+                f"for {it} in {self.call('range', self.array_length(id))}{self.block(*statements)}"  # noqa
             )
 
-        return self.linesep.join(stmts)
+        return self.linesep.join([stmts[0]] + [self.indent(s) for s in stmts[1:]])
 
     @expression
     def array_enumerate(
@@ -342,6 +340,27 @@ class Python(Language):
 
         self.register_helper(func_name, lib())
         return self.call(func_name, file)
+
+    @expression
+    @imports("sys")
+    def read_file_stdin(self):
+        func_name = "read_file_stdin"
+
+        def lib():
+            s1 = self.assign("content", self.string(""))
+            s2 = self.array_iterate(
+                "sys.stdin",
+                "line",
+                self.increment("content", "line"),
+                declare_it=False,
+                iterate_items=True,
+            )
+            s3 = self.do_return(expression="content")
+            stmts = [s1, s2, s3]
+            return self.function(func_name, Primitive.String, None, *stmts)
+
+        self.register_helper(func_name, lib())
+        return self.call(func_name)
 
     @imports("sys")
     def argc(self):

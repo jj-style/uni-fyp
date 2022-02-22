@@ -347,6 +347,32 @@ class Cpp(Language):
         self.register_helper(func_name, lib())
         return self.call(func_name, file)
 
+    @imports("iostream")
+    def read_file_stdin(self):
+        func_name = "read_file_stdin"
+
+        def lib():
+            s1 = self.declare("content", Primitive.String)
+            s2 = self.declare("line", Primitive.String)
+            s3 = self.while_loop(
+                self.increment(
+                    "content",
+                    inc=self.add("line", self.string(r"\n")),
+                ),
+                condition=self.call("getline", "std::cin", "line"),
+            )
+            s4 = self.do_return(expression="content")
+            stmts = [s1, s2, s3, s4]
+            return self.function(
+                func_name,
+                Primitive.String,
+                None,
+                *stmts,
+            )
+
+        self.register_helper(func_name, lib())
+        return self.call(func_name)
+
     def argc(self):
         return "argc"
 
