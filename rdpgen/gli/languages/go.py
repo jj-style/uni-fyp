@@ -8,6 +8,14 @@ import regex
 
 
 class Go(Language):
+    def __init__(
+        self,
+        expand_tabs: bool = True,
+        tab_size: int = 4,
+        case_converter: str = "camel",
+    ):
+        super().__init__(expand_tabs, tab_size, case_converter)
+
     @property
     def name(self) -> str:
         return "golang"
@@ -137,11 +145,11 @@ class Go(Language):
 
     def block(self, *statements):
         block = f"{{{self.linesep}"
-        self.ctx.indent_lvl += 1
+        self.indent_lvl += 1
         for stmt in statements:
             block += self.indent(str(stmt)) + self.linesep
-        self.ctx.indent_lvl -= 1
-        block += self.indent("}") if self.ctx.indent_lvl > 0 else "}"
+        self.indent_lvl -= 1
+        block += self.indent("}") if self.indent_lvl > 0 else "}"
         return block
 
     def do_return(self, expression=None):

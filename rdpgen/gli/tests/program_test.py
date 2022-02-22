@@ -1,4 +1,4 @@
-from rdpgen.gli import Program, Language, Go, Context, Cpp, Composite, Primitive, Python
+from rdpgen.gli import Program, Language, Go, Cpp, Composite, Primitive, Python
 from .common import file_contains, run_cmd
 from tempfile import NamedTemporaryFile
 from pathlib import Path
@@ -12,14 +12,14 @@ from .python_progs import PROG_HELLO_WORLD as PYTHON_HELLO_WORLD
 
 
 def test_go_prog_hello_world():
-    go = Go(Context(expand_tabs=True))
+    go = Go(expand_tabs=True, tab_size=2)
     prog = Program(go)
     prog.add(go.function("main", None, None, go.println(go.string("hello world"))))
     assert prog.generate() == GO_PROG_HELLO_WORLD
 
 
 def test_go_prog_writes_file():
-    go = Go(Context(expand_tabs=True))
+    go = Go(expand_tabs=True, tab_size=2)
     prog = Program(go)
     prog.add(go.function("main", None, None, go.println(go.string("hello world"))))
 
@@ -32,14 +32,14 @@ def test_go_prog_writes_file():
 
 
 def test_cpp_prog_hello_world():
-    cpp = Cpp(Context(expand_tabs=True))
+    cpp = Cpp(expand_tabs=True, tab_size=2)
     prog = Program(cpp)
     prog.add(cpp.function("main", None, None, cpp.println(cpp.string("hello world"))))
     assert prog.generate() == CPP_PROG_HELLO_WORLD
 
 
 def test_cpp_prog_writes_file():
-    cpp = Cpp(Context(expand_tabs=True))
+    cpp = Cpp(expand_tabs=True, tab_size=2)
     prog = Program(cpp)
     prog.add(cpp.function("main", None, None, cpp.println(cpp.string("hello world"))))
 
@@ -52,16 +52,16 @@ def test_cpp_prog_writes_file():
 
 
 def test_python_prog_hello_world():
-    p = Python(Context(expand_tabs=True))
+    p = Python(expand_tabs=True, tab_size=2)
     prog = Program(p)
     prog.add(p.function("main", None, None, p.println(p.string("hello world"))))
     assert prog.generate() == PYTHON_HELLO_WORLD
 
 
 def test_bubblesort():
-    go = Go(Context(expand_tabs=True))
-    cpp = Cpp(Context(expand_tabs=True))
-    py = Python(Context(expand_tabs=True))
+    go = Go(expand_tabs=True, tab_size=2)
+    cpp = Cpp(expand_tabs=True, tab_size=2)
+    py = Python(expand_tabs=True, tab_size=2)
     language_source = {
         go: {
             "src": GO_BUBBLE_SORT_PROG,

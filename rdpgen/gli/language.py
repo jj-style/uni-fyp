@@ -1,31 +1,38 @@
 from abc import ABC, abstractmethod
 from typing import Union, Dict, List, Optional, Any, Callable
+from case_convert import camel_case, snake_case
 import os
 
 from .types import Type, Expression
 
 
-class Context:
-    """Context for language"""
+def case_converter_function_from_name(name: str = None) -> Callable[[str], str]:
+    if name is None:
+        return lambda s: s
+    elif name == "snake":
+        return snake_case
+    elif name == "camel":
+        return camel_case
+    else:
+        raise ValueError(
+            f"unknown case converter: {name}. Choose from 'snake' or 'camel'"
+        )
 
+
+class Language(ABC):
     def __init__(
         self,
         expand_tabs: bool = False,
         tab_size: int = 2,
-        case_converter: Callable[[str], str] = None,
+        case_converter: str = None,
     ):
-        self.indent_lvl: int = 0
-        self.expand_tabs: bool = expand_tabs
-        self.tab_size: int = tab_size
-        self.case_convert = lambda s: s if case_converter is None else case_converter
-
-
-class Language(ABC):
-    def __init__(self, ctx: Context = None):
         self.__var_dec_count = {}
         self.imports = set()
         self.helper_funcs = {}
-        self.ctx = Context() if not ctx else ctx
+        self.indent_lvl: int = 0
+        self.expand_tabs: bool = expand_tabs
+        self.tab_size: int = tab_size
+        self.case_convert = case_converter_function_from_name(case_converter)
 
     def register_helper(self, name, func):
         self.helper_funcs[name] = func
@@ -58,14 +65,14 @@ class Language(ABC):
 
     @property
     def whitespace_char(self) -> str:
-        return " " * self.ctx.tab_size if self.ctx.expand_tabs else "\t"
+        return " " * self.tab_size if self.expand_tabs else "\t"
 
     @property
     def linesep(self) -> str:
         return os.linesep
 
     def indent(self, stmt: str) -> str:
-        return (self.ctx.indent_lvl * self.whitespace_char) + str(stmt)
+        return (self.indent_lvl * self.whitespace_char) + str(stmt)
 
     def import_package(self, pkg: str):
         """Adds a package to the list of imports

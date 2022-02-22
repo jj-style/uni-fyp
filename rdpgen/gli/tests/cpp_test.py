@@ -1,4 +1,4 @@
-from rdpgen.gli import Cpp, Context, Type, Primitive, Composite, MissingTypeError
+from rdpgen.gli import Cpp, Type, Primitive, Composite, MissingTypeError
 
 from .cpp_progs import *
 
@@ -6,13 +6,13 @@ import pytest
 
 
 def test_cpp_hello_world():
-    g = Cpp(Context(expand_tabs=True))
+    g = Cpp(expand_tabs=True)
     f = g.function("main", None, None, g.println(g.string("hello world")))
     assert f == HELLO_WORLD
 
 
 def test_cpp_variables_in_function():
-    g = Cpp(Context(expand_tabs=True))
+    g = Cpp(expand_tabs=True)
     f = g.function(
         "variables",
         None,
@@ -26,7 +26,7 @@ def test_cpp_variables_in_function():
 
 
 def test_cpp_for_loop():
-    g = Cpp(Context(expand_tabs=True))
+    g = Cpp(expand_tabs=True)
     f = g.for_loop(
         "i",
         0,
@@ -38,7 +38,7 @@ def test_cpp_for_loop():
 
 
 def test_cpp_if_else():
-    g = Cpp(Context(expand_tabs=True))
+    g = Cpp(expand_tabs=True)
     first = g.if_else(
         g.eq("i", "0"),
         [g.println(g.string("i is zero"))],
@@ -54,13 +54,13 @@ def test_cpp_if_else():
 
 
 def test_cpp_types_array():
-    g = Cpp(Context(expand_tabs=True))
+    g = Cpp(expand_tabs=True)
     assert g.types(Composite.array(Primitive.Int)) == "std::vector<int>"
     assert g.types(Composite.array(Primitive.String)) == "std::vector<std::string>"
 
 
 def test_cpp_array_declare():
-    g = Cpp(Context(expand_tabs=True))
+    g = Cpp(expand_tabs=True)
     f = g.function(
         "main",
         None,
@@ -73,18 +73,18 @@ def test_cpp_array_declare():
 
 
 def test_cpp_prelude():
-    g = Cpp(Context(expand_tabs=True))
+    g = Cpp(expand_tabs=True)
     f = g.function("main", None, None, g.println(g.string("hello world")))
     assert g.prelude() == HELLO_WORLD_PRELUDE
 
 
 def test_cpp_comment_oneline():
-    g = Cpp(Context(expand_tabs=True))
+    g = Cpp(expand_tabs=True)
     assert g.comment("i am a comment") == "// i am a comment"
 
 
 def test_cpp_comment_multiline():
-    g = Cpp(Context(expand_tabs=True))
+    g = Cpp(expand_tabs=True)
     assert (
         g.comment("i am first line\ni am second line\ni am third line")
         == MULTI_LINE_COMMENT
@@ -92,14 +92,14 @@ def test_cpp_comment_multiline():
 
 
 def test_cpp_while_true_loop():
-    g = Cpp(Context(expand_tabs=True))
+    g = Cpp(expand_tabs=True)
     assert (
         g.while_loop(g.println(g.string("i am in an infinite loop"))) == INFINITE_LOOP
     )
 
 
 def test_cpp_while_condition():
-    g = Cpp(Context(expand_tabs=True))
+    g = Cpp(expand_tabs=True)
     f = g.function(
         "main",
         None,
@@ -116,18 +116,18 @@ def test_cpp_while_condition():
 
 
 def test_cpp_array_length():
-    cpp = Cpp(Context(expand_tabs=True))
+    cpp = Cpp(expand_tabs=True)
     assert cpp.array_length("mylist") == "mylist.size()"
 
 
 def test_cpp_array_append():
-    cpp = Cpp(Context(expand_tabs=True))
+    cpp = Cpp(expand_tabs=True)
     assert cpp.array_append("mylist", 5) == "mylist.push_back(5);"
     assert cpp.array_append("mylist", cpp.string("hi")) == 'mylist.push_back("hi");'
 
 
 def test_cpp_command():
-    cpp = Cpp(Context(expand_tabs=True))
+    cpp = Cpp(expand_tabs=True)
 
     # test it produces correct call for running ls -l
     c = cpp.command(cpp.string("ls -l"), exit_on_failure=False)
@@ -141,7 +141,7 @@ def test_cpp_command():
 
 
 def test_cpp_command_with_exit():
-    cpp = Cpp(Context(expand_tabs=True))
+    cpp = Cpp(expand_tabs=True)
 
     # test it produces correct call for running ls -l
     c = cpp.command(cpp.string("ls -l"), exit_on_failure=True)
@@ -155,7 +155,7 @@ def test_cpp_command_with_exit():
 
 
 def test_cpp_exit():
-    cpp = Cpp(Context(expand_tabs=True))
+    cpp = Cpp(expand_tabs=True)
     assert cpp.exit() == "exit(0);"
     assert "stdlib.h" in cpp.imports
     cases = range(100)
@@ -164,7 +164,7 @@ def test_cpp_exit():
 
 
 def test_cpp_read_lines():
-    cpp = Cpp(Context(expand_tabs=True))
+    cpp = Cpp(expand_tabs=True)
     cpp.read_lines("myfile.txt")
     cpp.read_lines("myfile.txt")
     assert len(cpp.helper_funcs) == 1
@@ -176,17 +176,17 @@ def test_cpp_read_lines():
 
 
 def test_cpp_boolean_and():
-    cpp = Cpp(Context(expand_tabs=True))
+    cpp = Cpp(expand_tabs=True)
     assert cpp.bool_and(cpp.gt("x", 10), cpp.lt("x", 20)) == "x > 10 && x < 20"
 
 
 def test_cpp_boolean_or():
-    cpp = Cpp(Context(expand_tabs=True))
+    cpp = Cpp(expand_tabs=True)
     assert cpp.bool_or(cpp.lt("x", 10), cpp.gt("x", 20)) == "x < 10 || x > 20"
 
 
 def test_cpp_array_iterate():
-    cpp = Cpp(Context(expand_tabs=True))
+    cpp = Cpp(expand_tabs=True)
     i1 = cpp.array_iterate("mylist", "i", cpp.println("i"))
     assert (
         i1
@@ -226,7 +226,7 @@ for (i = 0; i < mylist.size(); i = i + 1) {
 
 
 def test_cpp_array_enumerate():
-    cpp = Cpp(Context(expand_tabs=True))
+    cpp = Cpp(expand_tabs=True)
 
     e1 = cpp.array_enumerate("mylist", "i", "elem", cpp.println("i", "elem"))
     assert (
@@ -269,7 +269,7 @@ for (i = 0; i < mylist.size(); i = i + 1) {
 
 
 def test_cpp_string_split():
-    cpp = Cpp(Context(expand_tabs=True))
+    cpp = Cpp(expand_tabs=True)
     assert (
         cpp.string_split(cpp.string("hello,world"), cpp.string(","))
         == """split_string("hello,world", ',')"""
@@ -287,19 +287,19 @@ def test_cpp_string_split():
 
 
 def test_cpp_array_remove():
-    cpp = Cpp(Context(expand_tabs=True))
+    cpp = Cpp(expand_tabs=True)
     assert cpp.array_remove("mylist", 0) == "mylist.erase(mylist.begin() + 0);"
     assert cpp.array_remove("mylist", 10) == "mylist.erase(mylist.begin() + 10);"
 
 
 def test_cpp_booleans():
-    cpp = Cpp(Context(expand_tabs=True))
+    cpp = Cpp(expand_tabs=True)
     assert cpp.types(Primitive.Bool) == "bool"
     assert cpp.true() == "true"
     assert cpp.false() == "false"
 
 
 def test_cpp_argc_argv():
-    cpp = Cpp(Context(expand_tabs=True))
+    cpp = Cpp(expand_tabs=True)
     assert cpp.argc() == "argc"
     assert cpp.argv() == "argv"

@@ -1,4 +1,4 @@
-from ..language import Language, Context
+from ..language import Language
 from ..types import Type, Primitive, Composite
 from ..utils import imports, expression
 from ..errors import MissingTypeError
@@ -8,8 +8,13 @@ import regex
 
 
 class Cpp(Language):
-    def __init__(self, ctx: Context):
-        super().__init__(ctx=ctx)
+    def __init__(
+        self,
+        expand_tabs: bool = True,
+        tab_size: int = 2,
+        case_converter: str = "snake",
+    ):
+        super().__init__(expand_tabs, tab_size, case_converter)
         self.__signatures = []
 
     @property
@@ -197,11 +202,11 @@ class Cpp(Language):
 
     def block(self, *statements):
         block = f"{{{self.linesep}"
-        self.ctx.indent_lvl += 1
+        self.indent_lvl += 1
         for stmt in statements:
             block += self.indent(str(stmt)) + self.linesep
-        self.ctx.indent_lvl -= 1
-        block += self.indent("}") if self.ctx.indent_lvl > 0 else "}"
+        self.indent_lvl -= 1
+        block += self.indent("}") if self.indent_lvl > 0 else "}"
         return block
 
     @imports("iostream")

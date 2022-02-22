@@ -1,26 +1,30 @@
 from .parse import Grammar
 from rdpgen.lexgen import Token
-from rdpgen.gli import Program, Language, Context, Go, Python, Cpp, Composite, Primitive
+from rdpgen.gli import Program, Language, Go, Python, Cpp, Composite, Primitive
 from rdpgen.bnfparse.parse import NodeType
 
-from typing import List
+from typing import List, Dict, Any
 from pathlib import Path
 
 
-def lang_from_name(name: str, ctx: Context) -> Language:
+def lang_from_name(name: str, options: Dict[str, Any]) -> Language:
     if name == "c++":
-        return Cpp(ctx)
+        return Cpp(**options)
     elif name == "go":
-        return Go(ctx)
+        return Go(**options)
     elif name == "python":
-        return Python(ctx)
+        return Python(**options)
 
 
 def parser_from_grammar(
-    grammar: Grammar, tokens: List[Token], language: str, outdir: str
+    grammar: Grammar,
+    tokens: List[Token],
+    language: str,
+    language_options: Dict[str, Any],
+    outdir: str,
 ):
     outdir = Path(outdir)
-    l = lang_from_name(language, Context(expand_tabs=True))  # noqa
+    l = lang_from_name(language, language_options)  # noqa
     prog = Program(l)
 
     # setup lexing stuff

@@ -1,4 +1,4 @@
-from rdpgen.gli import Python, Context, Primitive, Composite, MissingTypeError
+from rdpgen.gli import Python, Primitive, Composite, MissingTypeError
 from .python_progs import *
 from tempfile import NamedTemporaryFile
 from pathlib import Path
@@ -13,25 +13,25 @@ def test_python_imports():
         {"import": "a.b.c.d", "expect": "from a.b.c import d"},
     ]
     for case in cases:
-        p = Python(Context(expand_tabs=True))
+        p = Python(expand_tabs=True, tab_size=2)
         p.import_package(case["import"])
         assert p.prelude().strip() == case["expect"]
 
 
 def test_python_postlude():
-    p = Python(Context(expand_tabs=True))
+    p = Python(expand_tabs=True, tab_size=2)
     f = str(p.function("main", None, None, p.println(p.string("hello world"))))
     assert str(p.postlude()) == """if __name__ == "__main__":\n  main()"""
 
 
 def test_python_hello_world():
-    p = Python(Context(expand_tabs=True))
+    p = Python(expand_tabs=True, tab_size=2)
     f = p.function("main", None, None, p.println(p.string("hello world")))
     assert f == HELLO_WORLD
 
 
 def test_python_variables_in_function():
-    p = Python(Context(expand_tabs=True))
+    p = Python(expand_tabs=True, tab_size=2)
     f = p.function(
         "variables",
         None,
@@ -45,7 +45,7 @@ def test_python_variables_in_function():
 
 
 def test_python_inner_functions():
-    p = Python(Context(expand_tabs=True))
+    p = Python(expand_tabs=True, tab_size=2)
     f = p.function(
         "function",
         None,
@@ -58,7 +58,7 @@ def test_python_inner_functions():
 
 
 def test_python_for_loop_generic():
-    p = Python(Context(expand_tabs=True))
+    p = Python(expand_tabs=True, tab_size=2)
     f = p.for_loop(
         "i",
         0,
@@ -70,7 +70,7 @@ def test_python_for_loop_generic():
 
 
 def test_python_for_loop_ranged():
-    p = Python(Context(expand_tabs=True))
+    p = Python(expand_tabs=True, tab_size=2)
     inc = p.for_loop(
         "i",
         0,
@@ -91,7 +91,7 @@ def test_python_for_loop_ranged():
 
 
 def test_python_if_else():
-    p = Python(Context(expand_tabs=True))
+    p = Python(expand_tabs=True, tab_size=2)
     first = p.if_else(
         p.eq("i", "0"),
         [p.println(p.string("i is zero"))],
@@ -107,13 +107,13 @@ def test_python_if_else():
 
 
 def test_python_types_array():
-    p = Python(Context(expand_tabs=True))
+    p = Python(expand_tabs=True, tab_size=2)
     assert p.types(Composite.array(Primitive.Int)) == "List[int]"
     assert p.types(Composite.array(Primitive.String)) == "List[str]"
 
 
 def test_python_array_declare():
-    p = Python(Context(expand_tabs=True))
+    p = Python(expand_tabs=True, tab_size=2)
     f = p.function(
         "main",
         None,
@@ -126,18 +126,18 @@ def test_python_array_declare():
 
 
 def test_python_prelude():
-    p = Python(Context(expand_tabs=True))
+    p = Python(expand_tabs=True, tab_size=2)
     f = p.function("main", None, None, p.println(p.string("hello world")))
     assert p.prelude() == HELLO_WORLD_PRELUDE
 
 
 def test_python_comment_oneline():
-    p = Python(Context(expand_tabs=True))
+    p = Python(expand_tabs=True, tab_size=2)
     assert p.comment("i am a comment") == "# i am a comment"
 
 
 def test_python_comment_multiline():
-    p = Python(Context(expand_tabs=True))
+    p = Python(expand_tabs=True, tab_size=2)
     assert (
         p.comment("i am first line\ni am second line\ni am third line")
         == MULTI_LINE_COMMENT
@@ -145,13 +145,13 @@ def test_python_comment_multiline():
 
 
 def test_python_while_true_loop():
-    p = Python(Context(expand_tabs=True))
+    p = Python(expand_tabs=True, tab_size=2)
     loop = p.while_loop(p.println(p.string("i am in an infinite loop")))
     assert str(loop) == INFINITE_LOOP
 
 
 def test_python_while_condition():
-    p = Python(Context(expand_tabs=True))
+    p = Python(expand_tabs=True, tab_size=2)
     f = p.function(
         "main",
         None,
@@ -168,12 +168,12 @@ def test_python_while_condition():
 
 
 def test_python_array_length():
-    p = Python(Context(expand_tabs=True))
+    p = Python(expand_tabs=True, tab_size=2)
     assert p.array_length("mylist") == "len(mylist)"
 
 
 def test_python_command():
-    p = Python(Context(expand_tabs=True))
+    p = Python(expand_tabs=True, tab_size=2)
 
     # test it produces correct call for running ls -l
     c = p.command(p.string("ls -l"), exit_on_failure=False)
@@ -208,7 +208,7 @@ def test_python_command():
 
 
 def test_python_command_exit_on_failure():
-    p = Python(Context(expand_tabs=True))
+    p = Python(expand_tabs=True, tab_size=2)
     file = "/some/random/file/that/probably/doesnt/exist"
     c = p.command(p.string(f"cat {file}"), exit_on_failure=False, suppress_output=False)
     assert str(c) == f'subprocess.run("cat {file}", shell=True)'
@@ -221,7 +221,7 @@ def test_python_command_exit_on_failure():
 
 
 def test_python_exit():
-    p = Python(Context(expand_tabs=True))
+    p = Python(expand_tabs=True, tab_size=2)
     assert p.exit() == "exit(0)"
     cases = range(100)
     for c in cases:
@@ -229,7 +229,7 @@ def test_python_exit():
 
 
 def test_python_read_lines():
-    p = Python(Context(expand_tabs=True))
+    p = Python(expand_tabs=True, tab_size=2)
     p.read_lines("myfile.txt")
     p.read_lines("myfile.txt")
     assert len(p.helper_funcs) == 1
@@ -241,23 +241,23 @@ def test_python_read_lines():
 
 
 def test_python_array_append():
-    p = Python(Context(expand_tabs=True))
+    p = Python(expand_tabs=True, tab_size=2)
     assert p.array_append("mylist", 5) == "mylist.append(5)"
     assert p.array_append("mylist", p.string("5")) == 'mylist.append("5")'
 
 
 def test_python_boolean_and():
-    p = Python(Context(expand_tabs=True))
+    p = Python(expand_tabs=True, tab_size=2)
     assert p.bool_and(p.gt("x", 10), p.lt("x", 20)) == "x > 10 and x < 20"
 
 
 def test_python_boolean_or():
-    p = Python(Context(expand_tabs=True))
+    p = Python(expand_tabs=True, tab_size=2)
     assert p.bool_or(p.lt("x", 10), p.gt("x", 20)) == "x < 10 or x > 20"
 
 
 def test_python_array_iterate():
-    p = Python(Context(expand_tabs=True))
+    p = Python(expand_tabs=True, tab_size=2)
     i1 = p.array_iterate("mylist", "i", p.println("i"))
     assert (
         i1
@@ -292,7 +292,7 @@ for elem in mylist:
 
 
 def test_python_array_enumerate():
-    p = Python(Context(expand_tabs=True))
+    p = Python(expand_tabs=True, tab_size=2)
 
     e1 = p.array_enumerate("mylist", "i", "elem", p.println("i", "elem"))
     assert (
@@ -331,7 +331,7 @@ for i, elem in enumerate(mylist):
 
 
 def test_python_string_split():
-    p = Python(Context(expand_tabs=True))
+    p = Python(expand_tabs=True, tab_size=2)
     assert (
         p.string_split(p.string("hello,world"), p.string(","))
         == """"hello,world".split(",")"""
@@ -340,20 +340,20 @@ def test_python_string_split():
 
 
 def test_python_array_remove():
-    p = Python(Context(expand_tabs=True))
+    p = Python(expand_tabs=True, tab_size=2)
     assert p.array_remove("mylist", 0) == "mylist.pop(0)"
     assert p.array_remove("mylist", 10) == "mylist.pop(10)"
 
 
 def test_python_booleans():
-    p = Python(Context(expand_tabs=True))
+    p = Python(expand_tabs=True, tab_size=2)
     assert p.types(Primitive.Bool) == "bool"
     assert p.true() == "True"
     assert p.false() == "False"
 
 
 def test_python_argc_argv():
-    p = Python(Context(expand_tabs=True))
+    p = Python(expand_tabs=True, tab_size=2)
     assert p.argc() == "len(sys.argv)"
     assert p.argv() == "sys.argv"
     assert "sys" in p.imports

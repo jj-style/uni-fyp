@@ -13,10 +13,12 @@ from .bnfparse.parsergen import parser_from_grammar
     "language", type=click.Choice(["c++", "go", "python"], case_sensitive=False)
 )
 def cli(file: str, outdir: str, language: str):
+    # parse config
     with open(file, "rb") as f:
         config = tomli.load(f)
 
     tokens = tokens_from_config_map(config.get("tokens", {}).items())
+    lang_opts = config.get("language_options", {})
 
     # create a lexer program
     template_lex_file(tokens, outdir)
@@ -24,7 +26,7 @@ def cli(file: str, outdir: str, language: str):
     # parse the bnf grammar rules
     grammar_cfg = config.get("grammar", {})
     grammar = Grammar(grammar_cfg)
-    prog = parser_from_grammar(grammar, tokens, language, outdir)
+    prog = parser_from_grammar(grammar, tokens, language, lang_opts, outdir)
 
     outpath = Path(outdir) / f"parser.{prog.extension}"
     prog.write_file(str(outpath))

@@ -1,4 +1,4 @@
-from ..language import Language, Context
+from ..language import Language
 from ..types import Type, Composite, Primitive, Expression
 from ..utils import imports, expression
 from ..errors import MissingTypeError
@@ -8,8 +8,13 @@ import regex as re
 
 
 class Python(Language):
-    def __init__(self, ctx: Context = None):
-        super().__init__(ctx)
+    def __init__(
+        self,
+        expand_tabs: bool = False,
+        tab_size: int = 4,
+        case_converter: str = "snake",
+    ):
+        super().__init__(expand_tabs, tab_size, case_converter)
         self.__main_func: bool = False
 
     @property
@@ -160,10 +165,10 @@ class Python(Language):
 
     def block(self, *statements):
         block = f":{self.linesep}"
-        self.ctx.indent_lvl += 1
+        self.indent_lvl += 1
         for stmt in statements:
             block += self.indent(str(stmt)) + self.linesep
-        self.ctx.indent_lvl -= 1
+        self.indent_lvl -= 1
         return block.rstrip(self.linesep)
 
     def do_nothing(self):
