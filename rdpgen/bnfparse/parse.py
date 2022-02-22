@@ -173,6 +173,7 @@ class Grammar:
 
         if node == NodeType.NONTERMINAL:
             next_node = self.productions.get(node.value)
+            used_epsilon_lookahead = True
             if next_node not in completed:
                 nt_ls, used_epsilon_lookahead = self.__left_set(
                     self.productions.get(node.value), node, completed, terminals

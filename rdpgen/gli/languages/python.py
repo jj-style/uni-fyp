@@ -12,9 +12,9 @@ class Python(Language):
         self,
         expand_tabs: bool = False,
         tab_size: int = 4,
-        case_converter: str = "snake",
+        case: str = "snake",
     ):
-        super().__init__(expand_tabs, tab_size, case_converter)
+        super().__init__(expand_tabs, tab_size, case)
         self.__main_func: bool = False
 
     @property

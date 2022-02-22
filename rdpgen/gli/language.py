@@ -24,7 +24,7 @@ class Language(ABC):
         self,
         expand_tabs: bool = False,
         tab_size: int = 2,
-        case_converter: str = None,
+        case: str = None,
     ):
         self.__var_dec_count = {}
         self.imports = set()
@@ -32,7 +32,7 @@ class Language(ABC):
         self.indent_lvl: int = 0
         self.expand_tabs: bool = expand_tabs
         self.tab_size: int = tab_size
-        self.case_convert = case_converter_function_from_name(case_converter)
+        self.case_convert = case_converter_function_from_name(case)
 
     def register_helper(self, name, func):
         self.helper_funcs[name] = func

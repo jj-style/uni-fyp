@@ -12,9 +12,9 @@ class Cpp(Language):
         self,
         expand_tabs: bool = True,
         tab_size: int = 2,
-        case_converter: str = "snake",
+        case: str = "snake",
     ):
-        super().__init__(expand_tabs, tab_size, case_converter)
+        super().__init__(expand_tabs, tab_size, case)
         self.__signatures = []
 
     @property

@@ -12,9 +12,9 @@ class Go(Language):
         self,
         expand_tabs: bool = True,
         tab_size: int = 4,
-        case_converter: str = "camel",
+        case: str = "camel",
     ):
-        super().__init__(expand_tabs, tab_size, case_converter)
+        super().__init__(expand_tabs, tab_size, case)
 
     @property
     def name(self) -> str:

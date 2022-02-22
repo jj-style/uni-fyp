@@ -218,8 +218,6 @@ def parser_from_grammar(
                 for child in prod.children:
                     if child.value == first:
                         return child
-                    if child == NodeType.NONTERMINAL:
-                        return get_or_term(grammar.productions[child.value])
                     if child == NodeType.TERM:
                         for factor in child.children:
                             if factor.value == first:
