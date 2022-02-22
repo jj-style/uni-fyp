@@ -63,7 +63,7 @@ def test_python_for_loop_generic():
         "i",
         0,
         p.lt("i", 10),
-        p.assign("i", p.call("doSomething", "i")),
+        p.assign("i", p.call("do_something", "i")),
         p.println(p.string("i is "), "i"),
     )
     assert f == FOR_LOOP_GENERIC

@@ -65,7 +65,7 @@ class Cpp(Language):
 
         def lib():
             s1 = self.declare("tmp", Primitive.String)
-            s2 = self.call("std::stringstream ss", "s") + self.terminator
+            s2 = self.call("std::stringstream ss", "s", no_cc=True) + self.terminator
             s3 = self.declare("words", Composite.array(Primitive.String))
             s4 = self.while_loop(
                 self.array_append("words", "tmp"),

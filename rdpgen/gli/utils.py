@@ -39,7 +39,7 @@ def convert_case(index, *indices):
         @functools.wraps(f)
         def wrap(self, *args, **kwargs):
             args = list(args)
-            if "ignore_convert_case" not in kwargs:
+            if "no_cc" not in kwargs:
                 # HACK: for Go language, where a few assigns have
                 # assigned multiple variables at once like res,err =
                 match = regex.match(

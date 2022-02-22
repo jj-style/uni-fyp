@@ -105,9 +105,9 @@ def parser_from_grammar(
         "parse",
         None,
         {"file": Primitive.String},
-        l.call(l.cc("generate_tokens"), "file") + l.terminator,
-        l.call(l.cc("load_tokens")) + l.terminator,
-        l.call(l.cc(grammar.start)) + l.terminator,
+        l.call("generate_tokens", "file") + l.terminator,
+        l.call("load_tokens") + l.terminator,
+        l.call(grammar.start) + l.terminator,
     )
 
     nt = l.cc("next_token")
@@ -121,7 +121,7 @@ def parser_from_grammar(
         l.call("parse", "filename") + l.terminator,
         # check for EOF
         l.declare(nt, Composite.array(Primitive.String)),
-        l.assign(nt, l.call(l.cc("get_token"))),
+        l.assign(nt, l.call("get_token")),
         l.if_else(
             l.neq(l.index(nt, 0), l.s("EOF")),
             [l.call("expect", l.index(nt, 2), l.s("EOF")) + l.terminator],
@@ -171,7 +171,7 @@ def parser_from_grammar(
         s1 = l.declare(next_term_name, Composite.array(Primitive.String))
         s2 = l.assign(
             next_term_name,
-            l.call(l.cc("get_token")),
+            l.call("get_token"),
         )
 
         token_idx = 1 if factor == NodeType.TERMINAL else 0
@@ -187,7 +187,7 @@ def parser_from_grammar(
         return [s1, s2, s3]
 
     def handle_nonterminal(factor):
-        return [l.call(l.cc(factor.value)) + l.terminator]
+        return [l.call(factor.value) + l.terminator]
 
     for rule, prod in grammar.productions.items():
         # either-or-construction
@@ -264,7 +264,7 @@ def parser_from_grammar(
                     l.cc("next_token"),
                     l.call("peek")
                     if non_terminals or has_epsilon
-                    else l.call(l.cc("get_token")),
+                    else l.call("get_token"),
                 ),
                 recurse(tokens),
             )

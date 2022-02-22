@@ -186,7 +186,8 @@ class Language(ABC):
         """Index an array"""
         return f"{expression}[{offset}]"
 
-    def call(self, expression, *args):
+    @convert_case(0)
+    def call(self, expression, *args, **kwargs):
         """Call a function/method"""
         return f"{expression}({', '.join(str(a) for a in list(args))})"
 

@@ -57,7 +57,7 @@ class Go(Language):
 
     @imports("strings")
     def string_split(self, s: str, delim: str):
-        return self.call("strings.Split", s, delim)
+        return self.call("strings.Split", s, delim, no_cc=True)
 
     def array(self, t: Type, elements: List[Any]):
         joined = ", ".join(str(e) for e in elements)
@@ -228,11 +228,12 @@ class Go(Language):
                         self.string("bash"),
                         self.string("-c"),
                         command,
+                        no_cc=True,
                     ),
                 )
             )
             to_assign = "err" if exit_on_failure else "_"
-            stmts.append(self.assign(to_assign, self.call("cmd.Run")))
+            stmts.append(self.assign(to_assign, self.call("cmd.Run", no_cc=True)))
             if exit_on_failure:
                 stmts.append(self.if_else(self.neq("err", "nil"), [self.exit(1)]))
 
@@ -249,8 +250,9 @@ class Go(Language):
                         self.string("bash"),
                         self.string("-c"),
                         command,
+                        no_cc=True,
                     )
-                    + f".{self.call('Output')}",
+                    + f".{self.call('Output', no_cc=True)}",
                 )
             )
             if exit_on_failure:
@@ -261,7 +263,7 @@ class Go(Language):
 
     @imports("os")
     def exit(self, code: int = 0):
-        return self.call("os.Exit", code)
+        return self.call("os.Exit", code, no_cc=True)
 
     @imports("bufio", "os")
     def read_lines(self, file: str):
@@ -270,16 +272,16 @@ class Go(Language):
         def lib():
             s1 = self.declare("f", "*os.File")
             s2 = self.declare("err", "error")
-            s3 = self.assign("f, err", self.call("os.Open", "file"))
+            s3 = self.assign("f, err", self.call("os.Open", "file", no_cc=True))
             s4 = self.if_else(self.neq("err", "nil"), [self.exit(1)])
             s5 = self.declare("scanner", "*bufio.Scanner")
-            s6 = self.assign("scanner", self.call("bufio.NewScanner", "f"))
-            s7 = self.call("scanner.Split", "bufio.ScanLines")
+            s6 = self.assign("scanner", self.call("bufio.NewScanner", "f", no_cc=True))
+            s7 = self.call("scanner.Split", "bufio.ScanLines", no_cc=True)
             s8 = self.declare("lines", Composite.array(Primitive.String))
             s9 = Expression(
-                lambda: f"for {self.call('scanner.Scan')} {self.block(self.assign('lines', self.call('append', 'lines', self.call('scanner.Text'))))}"  # noqa
+                lambda: f"for {self.call('scanner.Scan',no_cc=True)} {self.block(self.assign('lines', self.call('append', 'lines', self.call('scanner.Text',no_cc=True))))}"  # noqa
             )
-            s10 = self.call("f.Close")
+            s10 = self.call("f.Close", no_cc=True)
             s11 = self.do_return(expression="lines")
             stmts = [s1, s2, s3, s4, s5, s6, s7, s8, s9, s10, s11]
             return self.function(
@@ -299,7 +301,9 @@ class Go(Language):
         def lib():
             s1 = self.declare("content", Composite.array("byte"))
             s2 = self.declare("err", "error")
-            s3 = self.assign("content, err", self.call("ioutil.ReadFile", "file"))
+            s3 = self.assign(
+                "content, err", self.call("ioutil.ReadFile", "file", no_cc=True)
+            )
             s4 = self.if_else(
                 self.neq("err", "nil"), [self.println("err"), self.exit(1)]
             )
@@ -322,11 +326,13 @@ class Go(Language):
 
         def lib():
             s1 = self.declare("scanner", "*bufio.Scanner")
-            s2 = self.assign("scanner", self.call("bufio.NewScanner", "os.Stdin"))
-            s3 = self.call("scanner.Split", "bufio.ScanLines")
+            s2 = self.assign(
+                "scanner", self.call("bufio.NewScanner", "os.Stdin", no_cc=True)
+            )
+            s3 = self.call("scanner.Split", "bufio.ScanLines", no_cc=True)
             s4 = self.declare("content", Primitive.String)
             s5 = Expression(
-                lambda: f"for {self.call('scanner.Scan')} {self.block(self.increment('content', self.add(self.call('scanner.Text'), self.string(rnl))))}"  # noqa
+                lambda: f"for {self.call('scanner.Scan', no_cc=True)} {self.block(self.increment('content', self.add(self.call('scanner.Text',no_cc=True), self.s(rnl))))}"  # noqa
             )
             s6 = self.do_return(expression="content")
             stmts = [s1, s2, s3, s4, s5, s6]
