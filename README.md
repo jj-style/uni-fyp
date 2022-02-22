@@ -29,6 +29,7 @@ Use the terminal `"¬"` to represent *epsilon* (this character doesn't need to b
 
 ```bash
 parsergen grammar.toml output/directory [python|go|c++]
+cd output/directory
 python parser.py $(realpath file/to/parse)
 go run parser.go $(realpath file/to/parse)
 g++ parser.cpp && ./a.out $(realpath file/to/parse)
