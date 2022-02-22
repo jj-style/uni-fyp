@@ -1,6 +1,6 @@
 from ..language import Language
 from ..types import Type, Primitive, Composite
-from ..utils import imports, expression
+from ..utils import imports, expression, convert_case
 from ..errors import MissingTypeError
 from .utils import format_function_arguments
 from typing import Dict, Union, Optional, List, Any
@@ -90,15 +90,18 @@ class Cpp(Language):
     def array_length(self, expression):
         return f"{expression}.size()"
 
+    @convert_case(0)
     def array_append(self, id: str, item):
         return self.call(f"{id}.push_back", str(item)) + self.terminator
 
+    @convert_case(0)
     def array_remove(self, id: str, idx: int):
         return (
             self.call(f"{id}.erase", self.add(self.call(f"{id}.begin"), idx))
             + self.terminator
         )
 
+    @convert_case(0, 1)
     @expression
     def array_iterate(
         self,
@@ -136,6 +139,7 @@ class Cpp(Language):
 
         return self.linesep.join(stmts)
 
+    @convert_case(0, 1, 2)
     @expression
     def array_enumerate(
         self,
@@ -158,12 +162,15 @@ class Cpp(Language):
         )
         return self.linesep.join(stmts)
 
+    @convert_case(0)
     def declare(self, id: str, type: Type):
         return f"{self.types(type)} {id}{self.terminator}"
 
+    @convert_case(0)
     def assign(self, id: str, expr):
         return f"{id} = {expr}{self.terminator}"
 
+    @convert_case(0)
     @expression
     def function(
         self,
@@ -216,13 +223,14 @@ class Cpp(Language):
 
     @imports("iostream")
     def print(self, *args) -> str:
-        a = " << ".join(list(args))
+        a = " << ".join(list([str(a) for a in args]))
         if len(a) > 0:
             return_s = f"std::cout << {a}{self.terminator}"
         else:
             return_s = f'std::cout << ""{self.terminator}'
         return return_s
 
+    @convert_case(0)
     @expression
     def for_loop(
         self,

@@ -52,7 +52,8 @@ def parser_from_grammar(
             "token_lines",
             "idx",
             l.array_append(
-                "tokens", l.string_split(l.index("token_lines", "idx"), l.string(":"))
+                "tokens",
+                l.string_split(l.index(l.cc("token_lines"), "idx"), l.string(":")),
             ),
         ),
     ]
@@ -104,11 +105,12 @@ def parser_from_grammar(
         "parse",
         None,
         {"file": Primitive.String},
-        l.call("generate_tokens", "file") + l.terminator,
-        l.call("load_tokens") + l.terminator,
-        l.call(grammar.start) + l.terminator,
+        l.call(l.cc("generate_tokens"), "file") + l.terminator,
+        l.call(l.cc("load_tokens")) + l.terminator,
+        l.call(l.cc(grammar.start)) + l.terminator,
     )
 
+    nt = l.cc("next_token")
     main = l.function(
         "main",
         None,
@@ -120,14 +122,11 @@ def parser_from_grammar(
         l.assign("filename", l.index(l.argv(), 1)),
         l.call("parse", "filename") + l.terminator,
         # check for EOF
-        l.declare("next_token", Composite.array(Primitive.String)),
-        l.assign("next_token", l.call("get_token")),
+        l.declare(nt, Composite.array(Primitive.String)),
+        l.assign(nt, l.call(l.cc("get_token"))),
         l.if_else(
-            l.neq(l.index("next_token", 0), l.string("EOF")),
-            [
-                l.call("expect", l.index("next_token", 2), l.string("EOF"))
-                + l.terminator
-            ],
+            l.neq(l.index(nt, 0), l.string("EOF")),
+            [l.call("expect", l.index(nt, 2), l.string("EOF")) + l.terminator],
         ),
     )
 
@@ -174,7 +173,7 @@ def parser_from_grammar(
         s1 = l.declare(next_term_name, Composite.array(Primitive.String))
         s2 = l.assign(
             next_term_name,
-            l.call("get_token"),
+            l.call(l.cc("get_token")),
         )
 
         token_idx = 1 if factor == NodeType.TERMINAL else 0
@@ -190,7 +189,7 @@ def parser_from_grammar(
         return [s1, s2, s3]
 
     def handle_nonterminal(factor):
-        return [l.call(factor.value) + l.terminator]
+        return [l.call(l.cc(factor.value)) + l.terminator]
 
     for rule, prod in grammar.productions.items():
         # either-or-construction
@@ -231,12 +230,15 @@ def parser_from_grammar(
                 or_term_2 = get_or_term(left[0])
                 or_term = or_term_1 if or_term_1 else or_term_2
 
+                next_tok = l.cc("next_token")
+                get_tok = l.cc("get_token")
+
                 return l.if_else(
-                    l.eq(l.index("next_token", tok_idx), l.string(left[0])),
+                    l.eq(l.index(next_tok, tok_idx), l.string(left[0])),
                     handle_rule(or_term)
                     if non_terminals
                     else [
-                        l.call("get_token") + l.terminator
+                        l.call(get_tok) + l.terminator
                         if has_epsilon
                         else l.do_nothing()
                     ],
@@ -245,7 +247,7 @@ def parser_from_grammar(
                     else [
                         l.call(
                             "expect",
-                            l.index("next_token", 2),
+                            l.index(next_tok, 2),
                             l.string(",".join(tokens)),
                         )
                         + l.terminator
@@ -259,12 +261,12 @@ def parser_from_grammar(
                 None,
                 None,
                 l.comment(grammar.bnf_from_rule(rule)),
-                l.declare("next_token", Composite.array(Primitive.String)),
+                l.declare(l.cc("next_token"), Composite.array(Primitive.String)),
                 l.assign(
-                    "next_token",
+                    l.cc("next_token"),
                     l.call("peek")
                     if non_terminals or has_epsilon
-                    else l.call("get_token"),
+                    else l.call(l.cc("get_token")),
                 ),
                 recurse(tokens),
             )

@@ -11,6 +11,5 @@ ASSIGN_PRIME = 'ASSIGN ASSIGN_PRIME | "¬"'
 ASSIGN = '<IDENTIFIER> "=" <NUMBER>'
 
 [language_options]
-case="camel"
 expand_tabs=true
 tab_size=2

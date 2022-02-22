@@ -1,6 +1,6 @@
 from ..language import Language
 from ..types import Type, Composite, Primitive, Expression
-from ..utils import imports, expression
+from ..utils import imports, expression, convert_case
 from ..errors import MissingTypeError
 from .utils import format_function_arguments
 from typing import Dict, Union, Optional, List, Any
@@ -80,12 +80,15 @@ class Python(Language):
     def array_length(self, expression):
         return self.call("len", expression)
 
+    @convert_case(0)
     def array_append(self, id: str, item):
         return self.call(f"{id}.append", str(item))
 
+    @convert_case(0)
     def array_remove(self, id: str, idx: int):
         return self.call(f"{id}.pop", idx)
 
+    @convert_case(0, 1)
     @expression
     def array_iterate(
         self,
@@ -114,6 +117,7 @@ class Python(Language):
 
         return self.linesep.join([stmts[0]] + [self.indent(s) for s in stmts[1:]])
 
+    @convert_case(0, 1, 2)
     @expression
     def array_enumerate(
         self,
@@ -137,13 +141,16 @@ class Python(Language):
         )
         return self.linesep.join([self.indent(s) for s in stmts])
 
+    @convert_case(0)
     @imports("typing.get_type_hints")
     def declare(self, id: str, type: Type):
         return f"{id}: {self.types(type)}"
 
+    @convert_case(0)
     def assign(self, id: str, expr):
         return f"{id} = {expr}"
 
+    @convert_case(0)
     @expression
     def function(
         self,
@@ -197,6 +204,7 @@ class Python(Language):
         print(f"""print({", ".join([str(a) for a in args])}, end="")""")
         return f"""print({", ".join([str(a) for a in args])}, end="")"""
 
+    @convert_case(0)
     @expression
     def for_loop(
         self,

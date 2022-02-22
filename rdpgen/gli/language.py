@@ -3,6 +3,7 @@ from typing import Union, Dict, List, Optional, Any, Callable
 from case_convert import camel_case, snake_case
 import os
 
+from .utils import convert_case, expression
 from .types import Type, Expression
 
 
@@ -32,7 +33,7 @@ class Language(ABC):
         self.indent_lvl: int = 0
         self.expand_tabs: bool = expand_tabs
         self.tab_size: int = tab_size
-        self.case_convert = case_converter_function_from_name(case)
+        self.convert_case = case_converter_function_from_name(case)
 
     def register_helper(self, name, func):
         self.helper_funcs[name] = func
@@ -49,6 +50,7 @@ class Language(ABC):
         """Extension of files for this language without the dot"""
         raise NotImplementedError
 
+    @convert_case(0)
     def varn(self, var: str) -> str:
         """Obtain a numbered variable to prevent redeclaration"""
         if var not in self.__var_dec_count:
@@ -179,6 +181,7 @@ class Language(ABC):
         """  # noqa
         raise NotImplementedError
 
+    @expression
     def index(self, expression, offset):
         """Index an array"""
         return f"{expression}[{offset}]"
@@ -309,12 +312,14 @@ class Language(ABC):
 
     # TODO: add loads of non-abstract common things like
     # equals, less than, array indexing, calling (), addition
+    @convert_case(0)
     def increment(self, id: str, inc: Expression = None):
         """Increment a variable identified with `id`, with an optional increment value.
         If not specified, defaults to 1.
         """
         return f"{id} = {id} + {1 if inc is None else inc}{self.terminator}"
 
+    @convert_case(0)
     def decrement(self, id: str, dec: Expression = None):
         """Decrement a variable identified with `id`, with an optional decrement value.
         If not specified, defaults to 1.
@@ -418,3 +423,11 @@ class Language(ABC):
     def argv(self):
         """Access to command line argument as a list of strings."""
         raise NotImplementedError
+
+    def cc(self, s: str):
+        """Shorthand to case convert function"""
+        return self.convert_case(s)
+
+    def s(self, s: str):
+        """Short hand to language.String"""
+        return self.string(s)

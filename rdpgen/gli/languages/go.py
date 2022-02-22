@@ -1,6 +1,6 @@
 from ..language import Language
 from ..types import Type, Primitive, Composite, Expression
-from ..utils import imports, expression
+from ..utils import imports, expression, convert_case
 from ..errors import MissingTypeError
 from .utils import format_function_arguments
 from typing import Dict, Union, Optional, List, Any
@@ -66,9 +66,11 @@ class Go(Language):
     def array_length(self, expression):
         return f"len({expression})"
 
+    @convert_case(0)
     def array_append(self, id: str, item):
         return self.assign(id, self.call("append", id, str(item)))
 
+    @convert_case(0)
     def array_remove(self, id: str, idx: int):
         return self.assign(
             id,
@@ -79,6 +81,7 @@ class Go(Language):
             ),
         )
 
+    @convert_case(0)
     def array_iterate(
         self,
         id: str,
@@ -98,6 +101,7 @@ class Go(Language):
             type=type,
         )
 
+    @convert_case(0)
     @expression
     def array_enumerate(
         self,
@@ -121,12 +125,15 @@ class Go(Language):
         )
         return self.linesep.join(stmts)
 
+    @convert_case(0)
     def declare(self, id: str, type: Type):
         return f"var {id} {self.types(type)}"
 
+    @convert_case(0)
     def assign(self, id: str, expr):
         return f"{id} = {expr}"
 
+    @convert_case(0)
     @expression
     def function(
         self,

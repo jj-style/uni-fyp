@@ -24,6 +24,5 @@ minusOpt = '"-" | "¬"'
 operand = '<int> | <float> | <identifier>'
 
 [language_options]
-case="camel"
 expand_tabs=true
 tab_size=2
