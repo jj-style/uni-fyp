@@ -160,7 +160,7 @@ class Grammar:
         return "\n".join(f"{k} ->\n{v}" for k, v in self.productions.items())
 
     def __left_set(
-        self, node: Node, parent: Node, completed, terminals
+        self, node: Node, parent: Node, completed, terminals, or_term: Node
     ) -> Dict[str, str]:
         completed.append(node)
         terminals = deepcopy(terminals)
@@ -168,7 +168,11 @@ class Grammar:
         if node == NodeType.TERMINAL or node == NodeType.TOKEN:
             return {
                 **terminals,
-                node.value: {"parent": parent.value, "token": node == NodeType.TOKEN},
+                node.value: {
+                    "parent": parent.value,
+                    "token": node == NodeType.TOKEN,
+                    "or_term": or_term,
+                },
             }, True
 
         if node == NodeType.NONTERMINAL:
@@ -176,7 +180,11 @@ class Grammar:
             used_epsilon_lookahead = True
             if next_node not in completed:
                 nt_ls, used_epsilon_lookahead = self.__left_set(
-                    self.productions.get(node.value), node, completed, terminals
+                    self.productions.get(node.value),
+                    node,
+                    completed,
+                    terminals,
+                    or_term,
                 )
                 terminals = {**terminals, **nt_ls}
             return terminals, used_epsilon_lookahead
@@ -190,7 +198,7 @@ class Grammar:
                 next_has_epsilon = False
                 if node.children[i] not in completed:
                     next_ls, used_epsilon_lookahead = self.__left_set(
-                        node.children[i], parent, completed, ls
+                        node.children[i], parent, completed, ls, or_term
                     )
                     next_has_epsilon = "¬" in next_ls
                     if (next_has_epsilon or used_epsilon_lookahead) or (
@@ -206,7 +214,13 @@ class Grammar:
             ls = {}
             for term in node.children:
                 if term not in completed:
-                    t_ls, _ = self.__left_set(term, parent, completed, ls)
+                    t_ls, _ = self.__left_set(
+                        term,
+                        parent,
+                        completed,
+                        ls,
+                        term if or_term is None else or_term,
+                    )
                     ls = {**ls, **t_ls}
             return {**terminals, **ls}, False
 
@@ -215,7 +229,9 @@ class Grammar:
         if start is None:
             raise ValueError(f"{rule} is not a production in the grammar")
 
-        ls, _ = self.__left_set(start, Node(NodeType.NONTERMINAL, value=rule), [], {})
+        ls, _ = self.__left_set(
+            start, Node(NodeType.NONTERMINAL, value=rule), [], {}, None
+        )
         return ls
 
     @property

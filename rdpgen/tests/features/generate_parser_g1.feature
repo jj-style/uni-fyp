@@ -16,7 +16,6 @@ Feature: Generate Parser for G1
         number = 3
         _varz = 123
     Then I get a 0 return code
-    Examples:
 
     Scenario Outline: Parser Rejects Invalid Input
     When I run the parser with "<command>" and input:

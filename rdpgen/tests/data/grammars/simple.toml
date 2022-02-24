@@ -1,0 +1,10 @@
+# grammar for parsing the language consisting of:
+# AA AE AI AO AU B+ B-
+
+[tokens]
+VOWEL = "[AEIOU]"
+SIGN = "[+-]"
+OTHER = "B"
+
+[grammar]
+SIMPLE = '"A" <VOWEL> | "B" <SIGN>'

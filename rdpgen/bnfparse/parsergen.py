@@ -5,6 +5,7 @@ from rdpgen.bnfparse.parse import NodeType
 
 from typing import List, Dict, Any
 from pathlib import Path
+from copy import deepcopy
 
 
 def lang_from_name(name: str, options: Dict[str, Any]) -> Language:
@@ -208,38 +209,26 @@ def parser_from_grammar(
                 else:
                     non_terminals |= child == NodeType.NONTERMINAL
 
-            def get_or_term(first):
-                """given an element in the first set, return the term in a group of or'd terms
-                that derives that element
-                """
-                for child in prod.children:
-                    if child.value == first:
-                        return child
-                    if child == NodeType.TERM:
-                        for factor in child.children:
-                            if factor.value == first:
-                                return child
-                        return get_or_term(child.children[0].value)
-
             def recurse(left):
                 tok_idx = 0 if left_set[left[0]].get("token", False) else 1
 
-                or_term_1 = get_or_term(left_set[left[0]]["parent"])
-                or_term_2 = get_or_term(left[0])
-                or_term = or_term_1 if or_term_1 else or_term_2
-
                 next_tok = l.cc("next_token")
                 get_tok = l.cc("get_token")
+
+                or_term = left_set[left[0]]["or_term"]
+                if len(or_term.children) > 1:
+                    following_stuff = deepcopy(or_term)
+                    following_stuff._children.pop(0)
 
                 return l.if_else(
                     l.eq(l.index(next_tok, tok_idx), l.s(left[0])),
                     handle_rule(or_term)
                     if non_terminals
-                    else [
-                        l.call(get_tok) + l.terminator
-                        if has_epsilon
-                        else l.do_nothing()
-                    ],
+                    else [l.call(get_tok) + l.terminator]
+                    if has_epsilon
+                    else [l.do_nothing()]
+                    if len(or_term.children) <= 1
+                    else handle_rule(following_stuff),
                     false_stmts=[recurse(left[1:])]
                     if len(left) > 1
                     else [
