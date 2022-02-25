@@ -21,6 +21,15 @@ SYMBOLS = "[=]"
 PROGRAM = 'ASSIGN ASSIGN_PRIME'
 ASSIGN_PRIME = 'ASSIGN ASSIGN_PRIME | "¬"'
 ASSIGN = '<IDENTIFIER> "=" <NUMBER>'
+
+[language_options]
+expand_tabs=true
+tab_size=4
+case="camel" # snake
+
+# language specific settings
+[language_options.python]
+declare_vars=false
 ```
 Note in the tokens section, the `SYMBOLS` rule, you must add any rule with all the possible terminals that could occur to prevent a lexer error of unknown character. Alternatively you could specify all terminals as tokens.  
 

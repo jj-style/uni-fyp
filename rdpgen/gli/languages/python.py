@@ -13,9 +13,11 @@ class Python(Language):
         expand_tabs: bool = False,
         tab_size: int = 4,
         case: str = "snake",
+        declare_vars: bool = True,
     ):
         super().__init__(expand_tabs, tab_size, case)
         self.__main_func: bool = False
+        self.declare_vars = declare_vars
 
     @property
     def name(self) -> str:
@@ -144,7 +146,11 @@ class Python(Language):
     @convert_case(0)
     @imports("typing.get_type_hints")
     def declare(self, id: str, type: Type):
-        return f"{id}: {self.types(type)}"
+        if self.declare_vars:
+            return f"{id}: {self.types(type)}"
+        else:
+            self.imports.discard("typing.get_type_hints")
+            return ""
 
     @convert_case(0)
     def assign(self, id: str, expr):
@@ -174,6 +180,8 @@ class Python(Language):
         block = f":{self.linesep}"
         self.indent_lvl += 1
         for stmt in statements:
+            if stmt == "":
+                continue
             block += self.indent(str(stmt)) + self.linesep
         self.indent_lvl -= 1
         return block.rstrip(self.linesep)

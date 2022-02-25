@@ -19,15 +19,16 @@ from .bnfparse.parsergen import parser_from_grammar
     help="which case identifiers should be generated in",
 )
 @click.option(
-    "--expand-tabs/--no-expand-tabs",
-    help="expand tabs to spaces (default expand-tabs)",
-    default=True,
+    "--expand-tabs",
+    "-e",
+    type=bool,
+    help="expand tabs to spaces",
 )
 @click.option(
     "--tab-size",
     "-t",
     type=int,
-    help="How many spaces in each layer of indentation (if expand-tabs is set)",
+    help="How many spaces in each layer of indentation (if expand-tabs is true)",
 )
 def cli(
     file: str, outdir: str, language: str, case: str, expand_tabs: bool, tab_size: int

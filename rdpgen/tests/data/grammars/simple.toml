@@ -8,3 +8,9 @@ OTHER = "B"
 
 [grammar]
 SIMPLE = '"A" <VOWEL> | "B" <SIGN>'
+
+[language_options]
+expand_tabs=true
+
+[language_options.python]
+declare_vars=false
