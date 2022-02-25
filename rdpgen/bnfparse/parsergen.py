@@ -18,12 +18,16 @@ def lang_from_name(name: str, options: Dict[str, Any]) -> Language:
     for lang in ["c++", "go", "python"]:
         if lang in options:
             options.pop(lang)
-    if name == "c++":
-        return Cpp(**options)
-    elif name == "go":
-        return Go(**options)
-    elif name == "python":
-        return Python(**options)
+    try:
+        if name == "c++":
+            return Cpp(**options)
+        elif name == "go":
+            return Go(**options)
+        elif name == "python":
+            return Python(**options)
+    except TypeError as e:
+        print("failed to create language:", e)
+        exit(1)
 
 
 def parser_from_grammar(
