@@ -67,7 +67,7 @@ def parser_from_grammar(
             "idx",
             l.array_append(
                 "tokens",
-                l.string_split(l.index(l.cc("token_lines"), "idx"), l.s(":")),
+                l.string_split(l.index(l.cc("token_lines"), "idx"), l.s("~")),
             ),
         ),
     ]
@@ -170,6 +170,8 @@ def parser_from_grammar(
                         if t.children[i] == NodeType.NONTERMINAL:
                             following.append(t.children[i])
                             idx += 1
+                        else:
+                            break
                 stmts.extend(handle_terminal(factor, *following))
             elif factor == NodeType.NONTERMINAL:
                 stmts.extend(handle_nonterminal(factor))

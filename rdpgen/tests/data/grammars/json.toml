@@ -1,0 +1,26 @@
+[tokens]
+STRING = '\"([^\\\"]|\\.)*\"'
+NUMBER = '-?[1-9][0-9]*(\.[0-9]+)?'
+ANY = '[a-zA-Z\[\]\{\}:,]'
+#ANY='.*'
+
+[grammar]
+#object → '{' pairs '}'
+object = '"{" pairs "}"'
+
+#pairs → pair pairs_tail | ε
+#pair → STRING ':' value
+#pairs_tail → ',' pairs | ε
+pairs = 'pair pairs_tail | "¬"'
+pair = '<STRING> ":" value'
+pairs_tail = '"," pairs | "¬"'
+
+#value → STRING | NUMBER | 'true' | 'false' | 'null' | object | array
+#array → '[' elements ']'
+value = '<STRING> | <NUMBER> | "true" | "false" | "null" | object | array'
+array = '"[" elements "]"'
+
+#elements → value elements_tail | ε
+#elements_tail → ',' elements | ε
+elements = 'value elements_tail | "¬"'
+elements_tail = '"," elements | "¬"'
