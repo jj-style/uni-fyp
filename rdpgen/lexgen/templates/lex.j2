@@ -18,7 +18,7 @@ whitespace  [ \t\r]+
 {% endif -%}
 {newline} ++lno;
 {% for token in tokens %}
-{{- '{' + token.name + '}' }} fprintf(fp,"{{token.name}}~%s~%d\n",yytext,lno);
+{{- '{' + token.name + '}' }} fprintf(fp,"{{token.name}}\a%s\a%d\n",yytext,lno);
 {% endfor -%}
 .	{printf("unknown item %s\n", yytext); exit(1);}
 %%
@@ -36,7 +36,7 @@ int main(int argc, char**argv) {
   fp = fopen("out.jl","w");
   yylex();
   // write sentinel EOF to token stream
-  fprintf(fp,"EOF~0~%d\n",lno);
+  fprintf(fp,"EOF\a0\a%d\n",lno);
   fclose(fp);
   return 0;
 }

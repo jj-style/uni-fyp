@@ -67,7 +67,7 @@ def parser_from_grammar(
             "idx",
             l.array_append(
                 "tokens",
-                l.string_split(l.index(l.cc("token_lines"), "idx"), l.s("~")),
+                l.string_split(l.index(l.cc("token_lines"), "idx"), l.s("\a")),
             ),
         ),
     ]
