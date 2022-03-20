@@ -183,7 +183,7 @@ def parser_from_grammar(
         for f in following_factors:
             following.extend(handle_nonterminal(f))
 
-        next_term_name = l.varn("next_token")
+        next_term_name = l.cc(l.varn("next_token"))
         s1 = l.declare(next_term_name, Composite.array(Primitive.String))
         s2 = l.assign(
             next_term_name,

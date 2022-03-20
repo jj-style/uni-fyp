@@ -5,6 +5,7 @@ University Final Year Project - Generating a Recursive Descent Parser
 
 ## External Dependencies
 - [flex](https://github.com/westes/flex)
+- [libfl-dev]
 
 ## Installing
 TODO (add setup.py)
