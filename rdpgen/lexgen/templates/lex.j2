@@ -20,7 +20,7 @@ whitespace  [ \t\r]+
 {% for token in tokens %}
 {{- '{' + token.name + '}' }} fprintf(fp,"{{token.name}}\a%s\a%d\n",yytext,lno);
 {% endfor -%}
-.	{printf("unknown item %s\n", yytext); exit(1);}
+.	{printf("unknown item on line %d: '%s'\n", lno, yytext); exit(1);}
 %%
 
 int main(int argc, char**argv) {

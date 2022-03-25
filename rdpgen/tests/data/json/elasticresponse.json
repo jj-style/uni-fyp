@@ -1,0 +1,55 @@
+{
+  "took": 7,
+  "timed_out": false,
+  "_shards": {
+    "total": 1,
+    "successful": 1,
+    "skipped": 0,
+    "failed": 0
+  },
+  "hits": {
+    "total": {
+      "value": 2,
+      "relation": "eq"
+    },
+    "max_score": 1.0,
+    "hits": [
+      {
+        "_index": "schools",
+        "_type": "school",
+        "_id": "5",
+        "_score": 1.0,
+        "_source": {
+          "name": "Central School",
+          "description": "CBSE Affiliation",
+          "street": "Nagan",
+          "city": "paprola",
+          "state": "HP",
+          "zip": "176115",
+          "location": [31.8955385, 76.8380405],
+          "fees": 2200,
+          "tags": ["Senior Secondary", "beautiful campus"],
+          "rating": "3.3"
+        }
+      },
+      {
+        "_index": "schools",
+        "_type": "school",
+        "_id": "4",
+        "_score": 1.0,
+        "_source": {
+          "name": "City Best School",
+          "description": "ICSE",
+          "street": "West End",
+          "city": "Meerut",
+          "state": "UP",
+          "zip": "250002",
+          "location": [28.9926174, 77.692485],
+          "fees": 3500,
+          "tags": ["fully computerized"],
+          "rating": "4.5"
+        }
+      }
+    ]
+  }
+}
