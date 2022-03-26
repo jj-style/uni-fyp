@@ -1,6 +1,7 @@
 jinja2
 click
 toml
+tomli
 regex
 case-convert
 pytest
