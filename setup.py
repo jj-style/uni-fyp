@@ -1,5 +1,5 @@
 import pathlib
-from setuptools import setup, find_packages
+from setuptools import setup
 
 # The directory containing this file
 HERE = pathlib.Path(__file__).parent
@@ -25,7 +25,7 @@ setup(
         "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
     ],
-    packages=find_packages("rdpgen", exclude=["tests"]),
+    packages=["rdpgen"],
     include_package_data=True,
     install_requires=["jinja2", "click", "toml", "tomli", "regex", "case-convert"],
     entry_points={
