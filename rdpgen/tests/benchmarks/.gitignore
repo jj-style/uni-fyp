@@ -1,0 +1,11 @@
+# ignore antlr build stuff
+*.java
+*.tokens
+*.interp
+*.class
+
+# ignore flex-bison build stuff
+*.c
+parser
+*.output
+*.h
