@@ -7,6 +7,7 @@ NULL = 'null'
 ANY = '[a-zA-Z\[\]\{\}:,]'
 
 [grammar]
+json = 'object | array'
 object = '"{" pairs "}"'
 
 pairs = 'pair pairs_tail | "¬"'
