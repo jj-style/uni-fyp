@@ -8,3 +8,4 @@ pytest
 pytest-bdd
 flake8
 black
+requests
