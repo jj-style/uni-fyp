@@ -9,3 +9,9 @@
 parser
 *.output
 *.h
+
+# ignore rdpgen build stuff
+parser_cpp
+parser_go
+lexer
+Makefile
