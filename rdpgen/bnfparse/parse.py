@@ -156,6 +156,14 @@ class Grammar:
     def bnf(self) -> str:
         return Grammar.bnf_from_grammar_dict(self.__rules)
 
+    @property
+    def start(self) -> str:
+        return self.__start
+
+    @start.setter
+    def start(self, new_start):
+        self.__start = new_start
+
     def __str__(self) -> str:
         return "\n".join(f"{k} ->\n{v}" for k, v in self.productions.items())
 
@@ -233,7 +241,3 @@ class Grammar:
             start, Node(NodeType.NONTERMINAL, value=rule), [], {}, None
         )
         return ls
-
-    @property
-    def start(self) -> str:
-        return self.__start
