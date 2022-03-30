@@ -13,6 +13,8 @@ TODO (add setup.py)
 ## Usage
 Create a grammar config file with token and grammar rules for the lexer and parser respectively.
 ```toml
+start = "program"   # optionally set start symbol of the grammar, defaults to the first one under [tokens]
+
 [tokens]
 IDENTIFIER = "[a-zA-Z_][a-zA-Z0-9_]*"
 NUMBER = "[0-9]+"

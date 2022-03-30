@@ -121,7 +121,7 @@ def parser_from_grammar(
         {"file": Primitive.String},
         l.call("generate_tokens", "file") + l.terminator,
         l.call("load_tokens") + l.terminator,
-        l.call(grammar.start) + l.terminator,
+        l.call(l.cc(grammar.start)) + l.terminator,
     )
 
     nt = l.cc("next_token")
