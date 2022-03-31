@@ -12,12 +12,15 @@ Feature: Generate Parser for Math
     
     Scenario Outline: Parser Accepts Valid Input
     When I run the parser with "<command>" and input:
-        x = 10 + 2
+        x = 10 + 2;
     Then I get a 0 return code
 
     Scenario Outline: Parser Rejects Invalid Input
     When I run the parser with "<command>" and input:
         10 +
+    Then I get a 1 return code
+    When I run the parser with "<command>" and input:
+        10 + 2
     Then I get a 1 return code
 
     
