@@ -8,7 +8,12 @@ University Final Year Project - Generating a Recursive Descent Parser
 - [libfl-dev]
 
 ## Installing
-TODO (add setup.py)
+### From Source
+```bash
+git clone https://github.com/jj-style/uni-fyp
+cd uni-fyp
+pip install -e .
+```
 
 ## Usage
 Create a grammar config file with token and grammar rules for the lexer and parser respectively.
