@@ -16,6 +16,7 @@ pip install -e .
 ```
 
 ## Usage
+### Parser Generator
 Create a grammar config file with token and grammar rules for the lexer and parser respectively.
 ```toml
 start = "program"   # optionally set start symbol of the grammar, defaults to the first one under [tokens]
@@ -45,9 +46,50 @@ The grammar must be in BNF and the user is responsible for checking it is valid 
 Use the terminal `"¬"` to represent *epsilon* (this character doesn't need to be defined in the lexer part).
 
 ```bash
-parsergen grammar.toml output/directory [python|go|c++]
+rdpgen grammar.toml output/directory [python|go|c++]
 cd output/directory
 python parser.py $(realpath file/to/parse)
 go run parser.go $(realpath file/to/parse)
 g++ parser.cpp && ./a.out $(realpath file/to/parse)
+```
+
+### ALI
+```python
+from rdpgen.ali import Program, Primitive, Composite, Python, Go, Cpp
+
+languages = [Python(), Go(), Cpp()]
+for l in languages:
+    prog = Program(l)
+    main = l.function("main", None, None,
+        l.println(l.s("hello world!"))
+    )
+    prog.add(main)
+    print(prog.generate())
+
+
+"""
+def main():
+        print("hello world!")
+
+if __name__ == "__main__":
+        main()
+
+package main
+
+import (
+    "fmt"
+)
+
+func main() {
+    fmt.Println("hello world!")
+}
+
+
+#include <iostream>
+
+int main(int argc, char* argv[]) {
+  std::cout << "hello world!" << std::endl;
+  return 0;
+}
+"""
 ```
