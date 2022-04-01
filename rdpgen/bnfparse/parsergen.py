@@ -288,6 +288,14 @@ def parser_from_grammar(
                 l.comment(grammar.bnf_from_rule(rule)),
                 *handle_terminal(prod),
             )
+        elif prod == NodeType.NONTERMINAL:
+            f = l.function(
+                rule,
+                None,
+                None,
+                l.comment(grammar.bnf_from_rule(rule)),
+                *handle_nonterminal(prod),
+            )
         else:
             f = l.function(rule, None, [], l.do_return(None))
         prog.add(f)
