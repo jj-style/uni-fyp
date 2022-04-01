@@ -93,3 +93,9 @@ int main(int argc, char* argv[]) {
 }
 """
 ```
+
+## Warning
+Please note, this is an exploratory project and the code generation is not tested for production code.  
+ 
+If you wish to use this library for code generation, you are strongly advised to review and test the generated code before running it.  
+By using this project, you are responsible and I take no responsibility for the resultant action of generated code.
