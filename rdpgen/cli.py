@@ -53,7 +53,6 @@ def cli(
     grammar = Grammar(grammar_cfg)
     if "start" in config:
         grammar.start = config["start"]
-        print("starting at", grammar.start)
     prog = parser_from_grammar(grammar, tokens, language, lang_opts, outdir)
 
     outpath = Path(outdir) / f"parser.{prog.extension}"
