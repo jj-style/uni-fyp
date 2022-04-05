@@ -53,7 +53,7 @@ go run parser.go $(realpath file/to/parse)
 g++ parser.cpp && ./a.out $(realpath file/to/parse)
 ```
 
-### ALI
+### Abstract Language Interface (ALI)
 ```python
 from rdpgen.ali import Program, Primitive, Composite, Python, Go, Cpp
 

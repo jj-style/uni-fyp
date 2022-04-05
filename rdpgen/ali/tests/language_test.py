@@ -1,4 +1,4 @@
-from rdpgen.gli import *
+from rdpgen.ali import *
 
 
 def test_language_convert_case():

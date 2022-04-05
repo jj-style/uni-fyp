@@ -1,6 +1,6 @@
 from .parse import Grammar
 from rdpgen.lexgen import Token
-from rdpgen.gli import Program, Language, Go, Python, Cpp, Composite, Primitive
+from rdpgen.ali import Program, Language, Go, Python, Cpp, Composite, Primitive
 from rdpgen.bnfparse.parse import NodeType
 
 from typing import List, Dict, Any

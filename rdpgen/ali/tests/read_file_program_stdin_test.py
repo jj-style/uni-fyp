@@ -1,4 +1,4 @@
-from rdpgen.gli import *
+from rdpgen.ali import *
 from .python_progs import READ_FILE_STDIN_PROGRAM as PY_SRC
 from .go_progs import READ_FILE_STDIN_PROGRAM as GO_SRC
 from .cpp_progs import READ_FILE_STDIN_PROGRAM as CPP_SRC
