@@ -1,4 +1,4 @@
-from rdpgen.gli import Cpp, Type, Primitive, Composite, MissingTypeError
+from rdpgen.ali import Cpp, Type, Primitive, Composite, MissingTypeError
 
 from .cpp_progs import *
 

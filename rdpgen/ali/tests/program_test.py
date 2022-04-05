@@ -1,4 +1,4 @@
-from rdpgen.gli import Program, Language, Go, Cpp, Composite, Primitive, Python
+from rdpgen.ali import Program, Language, Go, Cpp, Composite, Primitive, Python
 from .common import file_contains, run_cmd
 from tempfile import NamedTemporaryFile
 from pathlib import Path

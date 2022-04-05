@@ -2,7 +2,7 @@ import subprocess
 import sys
 from typing import List
 from typing import get_type_hints
-from rdpgen.gli import *
+from rdpgen.ali import *
 
 
 def read_lines(file: str) -> List[str]:

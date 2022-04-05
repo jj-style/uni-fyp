@@ -1,4 +1,4 @@
-from rdpgen.gli import Go, Type, Primitive, Composite, MissingTypeError
+from rdpgen.ali import Go, Type, Primitive, Composite, MissingTypeError
 
 from .go_progs import *
 import pytest

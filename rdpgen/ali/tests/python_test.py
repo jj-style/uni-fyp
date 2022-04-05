@@ -1,4 +1,4 @@
-from rdpgen.gli import Python, Primitive, Composite, MissingTypeError
+from rdpgen.ali import Python, Primitive, Composite, MissingTypeError
 from .python_progs import *
 from tempfile import NamedTemporaryFile
 from pathlib import Path
