@@ -39,6 +39,10 @@ case="camel" # snake
 # language specific settings
 [language_options.python]
 declare_vars=false
+
+[language_options.cpp]
+# add additional imports for each language in the resulting parser
+imports = ["extra_imports.hpp"]
 ```
 Note in the tokens section, the `SYMBOLS` rule, you must add any rule with all the possible terminals that could occur to prevent a lexer error of unknown character. Alternatively you could specify all terminals as tokens.  
 
