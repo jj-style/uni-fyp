@@ -26,6 +26,7 @@ class Language(ABC):
         expand_tabs: bool = False,
         tab_size: int = 2,
         case: str = None,
+        imports: List[str] = [],
     ):
         self.__var_dec_count = {}
         self.imports = set()
@@ -34,6 +35,8 @@ class Language(ABC):
         self.expand_tabs: bool = expand_tabs
         self.tab_size: int = tab_size
         self.convert_case = case_converter_function_from_name(case)
+        for pkg in imports:
+            self.import_package(pkg)
 
     def register_helper(self, name, func):
         self.helper_funcs[name] = func

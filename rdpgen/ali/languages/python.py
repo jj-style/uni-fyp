@@ -14,8 +14,10 @@ class Python(Language):
         tab_size: int = 4,
         case: str = "snake",
         declare_vars: bool = True,
+        imports: List[str] = [],
+        **kwargs,
     ):
-        super().__init__(expand_tabs, tab_size, case)
+        super().__init__(expand_tabs, tab_size, case, imports)
         self.__main_func: bool = False
         self.declare_vars = declare_vars
 

@@ -55,16 +55,20 @@ def convert_case(index, *indices):
                     )
                     args[index] = f"{v1}, {v2}"
                 elif isinstance(args[index], str):
+                    arg = args[index]
                     # HACK: for Go language if assigned _ so user can fill
                     # in errors later
-                    args[index] = (
-                        self.convert_case(args[index]) if args[index] != "_" else "_"
-                    )
+                    if arg != "_":
+                        args[index] = ".".join(
+                            [self.convert_case(part) for part in arg.split(".")]
+                        )
                 for idx in indices:
                     if isinstance(args[idx], str):
-                        args[idx] = (
-                            self.convert_case(args[idx]) if args[idx] != "_" else "_"
-                        )
+                        arg = args[idx]
+                        if arg != "_":
+                            args[idx] = ".".join(
+                                [self.convert_case(part) for part in arg.split(".")]
+                            )
             return f(self, *args, **kwargs)
 
         return wrap
