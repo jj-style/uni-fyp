@@ -13,8 +13,10 @@ class Go(Language):
         expand_tabs: bool = True,
         tab_size: int = 4,
         case: str = "camel",
+        imports: List[str] = [],
+        **kwargs,
     ):
-        super().__init__(expand_tabs, tab_size, case)
+        super().__init__(expand_tabs, tab_size, case, imports)
 
     @property
     def name(self) -> str:
